@@ -6,7 +6,9 @@ import {Authorize} from "@tsed/passport";
 export class HelloWorldController {
 
     @Get("/")
-    @Authorize()
+    @Authorize("*", {
+        session: true
+    })
     public get(): string {
         return "hello";
     }

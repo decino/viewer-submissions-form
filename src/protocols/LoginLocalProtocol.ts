@@ -12,8 +12,9 @@ import {StatusCodes} from "http-status-codes";
     name: "login",
     useStrategy: Strategy,
     settings: {
+        session: true,
         usernameField: "email",
-        passwordField: "password"
+        passwordField: "password",
     }
 })
 export class LoginLocalProtocol implements OnVerify {

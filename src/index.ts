@@ -20,7 +20,6 @@ async function bootstrap(): Promise<void> {
         async useAsyncFactory(logger: Logger) {
             await dataSource.initialize();
             logger.info("Connected with typeorm to database: main.sqlite");
-
             return dataSource;
         },
         hooks: {

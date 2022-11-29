@@ -11,14 +11,13 @@ export class UsersService {
     private ds: DataSource;
 
     public async getUser(email: string, password: string): Promise<UserModel | null> {
-        const passwordHash = await argon2.hash(password);
         const userObject = await this.ds.manager.findOne(UserModel, {
             where: {
-                email,
-                password: passwordHash
+                email
             }
         });
-        if (!userObject) {
+        // use safe timings compare to verify the hash matches
+        if (!userObject || !await argon2.verify(userObject.password, password)) {
             return null;
         }
         return userObject;

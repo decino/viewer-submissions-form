@@ -3,7 +3,7 @@ import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource, DeleteResult} from "typeorm";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
-import {NotFound} from "@tsed/exceptions";
+import {BadRequest, NotFound} from "@tsed/exceptions";
 import {PlatformMulterFile} from "@tsed/common";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
 
@@ -25,6 +25,11 @@ export class SubmissionService {
             throw new NotFound("can not add when there are no currently active rounds");
         }
         if (customWad) {
+            const allowed = await this.customWadEngine.validateFile(customWad);
+            if (!allowed) {
+                await this.customWadEngine.deleteCustomWad(customWad);
+                throw new BadRequest("invalid file, header mismatch");
+            }
             entry.customWadFileName = customWad.originalname;
         }
         entry.submissionRoundId = currentActiveRound.id;

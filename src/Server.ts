@@ -37,9 +37,10 @@ import {BadRequest} from "@tsed/exceptions";
             }
             const fileExt = file.originalname.split(".").pop() ?? "";
             const allowedFilesArr = allowedFiles.split(",");
-            if (!allowedFilesArr.includes(fileExt)) {
+            if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
                 return cb(new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`));
             }
+            return cb(null, true);
         },
         preservePath: true
     },

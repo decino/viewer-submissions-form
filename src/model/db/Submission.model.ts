@@ -1,6 +1,6 @@
 import {AbstractModel} from "./AbstractModel";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {Description, Example, Name, Required} from "@tsed/schema";
+import {CollectionOf, Description, Enum, Example, Ignore, Name, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 
@@ -8,12 +8,11 @@ import type {SubmissionRoundModel} from "./SubmissionRound.model";
 export class SubmissionModel extends AbstractModel {
 
     @Column({
-        nullable: false
+        nullable: true,
     })
     @Name("WAD")
     @Description("the url of the wad")
     @Example("https://www.doomworld.com/idgames/levels/doom2/Ports/megawads/sunlust")
-    @Required()
     public wadURL: string;
 
     @Column({
@@ -48,6 +47,8 @@ export class SubmissionModel extends AbstractModel {
     @Example("jump")
     @Example("mouselook")
     @Example("")
+    @Enum(GZDOOM_ACTIONS)
+    @CollectionOf(Number).MaxItems(3).MinItems(0)
     public gzDoomActions: GZDOOM_ACTIONS[];
 
     @Column({
@@ -71,7 +72,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         default: false
     })
-    @Name("distribute")
+    @Name("distributable")
     @Description("If you made this, am i allowed to distribute it to viewers?")
     @Example("yes")
     @Example("no")
@@ -89,8 +90,18 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         nullable: false
     })
-    public submissionRoundId: boolean;
+    public submissionRoundId: number;
 
+    @Column({
+        nullable: true
+    })
+    @Name("customWad")
+    @Description("the custom wad to play")
+    @Ignore()
+    public customWadFileName: string;
+
+    @Name("submissionRound")
+    @Description("The submission round this entry belongs to")
     @ManyToOne("SubmissionRoundModel", "submissions", AbstractModel.cascadeOps)
     @JoinColumn({
         name: "submissionRoundId",

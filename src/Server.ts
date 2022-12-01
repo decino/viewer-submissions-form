@@ -12,6 +12,10 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import methodOverride from "method-override";
 import cors from "cors";
+import {Request} from "express";
+import {FileFilterCallback} from "multer";
+import {BadRequest} from "@tsed/exceptions";
+
 
 @Configuration({
     ...config,
@@ -24,6 +28,21 @@ import cors from "cors";
         return false;
     }()),
     componentsScan: [`./services/**/**.js`],
+    multer: {
+        dest: `${__dirname}/../customWads`,
+        fileFilter: function (req: Request, file: Express.Multer.File, cb: FileFilterCallback) {
+            const allowedFiles = process.env.ALLOWED_FILES;
+            if (!allowedFiles) {
+                return cb(null, true);
+            }
+            const fileExt = file.originalname.split(".").pop() ?? "";
+            const allowedFilesArr = allowedFiles.split(",");
+            if (!allowedFilesArr.includes(fileExt)) {
+                return cb(new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`));
+            }
+        },
+        preservePath: true
+    },
     passport: {
         userInfoModel: CustomUserInfoModel
     },

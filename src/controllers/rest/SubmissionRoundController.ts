@@ -5,8 +5,8 @@ import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {SubmissionRoundModel} from "../../model/db/SubmissionRound.model";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
 import {BaseRestController} from "./BaseRestController";
-import {ErrorModel} from "../../model/rest/ErrorModel";
 import {SuccessModel} from "../../model/rest/SuccessModel";
+import {BadRequest, NotFound} from "@tsed/exceptions";
 
 @Controller("/submissionRound")
 export class SubmissionRoundController extends BaseRestController {
@@ -16,52 +16,35 @@ export class SubmissionRoundController extends BaseRestController {
 
     @Post("/newRound")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)
-    public createRound(@Res() res: PlatformResponse): unknown {
-        try {
-            return this.submissionRoundService.newSubmissionRound();
-        } catch (e) {
-            return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
-        }
+    public createRound(): unknown {
+        return this.submissionRoundService.newSubmissionRound();
     }
 
     @Get("/currentActiveRound")
     @Returns(StatusCodes.OK, SubmissionRoundModel)
-    @Returns(StatusCodes.NOT_FOUND, ErrorModel)
+    @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async getActiveRound(@Res() res: PlatformResponse): Promise<unknown> {
-        try {
-            const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
-            if (!activeRound) {
-                return super.doError(res, "No submission rounds are currently active", StatusCodes.NOT_FOUND);
-            }
-            return activeRound;
-        } catch (e) {
-            return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
+        const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        if (!activeRound) {
+            throw new NotFound("No submission rounds are currently active");
         }
+        return activeRound;
     }
 
     @Get("/getAllRounds")
     @Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel)
-    @Returns(StatusCodes.NOT_FOUND, ErrorModel)
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
-        try {
-            return this.submissionRoundService.getAllSubmissionRounds(includeActive);
-        } catch (e) {
-            return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
-        }
+        return this.submissionRoundService.getAllSubmissionRounds(includeActive);
     }
 
     @Post("/endCurrentRound")
     @Returns(StatusCodes.OK, SuccessModel)
-    @Returns(StatusCodes.BAD_REQUEST, ErrorModel)
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async endCurrentRound(@Res() res: PlatformResponse): Promise<unknown> {
-        try {
-            const ended = await this.submissionRoundService.endActiveSubmissionRound();
-            if (ended) {
-                return super.doSuccess(res, "the currently active submission round has been ended");
-            }
-        } catch (e) {
-            return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
+        const ended = await this.submissionRoundService.endActiveSubmissionRound();
+        if (ended) {
+            return super.doSuccess(res, "the currently active submission round has been ended");
         }
-        return super.doError(res, "There are no currently active submission rounds to end", StatusCodes.BAD_REQUEST);
+        throw new BadRequest("There are no currently active submission rounds to end");
     }
 }

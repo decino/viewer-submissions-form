@@ -1,11 +1,14 @@
 import {PlatformResponse} from "@tsed/common";
-import {getReasonPhrase, StatusCodes} from "http-status-codes";
+import {StatusCodes} from "http-status-codes";
+import {ErrorModel} from "../../model/rest/ErrorModel";
+import {SuccessModel} from "../../model/rest/SuccessModel";
 
 export abstract class BaseRestController {
     protected doError(res: PlatformResponse, message: string, status: StatusCodes): PlatformResponse {
-        return res.status(status).body({
-            error: `${status} ${getReasonPhrase(status)}`,
-            message: message
-        });
+        return res.status(status).body(new ErrorModel(message));
+    }
+
+    protected doSuccess(res: PlatformResponse, message: string): PlatformResponse {
+        return res.status(StatusCodes.OK).body(new SuccessModel(true, message));
     }
 }

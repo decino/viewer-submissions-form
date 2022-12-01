@@ -57,7 +57,7 @@ export class SubmissionRoundService {
         return foundWithoutActive ?? [];
     }
 
-    public async endActiveSubmissionRound(): Promise<void> {
+    public async endActiveSubmissionRound(): Promise<boolean> {
         const repo = this.ds.getRepository(SubmissionRoundModel);
         const currentlyActive = await repo.findOne({
             where: {
@@ -67,6 +67,8 @@ export class SubmissionRoundService {
         if (currentlyActive) {
             currentlyActive.active = false;
             await repo.save(currentlyActive);
+            return true;
         }
+        return false;
     }
 }

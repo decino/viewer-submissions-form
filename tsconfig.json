@@ -21,7 +21,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "newLine": "LF",
-    "noEmit": true,
+    "noEmit": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "lib": [

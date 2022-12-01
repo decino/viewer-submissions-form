@@ -1,7 +1,7 @@
 import {Controller} from "@tsed/di";
 import {Get} from "@tsed/schema";
 
-@Controller("/hello-world")
+@Controller("/submission")
 export class SubmissionController {
 
     @Get("/")

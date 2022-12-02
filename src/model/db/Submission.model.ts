@@ -3,6 +3,7 @@ import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {CollectionOf, Description, Enum, Example, Ignore, Name, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
+import {DOOM_ENGINE} from "../constants/DoomEngine";
 
 @Entity()
 export class SubmissionModel extends AbstractModel {
@@ -26,6 +27,7 @@ export class SubmissionModel extends AbstractModel {
     public wadLevel: string;
 
     @Column({
+        type: "simple-array",
         nullable: false
     })
     @Name("engine")
@@ -33,8 +35,10 @@ export class SubmissionModel extends AbstractModel {
     @Example("Classic Doom")
     @Example("Boom")
     @Example("GZDoom")
+    @Enum(DOOM_ENGINE)
+    @CollectionOf(Number).MaxItems(3).MinItems(0)
     @Required()
-    public wadEngine: string;
+    public wadEngine: DOOM_ENGINE[];
 
     @Column({
         type: "simple-array",

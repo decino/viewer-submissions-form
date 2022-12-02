@@ -23,7 +23,7 @@ export class SubmissionRoundController extends BaseRestController {
     @Get("/currentActiveRound")
     @Returns(StatusCodes.OK, SubmissionRoundModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
-    public async getActiveRound(@Res() res: PlatformResponse): Promise<unknown> {
+    public async getActiveRound(): Promise<unknown> {
         const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         if (!activeRound) {
             throw new NotFound("No submission rounds are currently active");

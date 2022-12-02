@@ -27,7 +27,7 @@ export class SubmissionModel extends AbstractModel {
     public wadLevel: string;
 
     @Column({
-        type: "simple-array",
+        type: "integer",
         nullable: false
     })
     @Name("engine")
@@ -36,9 +36,8 @@ export class SubmissionModel extends AbstractModel {
     @Example("Boom")
     @Example("GZDoom")
     @Enum(DOOM_ENGINE)
-    @CollectionOf(Number)
     @Required()
-    public wadEngine: DOOM_ENGINE[];
+    public wadEngine: DOOM_ENGINE;
 
     @Column({
         type: "simple-array",

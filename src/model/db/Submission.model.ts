@@ -36,7 +36,7 @@ export class SubmissionModel extends AbstractModel {
     @Example("Boom")
     @Example("GZDoom")
     @Enum(DOOM_ENGINE)
-    @CollectionOf(Number).MaxItems(3).MinItems(0)
+    @CollectionOf(Number)
     @Required()
     public wadEngine: DOOM_ENGINE[];
 

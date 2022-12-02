@@ -54,7 +54,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         nullable: true
     })
-    @Name("name")
+    @Name("authorName")
     @Description("submitter name")
     @Example("Victoria")
     @Example("")

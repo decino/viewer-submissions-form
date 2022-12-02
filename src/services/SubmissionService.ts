@@ -1,11 +1,12 @@
 import {Inject, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource, DeleteResult} from "typeorm";
+import {DataSource} from "typeorm";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
 import {BadRequest, NotFound} from "@tsed/exceptions";
 import {PlatformMulterFile} from "@tsed/common";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
+import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 
 @Service()
 export class SubmissionService {
@@ -24,6 +25,9 @@ export class SubmissionService {
         if (!currentActiveRound) {
             throw new NotFound("can not add when there are no currently active rounds");
         }
+        if (!this.canAddEntry(entry, currentActiveRound)) {
+            throw new BadRequest("This level for this wad has already been requested, please try a different map or wad, or you have already submitted a request");
+        }
         if (customWad) {
             const allowed = await this.customWadEngine.validateFile(customWad);
             if (!allowed) {
@@ -36,15 +40,46 @@ export class SubmissionService {
         const repo = this.ds.getRepository(SubmissionModel);
         const saveEntry = await repo.save(entry);
         if (customWad) {
-            await this.customWadEngine.moveWad(saveEntry.id, customWad);
+            await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
         }
         return saveEntry;
     }
 
-    public deleteEntry(id: number): Promise<DeleteResult> {
+    public async getEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
-        return repo.delete({
-            id
+        const entry = await repo.findOne({
+            where: {
+                id
+            }
         });
+        if (!entry) {
+            return null;
+        }
+        return entry;
+    }
+
+    public async deleteEntry(id: number): Promise<SubmissionModel | null> {
+        const repo = this.ds.getRepository(SubmissionModel);
+        const entry = await repo.findOne({
+            where: {
+                id
+            }
+        });
+        if (!entry) {
+            return null;
+        }
+        const removedItem = await repo.remove(entry);
+        if (entry.customWadFileName) {
+            await this.customWadEngine.deleteCustomWad(id);
+        }
+        return removedItem;
+    }
+
+    private canAddEntry(entry: SubmissionModel, round: SubmissionRoundModel): boolean {
+        const wadUrl = entry.wadURL;
+        const submitterName = entry.submitterName;
+        const level = entry.wadLevel;
+        const alreadySubmitted = round.submissions.find(entry => (entry.wadURL === wadUrl && entry.wadLevel === level) || entry.submitterName === submitterName);
+        return !alreadySubmitted;
     }
 }

@@ -12,19 +12,22 @@ export type CustomWadEntry = {
     scope: ProviderScope.SINGLETON
 })
 export class CustomWadEngine {
-    protected readonly basePath = `${__dirname}/../../customWads`;
+    private readonly basePath = `${__dirname}/../../customWads`;
 
-    public async getWad(entryId: number): Promise<CustomWadEntry | null> {
-        const files = await fs.promises.readdir(`${this.basePath}/${entryId}`);
-        const content = await fs.promises.readFile(`${this.basePath}/${entryId}/${files[0]}`);
+    public async getWad(round: number, entryId: number): Promise<CustomWadEntry | null> {
+        const files = await fs.promises.readdir(`${this.basePath}/${round}/${entryId}`);
+        if (files.length === 0) {
+            return null;
+        }
+        const content = await fs.promises.readFile(`${this.basePath}/${round}/${entryId}/${files[0]}`);
         return {
             content,
             filename: files[0]
         };
     }
 
-    public async moveWad(entryId: number, customWad: PlatformMulterFile): Promise<void> {
-        const newFolder = `${this.basePath}/${entryId}`;
+    public async moveWad(entryId: number, customWad: PlatformMulterFile, round: number): Promise<void> {
+        const newFolder = `${this.basePath}/${round}/${entryId}`;
         await fs.promises.mkdir(newFolder, {recursive: true});
         return fs.promises.rename(customWad.path, `${newFolder}/${customWad.originalname}`);
     }
@@ -44,4 +47,5 @@ export class CustomWadEngine {
         const toDelete = typeof entry === "number" ? `${this.basePath}/${entry}` : entry.path;
         return fs.promises.rm(toDelete, {recursive: true, force: true});
     }
+
 }

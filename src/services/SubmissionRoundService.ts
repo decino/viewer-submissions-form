@@ -2,12 +2,16 @@ import {Inject, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
+import {CustomWadEngine} from "../engine/CustomWadEngine";
 
 @Service()
 export class SubmissionRoundService {
 
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
+
+    @Inject()
+    private customWadEngine: CustomWadEngine;
 
     public newSubmissionRound(): Promise<SubmissionRoundModel> {
         return this.ds.transaction(async entityManager => {
@@ -62,7 +66,8 @@ export class SubmissionRoundService {
         const currentlyActive = await repo.findOne({
             where: {
                 active: true
-            }
+            },
+            relations: ["submissions"]
         });
         if (currentlyActive) {
             currentlyActive.active = false;

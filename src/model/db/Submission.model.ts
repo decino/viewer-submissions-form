@@ -1,11 +1,16 @@
 import {AbstractModel} from "./AbstractModel";
-import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {CollectionOf, Description, Enum, Example, Ignore, Name, Required} from "@tsed/schema";
+import {Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
+import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 import {DOOM_ENGINE} from "../constants/DoomEngine";
+import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
 
 @Entity()
+// entries with same submissionRoundId must have unique emails
+@Index(["submissionRoundId", "submitterEmail"], {
+    unique: true
+})
 export class SubmissionModel extends AbstractModel {
 
     @Column({
@@ -90,6 +95,10 @@ export class SubmissionModel extends AbstractModel {
     @Example("I like cats")
     public info: string;
 
+    @Name("submissionRoundId")
+    @Description("The submission round this entry belongs to")
+    @Example("1")
+    @Example("2")
     @Column({
         nullable: false
     })
@@ -103,6 +112,25 @@ export class SubmissionModel extends AbstractModel {
     @Ignore()
     public customWadFileName: string;
 
+    @Column({
+        nullable: false
+    })
+    @Name("email")
+    @Description("email of the submitter")
+    @Example("foo@example.com")
+    @Required()
+    @Format("email")
+    public submitterEmail: string;
+
+    @Column({
+        nullable: false,
+        default: false
+    })
+    @Name("submissionValid")
+    @Description("valid if the user clicks the confirmation url")
+    public submissionValid: boolean;
+
+
     @Name("submissionRound")
     @Description("The submission round this entry belongs to")
     @ManyToOne("SubmissionRoundModel", "submissions", AbstractModel.cascadeOps)
@@ -111,5 +139,10 @@ export class SubmissionModel extends AbstractModel {
         referencedColumnName: "id"
     })
     public submissionRound: SubmissionRoundModel;
+
+    @Name("confirmation")
+    @Description("the confirmation if any that this submission belongs to")
+    @OneToOne("PendingEntryConfirmationModel", "submission", AbstractModel.cascadeOps)
+    public confirmation: PendingEntryConfirmationModel;
 
 }

@@ -4,5 +4,6 @@
 
 export * from "./BaseRestController";
 export * from "./PassportCtrl";
+export * from "./SubmissionConfirmationController";
 export * from "./SubmissionController";
 export * from "./SubmissionRoundController";

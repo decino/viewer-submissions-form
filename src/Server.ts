@@ -1,10 +1,10 @@
-import {join} from "path";
 import {Configuration, Inject} from "@tsed/di";
 import {PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
 import {config} from "./config";
 import * as rest from "./controllers/rest/index";
+import * as views from "./controllers/views/index";
 import {CustomUserInfoModel} from "./model/auth/CustomUserInfoModel";
 import "./protocols/LoginLocalProtocol";
 import bodyParser from "body-parser";
@@ -15,6 +15,7 @@ import cors from "cors";
 import {Request} from "express";
 import {FileFilterCallback} from "multer";
 import {BadRequest} from "@tsed/exceptions";
+import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesInit";
 
 
 @Configuration({
@@ -50,6 +51,17 @@ import {BadRequest} from "@tsed/exceptions";
     mount: {
         "/rest": [
             ...Object.values(rest)
+        ],
+        "/": [
+            ...Object.values(views)
+        ]
+    },
+    statics: {
+        "/": [
+            {
+                root: `${__dirname}/public`,
+                hook: "$beforeRoutesInit"
+            }
         ]
     },
     middlewares: [
@@ -61,7 +73,7 @@ import {BadRequest} from "@tsed/exceptions";
         {use: "urlencoded-parser", options: {extended: true}}
     ],
     views: {
-        root: join(process.cwd(), "../views"),
+        root: `${__dirname}/public`,
         extensions: {
             ejs: "ejs"
         }
@@ -70,14 +82,14 @@ import {BadRequest} from "@tsed/exceptions";
         "**/*.spec.ts"
     ]
 })
-export class Server {
+export class Server implements BeforeRoutesInit {
     @Inject()
     protected app: PlatformApplication;
 
     @Configuration()
     protected settings: Configuration;
 
-    private $beforeRoutesInit(): void {
+    public $beforeRoutesInit(): void {
         this.app
             .use(cors())
             .use(cookieParser())

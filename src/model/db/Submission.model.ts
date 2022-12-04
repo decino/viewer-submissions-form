@@ -142,7 +142,7 @@ export class SubmissionModel extends AbstractModel {
 
     @Name("confirmation")
     @Description("the confirmation if any that this submission belongs to")
-    @OneToOne("PendingEntryConfirmationModel", "submission", AbstractModel.cascadeOps)
+    @OneToOne("PendingEntryConfirmationModel", "submission")
     public confirmation: PendingEntryConfirmationModel;
 
 }

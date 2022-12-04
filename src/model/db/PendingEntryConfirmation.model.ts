@@ -36,7 +36,7 @@ export class PendingEntryConfirmationModel extends AbstractModel {
     })
     public submissionRoundId: number;
 
-    @OneToOne("SubmissionModel", "confirmation")
+    @OneToOne("SubmissionModel", "confirmation", AbstractModel.cascadeOps)
     @JoinColumn([
         {
             name: "submitterEmail",

@@ -66,8 +66,7 @@ export class SubmissionRoundService {
         const currentlyActive = await repo.findOne({
             where: {
                 active: true
-            },
-            relations: ["submissions"]
+            }
         });
         if (currentlyActive) {
             currentlyActive.active = false;

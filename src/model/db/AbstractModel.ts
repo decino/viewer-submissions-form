@@ -6,8 +6,7 @@ export abstract class AbstractModel {
 
     protected static readonly cascadeOps: RelationOptions = {
         onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-        cascade: true
+        onUpdate: "CASCADE"
     };
 
     @PrimaryGeneratedColumn("increment")

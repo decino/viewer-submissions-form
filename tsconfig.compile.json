@@ -7,7 +7,10 @@
     "declaration": true,
     "noResolve": false,
     "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "sourceMap": true,
+    "target": "esnext",
     "noEmit": false,
     "emitDeclarationOnly": false,
     "inlineSources": true

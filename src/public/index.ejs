@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Victoria">
+    <title>decino submission round</title>
+    <link href="assets/vendor/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/custom/css/main.css" rel="stylesheet">
+    <meta name="theme-color" content="#712cf9">
+</head>
+<body>
+<div class="container mt-5">
+    <main>
+        <% if (currentActiveRound === null){ %>
+            <div class="col-md-12">
+                <%- include('resultTable.ejs'); %>
+            </div>
+        <% } else { %>
+            <div class="card border-primary mb-3">
+                <div class="card-header">Header</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title">Primary card title</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+            </div>
+        <% } %>
+    </main>
+</div>
+<script src="assets/vendor/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

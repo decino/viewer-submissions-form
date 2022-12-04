@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "sourceRoot": "src",
     "rootDir": "src",
-    "outDir": "build",
+    "outDir": "dist",
     "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "target": "esnext",
@@ -21,7 +21,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "newLine": "LF",
-    "noEmit": false,
+    "noEmit": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "lib": [

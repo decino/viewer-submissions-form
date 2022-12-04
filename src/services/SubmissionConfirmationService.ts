@@ -43,5 +43,4 @@ export class SubmissionConfirmationService {
         });
         return confirmationModelRepository.save(newEntry);
     }
-
 }

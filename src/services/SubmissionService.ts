@@ -9,6 +9,7 @@ import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
+import {EmailService} from "./EmailService";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -26,6 +27,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private submissionConfirmationService: SubmissionConfirmationService;
+
+    @Inject()
+    private emailService: EmailService;
 
     @Inject()
     private logger: Logger;
@@ -54,6 +58,7 @@ export class SubmissionService implements OnInit {
                 await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
             }
             saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.submissionRoundId);
+            await this.emailService.sendConfirmationEmail(saveEntry.confirmation);
             return saveEntry;
         });
     }

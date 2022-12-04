@@ -2,10 +2,10 @@ import {Controller, Inject} from "@tsed/di";
 import {Get, Post, Returns} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
-import {SubmissionRoundModel} from "../../model/db/SubmissionRound.model";
-import {SubmissionRoundService} from "../../services/SubmissionRoundService";
-import {BaseRestController} from "./BaseRestController";
-import {SuccessModel} from "../../model/rest/SuccessModel";
+import {SubmissionRoundModel} from "../../../model/db/SubmissionRound.model";
+import {SubmissionRoundService} from "../../../services/SubmissionRoundService";
+import {BaseRestController} from "../BaseRestController";
+import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {BadRequest, NotFound} from "@tsed/exceptions";
 
 @Controller("/submissionRound")

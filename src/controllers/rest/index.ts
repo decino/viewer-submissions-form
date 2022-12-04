@@ -3,7 +3,7 @@
  */
 
 export * from "./BaseRestController";
-export * from "./PassportCtrl";
-export * from "./SubmissionConfirmationController";
-export * from "./SubmissionController";
-export * from "./SubmissionRoundController";
+export * from "./impl/SubmissionConfirmationController";
+export * from "./impl/SubmissionController";
+export * from "./impl/SubmissionRoundController";
+export * from "./impl/security/PassportCtrl";

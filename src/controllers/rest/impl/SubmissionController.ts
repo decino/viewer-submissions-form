@@ -1,14 +1,14 @@
 import {Controller, Inject} from "@tsed/di";
 import {Delete, Get, Post, Returns} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
-import {SubmissionModel} from "../../model/db/Submission.model";
-import {SubmissionService} from "../../services/SubmissionService";
+import {SubmissionModel} from "../../../model/db/Submission.model";
+import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
 import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
-import {SuccessModel} from "../../model/rest/SuccessModel";
+import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res} from "@tsed/common";
-import {BaseRestController} from "./BaseRestController";
-import {CustomWadEngine} from "../../engine/CustomWadEngine";
+import {BaseRestController} from "../BaseRestController";
+import {CustomWadEngine} from "../../../engine/CustomWadEngine";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {

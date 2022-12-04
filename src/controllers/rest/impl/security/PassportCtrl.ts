@@ -3,7 +3,7 @@ import {Authenticate} from "@tsed/passport";
 import {Post, Returns} from "@tsed/schema";
 import {BodyParams} from "@tsed/platform-params";
 import {Req} from "@tsed/common";
-import {UserModel} from "../../model/db/User.model";
+import {UserModel} from "../../../../model/db/User.model";
 
 @Controller("/auth")
 @Scope(ProviderScope.SINGLETON)

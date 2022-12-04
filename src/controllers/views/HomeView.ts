@@ -1,6 +1,9 @@
 import {Get, View} from "@tsed/schema";
 import {Controller, Inject} from "@tsed/di";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
+import {ObjectUtils} from "../../utils/Utils";
+import DOOM_ENGINE from "../../model/constants/DoomEngine";
+import GZDOOM_ACTIONS from "../../model/constants/GZDoomActions";
 
 @Controller("/")
 export class HomeView {
@@ -15,7 +18,10 @@ export class HomeView {
         const allRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
         return {
             currentActiveRound,
-            allRounds
+            allRounds,
+            doomEngines: ObjectUtils.getEnumAsObject(DOOM_ENGINE),
+            GzActions: ObjectUtils.getEnumAsObject(GZDOOM_ACTIONS)
         };
     }
+
 }

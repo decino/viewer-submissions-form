@@ -3,7 +3,7 @@ import {Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
 import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
-import {DOOM_ENGINE} from "../constants/DoomEngine";
+import DOOM_ENGINE from "../constants/DoomEngine";
 import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
 
 @Entity()
@@ -46,8 +46,8 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         type: "simple-array",
-        nullable: false,
-        default: [GZDOOM_ACTIONS.NONE]
+        nullable: true,
+        default: null
     })
     @Name("gzDoomAction")
     @Description("GZDoom parameters")

@@ -10,7 +10,7 @@ export class HomeView {
 
     @Get()
     @View("index.ejs")
-    public async get(): Promise<unknown> {
+    public async showRoot(): Promise<unknown> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         const allRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
         return {

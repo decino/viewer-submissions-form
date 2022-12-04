@@ -8,5 +8,4 @@ export const config: Partial<TsED.Configuration> = {
     version: pkg.version,
     envs,
     logger: loggerConfig,
-    // additional shared configuration
 };

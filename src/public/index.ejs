@@ -1,33 +1,46 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Victoria">
-    <title>decino submission round</title>
-    <link href="assets/vendor/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/custom/css/main.css" rel="stylesheet">
-    <meta name="theme-color" content="#712cf9">
-</head>
+<%- include('snippets/head.ejs'); %>
 <body>
 <div class="container mt-5">
     <main>
         <% if (currentActiveRound === null){ %>
             <div class="col-md-12">
-                <%- include('resultTable.ejs'); %>
+                <%- include('snippets/resultTable.ejs'); %>
             </div>
         <% } else { %>
             <div class="card border-primary mb-3">
-                <div class="card-header">Header</div>
-                <div class="card-body text-primary">
-                    <h5 class="card-title">Primary card title</h5>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <div class="card-header">Submission round <%- currentActiveRound.id -%></div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="d-block mb-2">Post a link to the WAD below. Or you can attach it</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="uploadOrUrl" id="link" value="url" checked>
+                                <label class="form-check-label" for="link">Link</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="uploadOrUrl" id="Upload" value="upload">
+                                <label class="form-check-label" for="Upload">Upload</label>
+                            </div>
+                            <div class="hidden">
+                                <label for="wadUrl" class="form-label">Wad download URL</label>
+                                <input type="url" class="form-control" id="wadUrl">
+                            </div>
+
+                            <div class="hidden">
+                                <label for="wadFile" class="form-label">Upload WAD</label>
+                                <input class="form-control" type="file" id="wadFile" accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                            </div>
+                        </div>
+                    </form>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </div>
         <% } %>
     </main>
 </div>
-<script src="assets/vendor/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
+<%- include('snippets/scripts.ejs'); %>
+<script src="assets/custom/js/index.js"></script>
 </body>
 </html>

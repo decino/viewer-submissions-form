@@ -3,7 +3,6 @@
  */
 
 export * from "./BaseRestController";
-export * from "./impl/SubmissionConfirmationController";
 export * from "./impl/SubmissionController";
 export * from "./impl/SubmissionRoundController";
 export * from "./impl/SubmissionRoundResultController";

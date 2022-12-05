@@ -6,7 +6,7 @@ import {NotFound} from "@tsed/exceptions";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {SubmissionConfirmationService} from "../../../services/SubmissionConfirmationService";
 
-@Controller("/submissionConformation")
+@Controller("/submissionConfirmation")
 export class SubmissionConfirmationController {
 
     @Inject()

@@ -46,7 +46,7 @@ export class EmailService implements BeforeInit {
 
     public async sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<string> {
         const baseUrl = process.env.BASE_URL;
-        const confirmationUrl = `${baseUrl}/rest/submissionConformation/processSubmission?uid=${pendingEntry.confirmationUid}`;
+        const confirmationUrl = `${baseUrl}/rest/submissionConfirmation/processSubmission?uid=${pendingEntry.confirmationUid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes\n${confirmationUrl}`;
         const env: Envelope = {
             from: process.env.SMTP_FROM,

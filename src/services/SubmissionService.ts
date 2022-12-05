@@ -71,7 +71,14 @@ export class SubmissionService implements OnInit {
         return entry;
     }
 
-    public async getAllEntries(roundId: number): Promise<SubmissionModel[]> {
+    public async getAllEntries(roundId = -1): Promise<SubmissionModel[]> {
+        if (roundId === -1) {
+            const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+            if (!currentActiveRound) {
+                throw new Error("No round exists");
+            }
+            roundId = currentActiveRound?.id;
+        }
         const repo = this.ds.getRepository(SubmissionModel);
         const entries = await repo.find({
             where: {

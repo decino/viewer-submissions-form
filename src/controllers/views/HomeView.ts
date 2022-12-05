@@ -15,10 +15,8 @@ export class HomeView {
     @View("index.ejs")
     public async showRoot(): Promise<unknown> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
-        const allRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
         return {
             currentActiveRound,
-            allRounds,
             doomEngines: ObjectUtils.getEnumAsObject(DOOM_ENGINE),
             GzActions: ObjectUtils.getEnumAsObject(GZDOOM_ACTIONS)
         };

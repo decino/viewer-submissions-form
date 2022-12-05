@@ -1,5 +1,5 @@
 import {Controller, Inject} from "@tsed/di";
-import {Post, Returns} from "@tsed/schema";
+import {Get, Returns} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {NotFound} from "@tsed/exceptions";
@@ -12,7 +12,7 @@ export class SubmissionConfirmationController {
     @Inject()
     private submissionConfirmationService: SubmissionConfirmationService;
 
-    @Post("/processSubmission")
+    @Get("/processSubmission")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public createRound(@Res() res: PlatformResponse, @QueryParams("uid") uid: string): Promise<unknown> {

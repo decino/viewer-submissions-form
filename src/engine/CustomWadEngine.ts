@@ -43,8 +43,8 @@ export class CustomWadEngine {
         return allowedHeadersArr.includes(header);
     }
 
-    public deleteCustomWad(entry: number | PlatformMulterFile): Promise<void> {
-        const toDelete = typeof entry === "number" ? `${this.basePath}/${entry}` : entry.path;
+    public deleteCustomWad(entry: number | PlatformMulterFile, round?: number): Promise<void> {
+        const toDelete = typeof entry === "number" ? `${this.basePath}/${round}/${entry}` : entry.path;
         return fs.promises.rm(toDelete, {recursive: true, force: true});
     }
 

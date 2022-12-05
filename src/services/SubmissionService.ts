@@ -76,6 +76,16 @@ export class SubmissionService implements OnInit {
         return entry;
     }
 
+    public async getAllEntries(roundId: number): Promise<SubmissionModel[]> {
+        const repo = this.ds.getRepository(SubmissionModel);
+        const entries = await repo.find({
+            where: {
+                submissionRoundId: roundId
+            }
+        });
+        return entries ?? [];
+    }
+
     public async deleteEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
         const entry = await repo.findOne({
@@ -88,12 +98,12 @@ export class SubmissionService implements OnInit {
         }
         const removedItem = await repo.remove(entry);
         if (entry.customWadFileName) {
-            await this.customWadEngine.deleteCustomWad(id);
+            await this.customWadEngine.deleteCustomWad(id, entry.submissionRoundId);
         }
         return removedItem;
     }
 
-    public $onInit(): Promise<any> | void {
+    public $onInit(): void {
         const task = new AsyncTask(
             'cleanOldEntries',
             () => this.scanDb() as Promise<void>

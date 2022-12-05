@@ -9,91 +9,101 @@
                 <%- include('snippets/resultTable.ejs'); %>
             </div>
         <% } else { %>
-            <div class="card border-primary mb-3">
-                <div class="card-header">Submission round <%- currentActiveRound.id -%></div>
-                <div class="card-body">
-                    <form>
-                        <div class="mb-3">
-                            <label class="d-block mb-2">Post a link to the WAD below. Or you can attach it</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="uploadOrUrl" id="link" value="url" checked>
-                                <label class="form-check-label" for="link">Link</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="uploadOrUrl" id="Upload" value="upload">
-                                <label class="form-check-label" for="Upload">Upload</label>
-                            </div>
-                            <div>
-                                <label for="wadUrl" class="form-label">Wad download URL</label>
-                                <input type="url" class="form-control" id="wadUrl" name="WAD" required>
-                            </div>
+            <div class="col-md-12">
+                <div class="card border-primary mb-3">
+                    <div class="card-header">Submission round <%- currentActiveRound.id -%></div>
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label class="d-block mb-2">Post a link to the WAD below. Or you can attach it</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="uploadOrUrl" id="link" value="url" checked>
+                                    <label class="form-check-label" for="link">Link</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="uploadOrUrl" id="Upload" value="upload">
+                                    <label class="form-check-label" for="Upload">Upload</label>
+                                </div>
+                                <div>
+                                    <label for="wadUrl" class="form-label">Wad download URL
+                                        <span title="required" class="text-danger">*</span></label>
+                                    <input type="url" class="form-control" id="wadUrl" name="WAD" required>
+                                </div>
 
-                            <div class="hidden">
-                                <label for="wadFile" class="form-label">Upload WAD</label>
-                                <input required class="form-control" type="file" id="wadFile" accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                                <div class="hidden">
+                                    <label for="wadFile" class="form-label">Upload WAD
+                                        <span title="required" class="text-danger">*</span></label>
+                                    <input required class="form-control" type="file" id="wadFile" accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="levelToPlay" class="form-label">Which level should I play? Don't tell me to choose one myself, or I'll have to reject it.</label>
-                            <input name="level" type="text" class="form-control" id="levelToPlay" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="gameEngine" class="form-label">Which engine is this level designed for?</label>
-                            <select name="engine" id="gameEngine" class="form-select" aria-label="Which engine is this level designed for?">
-                                <% for(const key in doomEngines) {
-                                    const value = doomEngines[key];
+                            <div class="mb-3">
+                                <label for="levelToPlay" class="form-label">Which level should I play? Don't tell me to choose one myself, or I'll have to reject it.
+                                    <span title="required" class="text-danger">*</span></label>
+                                <input name="level" type="text" class="form-control" id="levelToPlay" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="gameEngine" class="form-label">Which engine is this level designed for?
+                                    <span title="required" class="text-danger">*</span></label>
+                                <select name="engine" id="gameEngine" class="form-select" aria-label="Which engine is this level designed for?">
+                                    <% for(const key in doomEngines) {
+                                        const value = doomEngines[key];
+                                    %>
+                                    <option data-value=<%- value -%> value="<%- key -%>"><%- value -%></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="mb-3 hidden" id="gzActionsContainer">
+                                <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
+                                <% for(const key in GzActions) {
+                                    const value = GzActions[key];
                                 %>
-                                <option data-value=<%- value -%> value="<%- key -%>"><%- value -%></option>
+                                <div class="form-check form-check-inline">
+                                    <input name="gzDoomAction" class="form-check-input" type="checkbox" id="gzActionCheck_<%- key -%>" value="<%- key -%>">
+                                    <label class="form-check-label" for="gzActionCheck_<%- key -%>"><%- value -%></label>
+                                </div>
                                 <% } %>
-                            </select>
-                        </div>
-                        <div class="mb-3 hidden" id="gzActionsContainer">
-                            <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
-                            <% for(const key in GzActions) {
-                                const value = GzActions[key];
-                            %>
-                            <div class="form-check form-check-inline">
-                                <input name="gzDoomAction" class="form-check-input" type="checkbox" id="gzActionCheck_<%- key -%>" value="<%- key -%>">
-                                <label class="form-check-label" for="gzActionCheck_<%- key -%>"><%- value -%></label>
                             </div>
-                            <% } %>
-                        </div>
-                        <div class="mb-3">
-                            <label for="authorName" class="form-label">Under what name would you like to submit? Leave empty to remain anonymous.</label>
-                            <input name="authorName" type="text" class="form-control" id="authorName" placeholder="anonymous">
-                        </div>
-                        <div class="mb-3">
-                            <label class="d-block mb-2">Did you make this level?</label>
-                            <div class="form-check form-check-inline">
-                                <input name="author" class="form-check-input" type="radio" id="authorYes" value="yes">
-                                <label class="form-check-label" for="authorYes">Yes</label>
+                            <div class="mb-3">
+                                <label for="authorName" class="form-label">Under what name would you like to submit? Leave empty to remain anonymous.</label>
+                                <input name="authorName" type="text" class="form-control" id="authorName" placeholder="anonymous">
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input name="author" class="form-check-input" type="radio" id="authorNo" value="no" checked>
-                                <label class="form-check-label" for="authorNo">No</label>
+                            <div class="mb-3">
+                                <label class="d-block mb-2">Did you make this level?
+                                    <span title="required" class="text-danger">*</span></label>
+                                <div class="form-check form-check-inline">
+                                    <input name="author" class="form-check-input" type="radio" id="authorYes" value="yes">
+                                    <label class="form-check-label" for="authorYes">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input name="author" class="form-check-input" type="radio" id="authorNo" value="no" checked>
+                                    <label class="form-check-label" for="authorNo">No</label>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3 hidden" id="distributableSection">
-                            <label class="d-block mb-2">If you've made the WAD, and it's not hosted or available anywhere, am I allowed to provide it to the viewers?</label>
-                            <div class="form-check form-check-inline">
-                                <input name="distributable" class="form-check-input" type="radio" id="distributableYes" value="yes">
-                                <label class="form-check-label" for="distributableYes">Yes</label>
+                            <div class="mb-3 hidden" id="distributableSection">
+                                <label class="d-block mb-2">If you've made the WAD, and it's not hosted or available anywhere, am I allowed to provide it to the viewers?</label>
+                                <div class="form-check form-check-inline">
+                                    <input name="distributable" class="form-check-input" type="radio" id="distributableYes" value="yes">
+                                    <label class="form-check-label" for="distributableYes">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input name="distributable" class="form-check-input" type="radio" id="distributableNo" value="no" checked>
+                                    <label class="form-check-label" for="distributableNo">No</label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input name="distributable" class="form-check-input" type="radio" id="distributableNo" value="no" checked>
-                                <label class="form-check-label" for="distributableNo">No</label>
+                            <div class="mb-3">
+                                <label for="extraInfo" class="form-label">Tell me something about the level, its backstory, inspiration, yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
+                                <textarea name="info" class="form-control" id="extraInfo" rows="3"></textarea>
                             </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Your Email address
+                                    <span title="required" class="text-danger">*</span></label>
+                                <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" required>
+                            </div>
+                        </form>
+                        <div class="text-center">
+                            <button id="submit" type="button" class="btn btn-primary">Submit</button>
                         </div>
-                        <div class="mb-3">
-                            <label for="extraInfo" class="form-label">Tell me something about the level, its backstory, inspiration, yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
-                            <textarea name="info" class="form-control" id="extraInfo" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Your Email address</label>
-                            <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com">
-                        </div>
-                    </form>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
                 </div>
             </div>
         <% } %>

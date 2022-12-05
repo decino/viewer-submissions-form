@@ -119,10 +119,12 @@ export class SubmissionService implements OnInit {
         const submitterName = entry.submitterName;
         const level = entry.wadLevel;
         const email = entry.submitterEmail;
-        const alreadySubmitted = round.submissions.find(
-            entry => (entry.wadURL === wadUrl && entry.wadLevel === level)
+        const alreadySubmitted = round.submissions
+            .find(entry =>
+                (entry.wadURL === wadUrl && entry.wadLevel === level)
                 || entry.submitterName === submitterName
-                || entry.submitterEmail === email)
+                || entry.submitterEmail === email
+            )
         ;
         return !alreadySubmitted;
     }

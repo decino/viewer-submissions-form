@@ -29,9 +29,12 @@ export class SubmissionRoundResultService {
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    private getMultipleRandom<T>(arr: T[], num = -1): T[] {
-        const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    private getMultipleRandom<T>(array: T[], num = -1): T[] {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
         return num === -1 ? shuffled : shuffled.slice(0, num);
     }
-
 }

@@ -4,7 +4,6 @@ import * as nodemailer from "nodemailer";
 import {Transporter} from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {Envelope} from "nodemailer/lib/mailer";
-import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
 import * as process from "process";
 
 @Service()
@@ -31,9 +30,6 @@ export class EmailService implements BeforeInit {
         if (!process.env.SMTP_HOST) {
             throw new Error("No SMTP server has been defined");
         }
-        if (!process.env.BASE_URL) {
-            throw new Error("Base URL has not been set");
-        }
         try {
             await transporter.verify();
         } catch (e) {
@@ -44,13 +40,10 @@ export class EmailService implements BeforeInit {
         this.emailTransport = transporter;
     }
 
-    public async sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<string> {
-        const baseUrl = process.env.BASE_URL;
-        const confirmationUrl = `${baseUrl}/rest/submissionConfirmation/processSubmission?uid=${pendingEntry.confirmationUid}`;
-        const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes\n${confirmationUrl}`;
+    public async sendMail(body: string, to: string): Promise<string> {
         const env: Envelope = {
             from: process.env.SMTP_FROM,
-            to: pendingEntry.submitterEmail
+            to
         };
         const sentMail = await this.emailTransport.sendMail({
             ...env,
@@ -59,7 +52,7 @@ export class EmailService implements BeforeInit {
             sender: process.env.SMTP_FROM,
             subject: "confirmation for submission round"
         });
-        this.logger.info(`send mail to: ${pendingEntry.submitterEmail}. mail transport id: ${sentMail.messageId}`);
+        this.logger.info(`send mail to: ${to}. mail transport id: ${sentMail.messageId}`);
         return sentMail.messageId;
     }
 }

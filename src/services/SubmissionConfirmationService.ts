@@ -1,19 +1,24 @@
-import {Inject, Service} from "@tsed/di";
+import {Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
 import {NotFound} from "@tsed/exceptions";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {Logger} from "@tsed/common";
+import {EmailService} from "./EmailService";
+import process from "process";
 
 @Service()
-export class SubmissionConfirmationService {
+export class SubmissionConfirmationService implements OnInit {
 
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
     @Inject()
     private logger: Logger;
+
+    @Inject()
+    private emailService: EmailService;
 
     public processConfirmation(confirmationUid: string): Promise<void> {
         return this.ds.manager.transaction(async entityManager => {
@@ -35,12 +40,28 @@ export class SubmissionConfirmationService {
         });
     }
 
-    public generateConfirmationEntry(email: string, round: number): Promise<PendingEntryConfirmationModel> {
+    public async generateConfirmationEntry(email: string, round: number): Promise<PendingEntryConfirmationModel> {
         const confirmationModelRepository = this.ds.getRepository(PendingEntryConfirmationModel);
         const newEntry = this.ds.manager.create(PendingEntryConfirmationModel, {
             submitterEmail: email,
             submissionRoundId: round
         });
-        return confirmationModelRepository.save(newEntry);
+        const saveEntry = await confirmationModelRepository.save(newEntry);
+        await this.sendConfirmationEmail(saveEntry);
+        return saveEntry;
     }
+
+    public $onInit(): Promise<any> | void {
+        if (!process.env.BASE_URL) {
+            throw new Error("Base URL has not been set");
+        }
+    }
+
+    private sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<string> {
+        const baseUrl = process.env.BASE_URL;
+        const confirmationUrl = `${baseUrl}/rest/submissionConfirmation/processSubmission?uid=${pendingEntry.confirmationUid}`;
+        const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes\n${confirmationUrl}`;
+        return this.emailService.sendMail(body, pendingEntry.submitterEmail);
+    }
+
 }

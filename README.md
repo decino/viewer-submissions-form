@@ -29,7 +29,7 @@ docker compose up
 This project uses [barrelsby](https://www.npmjs.com/package/barrelsby) to generate index files to import the
 controllers.
 
-Edit `.barreslby.json` to customize it:
+Edit `.barrelsby.json` to customize it:
 
 ```json
 {

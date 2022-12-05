@@ -17,7 +17,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true,
     })
     @Name("WAD")
-    @Description("the url of the wad")
+    @Description("The URL of the wad")
     @Example("https://www.doomworld.com/idgames/levels/doom2/Ports/megawads/sunlust")
     public wadURL: string;
 
@@ -36,7 +36,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: false
     })
     @Name("engine")
-    @Description("what game engine to use")
+    @Description("What game engine to use")
     @Example("Classic Doom")
     @Example("Boom")
     @Example("GZDoom")
@@ -63,7 +63,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true
     })
     @Name("authorName")
-    @Description("submitter name")
+    @Description("Submitter name")
     @Example("Victoria")
     @Example("")
     public submitterName: string;
@@ -81,7 +81,7 @@ export class SubmissionModel extends AbstractModel {
         default: false
     })
     @Name("distributable")
-    @Description("If you made this, am i allowed to distribute it to viewers?")
+    @Description("If you made this, am i allowed to distribute it to the public?")
     @Example("yes")
     @Example("no")
     public distributable: boolean;
@@ -90,7 +90,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true
     })
     @Name("info")
-    @Description("additional info")
+    @Description("Additional info")
     @Example("This wad was made in 4 years")
     @Example("I like cats")
     public info: string;
@@ -108,7 +108,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true
     })
     @Name("customWad")
-    @Description("the custom wad to play")
+    @Description("The custom wad to play")
     @Ignore()
     public customWadFileName: string;
 
@@ -116,7 +116,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: false
     })
     @Name("email")
-    @Description("email of the submitter")
+    @Description("Email of the submitter")
     @Example("foo@example.com")
     @Required()
     @Format("email")
@@ -127,7 +127,7 @@ export class SubmissionModel extends AbstractModel {
         default: false
     })
     @Name("submissionValid")
-    @Description("valid if the user clicks the confirmation url")
+    @Description("Valid if the user clicks the confirmation URL")
     public submissionValid: boolean;
 
 
@@ -141,7 +141,7 @@ export class SubmissionModel extends AbstractModel {
     public submissionRound: SubmissionRoundModel;
 
     @Name("confirmation")
-    @Description("the confirmation if any that this submission belongs to")
+    @Description("The confirmation (if any) that this submission belongs to")
     @OneToOne("PendingEntryConfirmationModel", "submission")
     public confirmation: PendingEntryConfirmationModel;
 

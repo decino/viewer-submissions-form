@@ -6,7 +6,7 @@ export class SuccessModel {
     public success: boolean;
 
     @Name("description")
-    @Description("the description of the success")
+    @Description("The description of the success")
     public description: string;
 
     public constructor(success: boolean, description: string) {

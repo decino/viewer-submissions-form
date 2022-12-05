@@ -31,7 +31,7 @@ export class SubmissionConfirmationService implements OnInit {
                 relations: ["submission"]
             });
             if (!confirmationEntry) {
-                throw new NotFound(`Unable to find submission with id: ${confirmationUid}, maybe it has expired`);
+                throw new NotFound(`Unable to find submission with id: ${confirmationUid}, maybe it has expired.`);
             }
             const submission = confirmationEntry.submission;
             submission.submissionValid = true;
@@ -53,7 +53,7 @@ export class SubmissionConfirmationService implements OnInit {
 
     public $onInit(): Promise<any> | void {
         if (!process.env.BASE_URL) {
-            throw new Error("Base URL has not been set");
+            throw new Error("Base URL has not been set.");
         }
     }
 

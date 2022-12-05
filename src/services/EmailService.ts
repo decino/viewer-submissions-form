@@ -28,7 +28,7 @@ export class EmailService implements BeforeInit {
             }
         });
         if (!process.env.SMTP_HOST) {
-            throw new Error("No SMTP server has been defined");
+            throw new Error("No SMTP server has been defined.");
         }
         try {
             await transporter.verify();
@@ -50,7 +50,7 @@ export class EmailService implements BeforeInit {
             text: body,
             replyTo: process.env.REPLY_TO,
             sender: process.env.SMTP_FROM,
-            subject: "confirmation for submission round"
+            subject: "Viewer-Submitted Levels Confirmation"
         });
         this.logger.info(`send mail to: ${to}. mail transport id: ${sentMail.messageId}`);
         return sentMail.messageId;

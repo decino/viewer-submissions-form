@@ -41,7 +41,7 @@ export class SubmissionService implements OnInit {
                 throw new NotFound("can not add when there are no currently active rounds");
             }
             if (!this.canAddEntry(entry, currentActiveRound)) {
-                throw new BadRequest("This level for this wad has already been requested, please try a different map or wad, or you have already submitted a request");
+                throw new BadRequest("This level for this wad has already been submitted, or you have already created a submission. Please submit a different map.");
             }
             if (customWad) {
                 const allowed = await this.customWadEngine.validateFile(customWad);

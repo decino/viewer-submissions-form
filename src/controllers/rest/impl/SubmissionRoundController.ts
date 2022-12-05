@@ -26,7 +26,7 @@ export class SubmissionRoundController extends BaseRestController {
     public async getActiveRound(): Promise<unknown> {
         const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         if (!activeRound) {
-            throw new NotFound("No submission rounds are currently active");
+            throw new NotFound("No submission rounds are currently active.");
         }
         return activeRound;
     }
@@ -43,8 +43,8 @@ export class SubmissionRoundController extends BaseRestController {
     public async endCurrentRound(@Res() res: PlatformResponse): Promise<unknown> {
         const ended = await this.submissionRoundService.endActiveSubmissionRound();
         if (ended) {
-            return super.doSuccess(res, "the currently active submission round has been ended");
+            return super.doSuccess(res, "The active submission round has been ended.");
         }
-        throw new BadRequest("There are no currently active submission rounds to end");
+        throw new BadRequest("There are no active submission rounds to end.");
     }
 }

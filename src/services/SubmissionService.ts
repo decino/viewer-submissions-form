@@ -34,7 +34,7 @@ export class SubmissionService implements OnInit {
         return this.ds.manager.transaction(async entityManager => {
             const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
             if (!currentActiveRound) {
-                throw new NotFound("can not add when there are no currently active rounds");
+                throw new NotFound("Cannot add a submission when there are no currently active rounds.");
             }
             if (!this.canAddEntry(entry, currentActiveRound)) {
                 throw new BadRequest("This level for this wad has already been submitted, or you have already created a submission. Please submit a different map.");
@@ -43,7 +43,7 @@ export class SubmissionService implements OnInit {
                 const allowed = await this.customWadEngine.validateFile(customWad);
                 if (!allowed) {
                     await this.customWadEngine.deleteCustomWad(customWad);
-                    throw new BadRequest("invalid file, header mismatch");
+                    throw new BadRequest("Invalid file, header mismatch");
                 }
                 entry.customWadFileName = customWad.originalname;
             }

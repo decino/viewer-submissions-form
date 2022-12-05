@@ -38,10 +38,10 @@ export class SubmissionController extends BaseRestController {
         }
         const entry = await this.submissionService.getEntry(id);
         if (!entry) {
-            throw new InternalServerError("An error has occurred when trying to find this wads associated entry");
+            throw new InternalServerError("An error has occurred when trying to find this wad's associated entry.");
         }
         if (!entry.distributable) {
-            throw new BadRequest("This wad is not sharable by authors request");
+            throw new BadRequest("This wad is not shareable by author's request.");
         }
         res.attachment(entry.customWadFileName);
         res.contentType("application/octet-stream");
@@ -54,8 +54,8 @@ export class SubmissionController extends BaseRestController {
     public async deleteEntry(@Res() res: PlatformResponse, @QueryParams("id") submissionId: number): Promise<unknown> {
         const result = await this.submissionService.deleteEntry(submissionId);
         if (!result) {
-            throw new NotFound(`Entry with id ${submissionId} not found`);
+            throw new NotFound(`Entry with id ${submissionId} not found.`);
         }
-        return super.doSuccess(res, `entry ${submissionId} has been deleted`);
+        return super.doSuccess(res, `Entry ${submissionId} has been deleted.`);
     }
 }

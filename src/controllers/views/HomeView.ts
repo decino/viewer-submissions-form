@@ -32,7 +32,7 @@ export class HomeView {
     @View("submissionSuccessful.ejs")
     public async createRound(@Res() res: PlatformResponse, @QueryParams("uid") uid: string): Promise<unknown> {
         const retStre = {
-            message: "Your submission has been confirmed",
+            message: "Your submission has been confirmed.",
             success: true
         };
         try {

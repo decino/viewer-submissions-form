@@ -63,7 +63,14 @@ Site.loadPage(async function (site) {
             const htmlText = await result.text();
             const domParser = new DOMParser();
             const doomWorldDOc = domParser.parseFromString(htmlText, "text/html");
-            wadNameInput.value = doomWorldDOc.getElementsByClassName("filelist")[0].querySelector("tbody > tr > td:nth-child(2)").textContent.trim();
+            const wadName = doomWorldDOc.getElementsByClassName("filelist")[0]?.querySelector("tbody > tr > td:nth-child(2)")?.textContent?.trim() ?? null;
+            if (!wadName) {
+                wadNameInput.removeAttribute("disabled");
+                wadNameInput.value = "";
+                site.loading(false);
+                return;
+            }
+            wadNameInput.value = wadName;
             wadNameInput.setAttribute("disabled", "");
             site.loading(false);
         });

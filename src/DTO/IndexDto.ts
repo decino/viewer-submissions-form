@@ -21,6 +21,7 @@ export class IndexDto {
         const date = createdAt.getDate();
         const month = createdAt.getMonth();
         const year = createdAt.getFullYear();
+        const monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const nth = function (d: number): string {
             if (d > 3 && d < 21) {
                 return 'th';
@@ -36,7 +37,7 @@ export class IndexDto {
                     return "th";
             }
         };
-        return `${date}<sup>${nth(date)}</sup> of ${month} ${year}`;
+        return `${date}<sup>${nth(date)}</sup> of ${monthName[month]} ${year}`;
     }
 
 }

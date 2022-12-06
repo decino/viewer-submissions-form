@@ -25,6 +25,7 @@ Site.loadPage(async function (site) {
                     urlForm.value = "";
                     uploadForm.setAttribute("required", "");
                     urlForm.removeAttribute("required");
+                    document.getElementById("wadName").removeAttribute("disabled");
                 } else {
                     site.display(true, uploadForm);
                     site.display(false, urlForm);

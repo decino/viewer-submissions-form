@@ -123,7 +123,7 @@ export class SubmissionService implements OnInit {
         const email = entry.submitterEmail;
         for (const submission of round.submissions) {
             if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
-                throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${process.env.HELP_EMAIL ?? "decino"} to change your submission`);
+                throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${process.env.HELP_EMAIL ?? "decino"} to change your submission.`);
             }
             if (submission.wadURL === wadUrl && entry.wadLevel === level) {
                 throw new Error("This level for this wad has already been submitted. Please submit a different map.");

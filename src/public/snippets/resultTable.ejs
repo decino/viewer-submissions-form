@@ -15,10 +15,6 @@
         <div class="tab-content" id="myTabContent">
             <% for(let i = 0; i < model.previousRounds.length; i++){
                 const round = model.previousRounds[i];
-                const createdDate = round.createdAt;
-                const date = createdDate.getDate();
-                const month = createdDate.getMonth();
-                const year = createdDate.getFullYear();
             %>
             <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane" role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0">
                 <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round) -%></p>

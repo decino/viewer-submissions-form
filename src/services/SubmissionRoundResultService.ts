@@ -5,12 +5,16 @@ import {SubmissionService} from "./SubmissionService";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
+import {SubmissionRoundService} from "./SubmissionRoundService";
 
 @Service()
 export class SubmissionRoundResultService {
 
     @Inject()
     private submissionService: SubmissionService;
+
+    @Inject()
+    private submissionRoundService: SubmissionRoundService;
 
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
@@ -36,19 +40,25 @@ export class SubmissionRoundResultService {
     }
 
     public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {
-        const repo = this.ds.getRepository(SubmissionRoundModel);
-        const result = await repo.find({
-            relations: ["submissions"],
-            where: {
-                active: false
-            }
-        });
+        const allNonActiveRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
         // this should be done as an inner select on the table join, but this ORM does not support this yet
-        const filteredResult = result.map(value => {
+        const filteredResult = allNonActiveRounds.map(value => {
             value.submissions = value.submissions.filter(submission => !!submission.chosenRoundId);
             return value;
         });
         return filteredResult ?? [];
+    }
+
+    public async submitEntries(entries: SubmissionModel[]): Promise<void> {
+        const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        if (!activeRound) {
+            return;
+        }
+        for (const entry of entries) {
+            entry.chosenRoundId = activeRound.id;
+        }
+        const repo = this.ds.getRepository(SubmissionModel);
+        await repo.save(entries);
     }
 
     private getMultipleRandom<T>(array: T[], num = -1): T[] {

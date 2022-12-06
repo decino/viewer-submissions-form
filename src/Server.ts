@@ -22,9 +22,9 @@ import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesIn
     ...config,
     acceptMimes: ["application/json"],
     httpPort: process.env.PORT ?? 8083,
-    httpsPort: (function (): string | boolean {
-        if (process.env.HTTPS) {
-            return process.env.HTTPS_PORT as string;
+    httpsPort: (function (): number | boolean {
+        if (process.env.HTTPS === "true") {
+            return Number.parseInt(process.env.HTTPS_PORT as string);
         }
         return false;
     }()),
@@ -105,8 +105,8 @@ export class Server implements BeforeRoutesInit {
                 // maxAge: 36000,
                 cookie: {
                     path: "/",
-                    httpOnly: !process.env.HTTPS,
-                    secure: Boolean(process.env.HTTPS)
+                    httpOnly: process.env.HTTPS === "false",
+                    secure: process.env.HTTPS === "true"
                 }
             }));
     }

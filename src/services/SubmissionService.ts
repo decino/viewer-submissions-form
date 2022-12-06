@@ -13,7 +13,7 @@ import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 @Service()
 export class SubmissionService implements OnInit {
 
-    private scheduler = new ToadScheduler();
+    private readonly scheduler = new ToadScheduler();
 
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;

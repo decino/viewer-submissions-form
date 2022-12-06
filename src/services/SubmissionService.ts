@@ -36,8 +36,10 @@ export class SubmissionService implements OnInit {
             if (!currentActiveRound) {
                 throw new NotFound("Cannot add a submission when there are no currently active rounds.");
             }
-            if (!this.canAddEntry(entry, currentActiveRound)) {
-                throw new BadRequest("This level for this wad has already been submitted, or you have already created a submission. Please submit a different map.");
+            try {
+                this.validateSubmission(entry, currentActiveRound);
+            } catch (e) {
+                throw new BadRequest(e.message);
             }
             if (customWad) {
                 const allowed = await this.customWadEngine.validateFile(customWad);
@@ -114,19 +116,20 @@ export class SubmissionService implements OnInit {
         this.scheduler.addSimpleIntervalJob(job);
     }
 
-    private canAddEntry(entry: SubmissionModel, round: SubmissionRoundModel): boolean {
+    private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel): void {
         const wadUrl = entry.wadURL;
         const submitterName = entry.submitterName;
         const level = entry.wadLevel;
         const email = entry.submitterEmail;
-        const alreadySubmitted = round.submissions
-            .find(entry =>
-                (entry.wadURL === wadUrl && entry.wadLevel === level)
-                || entry.submitterName === submitterName
-                || entry.submitterEmail === email
-            )
-        ;
-        return !alreadySubmitted;
+        for (const submission of round.submissions) {
+            if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
+                throw new Error("you have already created a submission, you may only submit one map.");
+            }
+            if (submission.wadURL === wadUrl && entry.wadLevel === level) {
+                throw new Error("This level for this wad has already been submitted, Please submit a different map.");
+            }
+
+        }
     }
 
     private scanDb(): Promise<unknown> {

@@ -5,6 +5,7 @@ import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 import DOOM_ENGINE from "../constants/DoomEngine";
 import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
+import process from "process";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -161,5 +162,12 @@ export class SubmissionModel extends AbstractModel {
     @Name("chosenRound")
     @Description("the round id that this entry was chosen for")
     public chosenRoundId: number;
+
+    public getDownloadUrl(): string | null {
+        if (this.submitterAuthor && !this.distributable) {
+            return null;
+        }
+        return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
+    }
 
 }

@@ -4,19 +4,19 @@
 <body>
 <div class="container mt-5">
     <main>
-        <% if (currentActiveRound === null && previousRounds.length === 0){ %>
+        <% if (model.currentActiveRound === null && model.previousRounds.length === 0){ %>
             <div class="card border-primary">
                 <div class="card-body">
                     <h5 class="card-title">No Submission Rounds have taken place</h5>
                     <p class="card-text">Please come back when an announcement has been made!</p>
                 </div>
             </div>
-        <% } else if(currentActiveRound !== null) { %>
+        <% } else if(model.currentActiveRound !== null) { %>
             <div class="row">
                 <div class="col-md-12">
                     <div class="card border-primary mb-3">
                         <div id="loader" class="hidden"></div>
-                        <div class="card-header">Submission round <%- currentActiveRound.id; -%></div>
+                        <div class="card-header">Submission round <%- model.currentActiveRound.id; -%></div>
                         <div class="card-body" id="overlay">
                             <form id="entryForm">
                                 <div class="mb-3">
@@ -55,8 +55,8 @@
                                     <label for="gameEngine" class="form-label">Which engine is this level designed for?
                                         <span title="required" class="text-danger">*</span></label>
                                     <select name="engine" id="gameEngine" class="form-select" aria-label="Which engine is this level designed for?">
-                                        <% for(const key in doomEngines) {
-                                            const value = doomEngines[key];
+                                        <% for(const key in model.doomEngines) {
+                                            const value = model.doomEngines[key];
                                         %>
                                         <option data-value=<%- value; -%> value="<%- key; -%>"><%- value; -%></option>
                                         <% } %>
@@ -64,8 +64,8 @@
                                 </div>
                                 <div class="mb-3 hidden" id="gzActionsContainer">
                                     <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
-                                    <% for(const key in GzActions) {
-                                        const value = GzActions[key];
+                                    <% for(const key in model.gzActions) {
+                                        const value = model.gzActions[key];
                                     %>
                                     <div class="form-check form-check-inline">
                                         <input name="gzDoomAction" class="form-check-input" type="checkbox" id="gzActionCheck_<%- key; -%>" value="<%- key; -%>">
@@ -135,7 +135,7 @@
                 </div>
             </div>
         <% } %>
-        <% if(previousRounds.length > 0){ %>
+        <% if(model.previousRounds.length > 0){ %>
             <div class="row mt-5">
                 <div class="col-md-12">
                     <%- include('snippets/resultTable.ejs'); %>

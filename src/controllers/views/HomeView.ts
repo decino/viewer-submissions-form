@@ -7,6 +7,7 @@ import GZDOOM_ACTIONS from "../../model/constants/GZDoomActions";
 import {SubmissionConfirmationService} from "../../services/SubmissionConfirmationService";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {NotFound} from "@tsed/exceptions";
+import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
 
 @Controller("/")
 export class HomeView {
@@ -14,14 +15,19 @@ export class HomeView {
     @Inject()
     private submissionRoundService: SubmissionRoundService;
 
+    @Inject()
+    private submissionRoundResultService: SubmissionRoundResultService;
+
     @Get()
     @View("index.ejs")
     public async showRoot(): Promise<unknown> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         return {
             currentActiveRound,
             doomEngines: ObjectUtils.getEnumAsObject(DOOM_ENGINE),
-            GzActions: ObjectUtils.getEnumAsObject(GZDOOM_ACTIONS)
+            GzActions: ObjectUtils.getEnumAsObject(GZDOOM_ACTIONS),
+            previousRounds,
         };
     }
 

@@ -14,6 +14,16 @@ import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.mod
 export class SubmissionModel extends AbstractModel {
 
     @Column({
+        nullable: false,
+    })
+    @Name("WADName")
+    @Description("The URL of the wad")
+    @Example("Alien Vendetta")
+    @Example("Sunlust")
+    @Required()
+    public wadName: string;
+
+    @Column({
         nullable: true,
     })
     @Name("WAD")
@@ -144,5 +154,12 @@ export class SubmissionModel extends AbstractModel {
     @Description("The confirmation (if any) that this submission belongs to")
     @OneToOne("PendingEntryConfirmationModel", "submission")
     public confirmation: PendingEntryConfirmationModel;
+
+    @Column({
+        nullable: true
+    })
+    @Name("chosenRound")
+    @Description("the round id that this entry was chosen for")
+    public chosenRoundId: number;
 
 }

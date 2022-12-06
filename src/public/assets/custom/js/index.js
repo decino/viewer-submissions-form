@@ -3,6 +3,16 @@ Site.loadPage(async function (site) {
 
     function loadEventListeners() {
 
+        function getUrl(string) {
+            let url;
+            try {
+                url = new URL(string);
+            } catch {
+                return null;
+            }
+            return url.protocol === "http:" || url.protocol === "https:" ? url : null;
+        }
+
         const wadRadios = document.querySelectorAll("#link,#Upload");
         for (const wadRadio of wadRadios) {
             wadRadio.addEventListener("change", evt => {
@@ -24,6 +34,39 @@ Site.loadPage(async function (site) {
                 }
             });
         }
+        document.getElementById("wadUrl").addEventListener("change", async ev => {
+            const value = ev.target.value;
+            const wadNameInput = document.getElementById("wadName");
+            if (!value) {
+                wadNameInput.removeAttribute("disabled");
+                wadNameInput.value = "";
+            }
+            const url = getUrl(value);
+            if (!url) {
+                return;
+            }
+            if (!(url.hostname.includes("doomworld.com") && url.pathname.includes("idgames"))) {
+                return;
+            }
+            site.loading(true);
+            const proxyURl = new URL(`https://api.codetabs.com/v1/proxy?quest=${url}`);
+            let result;
+            try {
+                result = await fetch(proxyURl);
+            } catch {
+                site.loading(false);
+                return;
+            }
+            if (result.status !== 200) {
+                return;
+            }
+            const htmlText = await result.text();
+            const domParser = new DOMParser();
+            const doomWorldDOc = domParser.parseFromString(htmlText, "text/html");
+            wadNameInput.value = doomWorldDOc.getElementsByClassName("filelist")[0].querySelector("tbody > tr > td:nth-child(2)").textContent.trim();
+            wadNameInput.setAttribute("disabled", "");
+            site.loading(false);
+        });
         document.getElementById("gameEngine").addEventListener("change", evt => {
             const selectedOption = evt.target.options[evt.target.selectedIndex];
             const selectedValue = selectedOption.dataset.value;

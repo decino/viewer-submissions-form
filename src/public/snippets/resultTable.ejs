@@ -1,9 +1,6 @@
-<div class="card border-primary mb-3">
+<div class="card card border-primary mb-3">
     <div class="card-header">
-        Previous round results
-    </div>
-    <div class="card-body">
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <ul class="nav nav-tabs card-header-tabs">
             <% for(let i = 0; i < model.previousRounds.length; i++){
                 const round = model.previousRounds[i];
             %>
@@ -12,44 +9,17 @@
             </li>
             <% } %>
         </ul>
+    </div>
+    <div class="card-body">
         <div class="tab-content" id="myTabContent">
             <% for(let i = 0; i < model.previousRounds.length; i++){
                 const round = model.previousRounds[i];
             %>
             <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane" role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0">
-                <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round) -%></p>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">No.</th>
-                        <th scope="col">WAD</th>
-                        <th scope="col">Level</th>
-                        <th scope="col">Download</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <% for(let i = 0 ; i < round.submissions.length; i++){
-                        const chosenSubmission = round.submissions[i];
-                    %>
-                    <tr>
-                        <td><%- i + 1 -%></td>
-                        <td><%- chosenSubmission.wadName -%></td>
-                        <td><%- chosenSubmission.wadLevel -%></td>
-                        <% if(chosenSubmission.getDownloadUrl() !== null){ %>
-                            <td>
-                                <a type="button" class="btn btn-outline-primary" href="<%- chosenSubmission.getDownloadUrl() -%>">Download</a>
-                            </td>
-                        <% } else { %>
-                            <td>N/A</td>
-                        <% } %>
-                    </tr>
-                    <% } %>
-                    </tbody>
-                </table>
+                <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round); -%></p>
+                <%- include('SubmissionsTable.ejs', {submissions: round.submissions}); %>
             </div>
             <% } %>
         </div>
     </div>
 </div>
-
-

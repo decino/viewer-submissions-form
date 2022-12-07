@@ -1,4 +1,19 @@
+// eslint-disable-next-line require-await
 Site.loadPage(async function (site) {
+
+    Site.loading = function loading(show) {
+        const submitButton = document.getElementById("submit");
+        if (show) {
+            document.getElementById("loading").classList.remove("hidden");
+            document.getElementById("submitEntry").classList.add("hidden");
+            submitButton.setAttribute("disabled", "");
+        } else {
+            document.getElementById("loading").classList.add("hidden");
+            document.getElementById("submitEntry").classList.remove("hidden");
+            submitButton.removeAttribute("disabled");
+        }
+    };
+
     loadEventListeners();
 
     function loadEventListeners() {

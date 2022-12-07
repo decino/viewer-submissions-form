@@ -45,3 +45,10 @@
     -webkit-transition: all 0.5s;
     -moz-transition: all 0.5s;
 }
+
+.submissionsTable tbody tr > td {
+    max-width: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

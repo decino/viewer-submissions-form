@@ -28,6 +28,16 @@ export class HomeView {
         };
     }
 
+    @Get("/secure")
+    @View("/secure/admin.ejs")
+    public async showAdmin(): Promise<unknown> {
+        const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
+        return {
+            model: new IndexDto(currentActiveRound, previousRounds)
+        };
+    }
+
     @Get("/processSubmission")
     @View("submissionSuccessful.ejs")
     public async createRound(@Res() res: PlatformResponse, @QueryParams("uid") uid: string): Promise<unknown> {

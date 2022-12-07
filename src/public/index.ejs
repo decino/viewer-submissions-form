@@ -14,121 +14,139 @@
         <% } else if(model.currentActiveRound !== null) { %>
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card border-primary mb-3">
-                        <div id="loader" class="hidden"></div>
-                        <div class="card-header">Submission round <%- model.currentActiveRound.id; -%></div>
-                        <div class="card-body" id="overlay">
-                            <form id="entryForm">
-                                <div class="mb-3">
-                                    <label class="d-block mb-2">Post a link to the WAD below. Or you can upload it</label>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="uploadOrUrl" id="link" value="url" checked>
-                                        <label class="form-check-label" for="link">Link</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="uploadOrUrl" id="Upload" value="upload">
-                                        <label class="form-check-label" for="Upload">Upload</label>
-                                    </div>
-                                    <div>
-                                        <label for="wadUrl" class="form-label">Wad download URL
-                                            <span title="required" class="text-danger">*</span></label>
-                                        <input required type="url" class="form-control" id="wadUrl" name="WAD">
-                                    </div>
+                    <div class="card-group">
+                        <div class="card border-primary mb-3">
+                            <div class="card-header">Submission round <%- model.currentActiveRound.id; -%></div>
+                            <div class="card-body">
+                                <form id="entryForm">
+                                    <div class="mb-3">
+                                        <label class="d-block mb-2">Post a link to the WAD below. Or you can upload it</label>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="uploadOrUrl" id="link" value="url" checked>
+                                            <label class="form-check-label" for="link">Link</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="uploadOrUrl" id="Upload" value="upload">
+                                            <label class="form-check-label" for="Upload">Upload</label>
+                                        </div>
+                                        <div>
+                                            <label for="wadUrl" class="form-label">Wad download URL
+                                                <span title="required" class="text-danger">*</span></label>
+                                            <input required type="url" class="form-control" id="wadUrl" name="WAD">
+                                        </div>
 
-                                    <div class="hidden">
-                                        <label for="wadFile" class="form-label">Upload WAD
+                                        <div class="hidden">
+                                            <label for="wadFile" class="form-label">Upload WAD
+                                                <span title="required" class="text-danger">*</span></label>
+                                            <input name="file" class="form-control" type="file" id="wadFile" accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="wadName" class="form-label">Name of the wad
                                             <span title="required" class="text-danger">*</span></label>
-                                        <input name="file" class="form-control" type="file" id="wadFile" accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                                        <input name="WADName" type="text" class="form-control" id="wadName" required>
                                     </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="wadName" class="form-label">Name of the wad
-                                        <span title="required" class="text-danger">*</span></label>
-                                    <input name="WADName" type="text" class="form-control" id="wadName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="levelToPlay" class="form-label">Which level should I play? Don't tell me to choose one myself, or I'll have to reject it.
-                                        <span title="required" class="text-danger">*</span></label>
-                                    <input name="level" type="text" class="form-control" id="levelToPlay" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="gameEngine" class="form-label">Which engine is this level designed for?
-                                        <span title="required" class="text-danger">*</span></label>
-                                    <select name="engine" id="gameEngine" class="form-select" aria-label="Which engine is this level designed for?">
-                                        <% for(const key in model.doomEngines) {
-                                            const value = model.doomEngines[key];
+                                    <div class="mb-3">
+                                        <label for="levelToPlay" class="form-label">Which level should I play? Don't tell me to choose one myself, or I'll have to reject it.
+                                            <span title="required" class="text-danger">*</span></label>
+                                        <input name="level" type="text" class="form-control" id="levelToPlay" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="gameEngine" class="form-label">Which engine is this level designed for?
+                                            <span title="required" class="text-danger">*</span></label>
+                                        <select name="engine" id="gameEngine" class="form-select" aria-label="Which engine is this level designed for?">
+                                            <% for(const key in model.doomEngines) {
+                                                const value = model.doomEngines[key];
+                                            %>
+                                            <option data-value=<%- value; -%> value="<%- key; -%>"><%- value; -%></option>
+                                            <% } %>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 hidden" id="gzActionsContainer">
+                                        <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
+                                        <% for(const key in model.gzActions) {
+                                            const value = model.gzActions[key];
                                         %>
-                                        <option data-value=<%- value; -%> value="<%- key; -%>"><%- value; -%></option>
+                                        <div class="form-check form-check-inline">
+                                            <input name="gzDoomAction" class="form-check-input" type="checkbox" id="gzActionCheck_<%- key; -%>" value="<%- key; -%>">
+                                            <label class="form-check-label" for="gzActionCheck_<%- key; -%>"><%- value; -%></label>
+                                        </div>
                                         <% } %>
-                                    </select>
-                                </div>
-                                <div class="mb-3 hidden" id="gzActionsContainer">
-                                    <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
-                                    <% for(const key in model.gzActions) {
-                                        const value = model.gzActions[key];
-                                    %>
-                                    <div class="form-check form-check-inline">
-                                        <input name="gzDoomAction" class="form-check-input" type="checkbox" id="gzActionCheck_<%- key; -%>" value="<%- key; -%>">
-                                        <label class="form-check-label" for="gzActionCheck_<%- key; -%>"><%- value; -%></label>
                                     </div>
-                                    <% } %>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="authorName" class="form-label">Under what name would you like to submit? Leave empty to remain anonymous.</label>
-                                    <input name="authorName" type="text" class="form-control" id="authorName" placeholder="anonymous">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="d-block mb-2">Did you make this level?
-                                        <span title="required" class="text-danger">*</span></label>
-                                    <div class="form-check form-check-inline">
-                                        <input name="author" class="form-check-input" type="radio" id="authorYes" value="true">
-                                        <label class="form-check-label" for="authorYes">Yes</label>
+                                    <div class="mb-3">
+                                        <label for="authorName" class="form-label">Under what name would you like to submit? Leave empty to remain anonymous.</label>
+                                        <input name="authorName" type="text" class="form-control" id="authorName" placeholder="anonymous">
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input name="author" class="form-check-input" type="radio" id="authorNo" value="false" checked>
-                                        <label class="form-check-label" for="authorNo">No</label>
+                                    <div class="mb-3">
+                                        <label class="d-block mb-2">Did you make this level?
+                                            <span title="required" class="text-danger">*</span></label>
+                                        <div class="form-check form-check-inline">
+                                            <input name="author" class="form-check-input" type="radio" id="authorYes" value="true">
+                                            <label class="form-check-label" for="authorYes">Yes</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input name="author" class="form-check-input" type="radio" id="authorNo" value="false" checked>
+                                            <label class="form-check-label" for="authorNo">No</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="mb-3 hidden" id="distributableSection">
-                                    <label class="d-block mb-2">If you've made the WAD, and it's not hosted or available anywhere, am I allowed to provide it to the viewers?</label>
-                                    <div class="form-check form-check-inline">
-                                        <input name="distributable" class="form-check-input" type="radio" id="distributableYes" value="true">
-                                        <label class="form-check-label" for="distributableYes">Yes</label>
+                                    <div class="mb-3 hidden" id="distributableSection">
+                                        <label class="d-block mb-2">If you've made the WAD, and it's not hosted or available anywhere, am I allowed to provide it to the viewers?</label>
+                                        <div class="form-check form-check-inline">
+                                            <input name="distributable" class="form-check-input" type="radio" id="distributableYes" value="true">
+                                            <label class="form-check-label" for="distributableYes">Yes</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input name="distributable" class="form-check-input" type="radio" id="distributableNo" value="false" checked>
+                                            <label class="form-check-label" for="distributableNo">No</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input name="distributable" class="form-check-input" type="radio" id="distributableNo" value="false" checked>
-                                        <label class="form-check-label" for="distributableNo">No</label>
+                                    <div class="mb-3">
+                                        <label for="extraInfo" class="form-label">Tell me something about the level, its backstory, inspiration, yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
+                                        <textarea name="info" class="form-control" id="extraInfo" rows="3"></textarea>
                                     </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="extraInfo" class="form-label">Tell me something about the level, its backstory, inspiration, yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
-                                    <textarea name="info" class="form-control" id="extraInfo" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Your Email address
-                                        <span title="required" class="text-danger">*</span></label>
-                                    <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" required>
-                                </div>
-                                <div class="text-center">
-                                    <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-                                </div>
-                            </form>
-                            <div class="mt-3">
-                                <div class="hidden" id="error">
-                                    <div class="alert alert-danger d-flex align-items-center" role="alert">
-                                        <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
-                                        <div id="errorContent"></div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Your Email address
+                                            <span title="required" class="text-danger">*</span></label>
+                                        <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" required>
                                     </div>
-                                </div>
-                                <div class="hidden" id="success">
-                                    <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
-                                        <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
-                                        <div id="successContent">
-                                            An Email has been sent to your address provided, please click the link in the email to confirm your entry.
-                                            <strong>NOTE:</strong> this link will expire in 20 minutes
+                                    <div class="text-center">
+                                        <button id="submit" type="submit" class="btn btn-primary">
+                                            <span id="loading" class="hidden">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Loading...
+                                            </span>
+                                            <span id="submitEntry">
+                                                Submit
+                                            </span>
+                                        </button>
+                                    </div>
+                                </form>
+                                <div class="mt-3">
+                                    <div class="hidden" id="error">
+                                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                            <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
+                                            <div id="errorContent"></div>
+                                        </div>
+                                    </div>
+                                    <div class="hidden" id="success">
+                                        <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
+                                            <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
+                                            <div id="successContent">
+                                                An Email has been sent to your address provided, please click the link in the email to confirm your entry.
+                                                <strong>NOTE:</strong> this link will expire in 20 minutes
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="card border-primary mb-3 ml-3">
+                            <div class="card-header">Current submissions</div>
+                            <div class="card-body" style="max-height: 900px; overflow-y: scroll;">
+                                <%- include('snippets/SubmissionsTable.ejs', {
+                                submissions: model.currentActiveRound.submissions,
+                                includeDownload: false
+                                }); %>
                             </div>
                         </div>
                     </div>
@@ -138,7 +156,10 @@
         <% if(model.previousRounds.length > 0){ %>
             <div class="row mt-5">
                 <div class="col-md-12">
-                    <%- include('snippets/resultTable.ejs'); %>
+                    <%- include('snippets/resultTable.ejs', {
+                    model: model,
+                    includeDownload: true
+                    }); %>
                 </div>
             </div>
         <% } %>

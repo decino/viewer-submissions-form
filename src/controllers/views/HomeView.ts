@@ -15,22 +15,13 @@ export class HomeView {
 
     @Inject()
     private submissionRoundResultService: SubmissionRoundResultService;
+
     @Inject()
     private submissionConfirmationService: SubmissionConfirmationService;
 
     @Get()
     @View("index.ejs")
     public async showRoot(): Promise<unknown> {
-        const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
-        const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
-        return {
-            model: new IndexDto(currentActiveRound, previousRounds)
-        };
-    }
-
-    @Get("/secure")
-    @View("/secure/admin.ejs")
-    public async showAdmin(): Promise<unknown> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         return {

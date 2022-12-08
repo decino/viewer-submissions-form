@@ -86,8 +86,8 @@ Site.loadPage(async function (site) {
                 site.loading(false);
                 return;
             }
-            wadNameInput.value = wadName;
             wadNameInput.setAttribute("disabled", "");
+            wadNameInput.value = wadName;
             site.loading(false);
         });
         document.getElementById("gameEngine").addEventListener("change", evt => {

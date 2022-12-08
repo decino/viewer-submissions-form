@@ -5,6 +5,7 @@ import "@tsed/ajv";
 import {config} from "./config";
 import * as rest from "./controllers/rest/index";
 import * as views from "./controllers/views/index";
+import * as secureViews from "./controllers/secureViews/index";
 import {CustomUserInfoModel} from "./model/auth/CustomUserInfoModel";
 import "./protocols/LoginLocalProtocol";
 import bodyParser from "body-parser";
@@ -54,13 +55,20 @@ import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesIn
         ],
         "/": [
             ...Object.values(views)
+        ],
+        "/secure": [
+            ...Object.values(secureViews)
         ]
     },
     statics: {
         "/": [
             {
-                root: `${__dirname}/public`,
-                hook: "$beforeRoutesInit"
+                root: `${__dirname}/public`
+            }
+        ],
+        "/secure": [
+            {
+                root: `${__dirname}/public`
             }
         ]
     },
@@ -76,6 +84,11 @@ import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesIn
         root: `${__dirname}/public`,
         extensions: {
             ejs: "ejs"
+        },
+        options: {
+            ejs: {
+                rmWhitespace: true
+            }
         }
     },
     exclude: [

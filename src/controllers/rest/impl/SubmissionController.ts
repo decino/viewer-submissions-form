@@ -8,7 +8,7 @@ import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
-import {CustomWadEngine} from "../../../engine/CustomWadEngine";
+import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -32,9 +32,15 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async downloadWad(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
-        const wad = await this.customWadEngine.getWad(roundId, id);
+        let wad: CustomWadEntry | null;
+        try {
+            wad = await this.customWadEngine.getWad(roundId, id);
+        } catch (e) {
+            throw new NotFound(`Unable to find wad with id: ${id} from round ${roundId}`);
+        }
+
         if (!wad) {
-            throw new NotFound(`Unable to find wad with id: ${id}`);
+            throw new NotFound(`Unable to find wad with id: ${id} from round ${roundId}`);
         }
         const entry = await this.submissionService.getEntry(id);
         if (!entry) {

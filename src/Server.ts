@@ -12,14 +12,15 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import methodOverride from "method-override";
-import cors from "cors";
 import {Request} from "express";
 import {FileFilterCallback} from "multer";
 import {BadRequest} from "@tsed/exceptions";
 import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesInit";
 import "@tsed/swagger";
 import {isProduction} from "./config/envs";
-
+import helmet from "helmet";
+import process from "process";
+import cors from "cors";
 
 const opts: Partial<TsED.Configuration> = {
     ...config,
@@ -75,12 +76,32 @@ const opts: Partial<TsED.Configuration> = {
         ]
     },
     middlewares: [
-        "cors",
-        "cookie-parser",
-        "compression",
-        "method-override",
-        "json-parser",
-        {use: "urlencoded-parser", options: {extended: true}}
+        helmet({
+            contentSecurityPolicy: false,
+            crossOriginEmbedderPolicy: {
+                policy: "credentialless"
+            }
+        }),
+        cors({
+            origin: process.env.BASE_URL
+        }),
+        cookieParser(),
+        methodOverride(),
+        bodyParser.json(),
+        bodyParser.urlencoded({
+            extended: true
+        }),
+        session({
+            secret: process.env.SESSION_KEY as string,
+            resave: true,
+            saveUninitialized: true,
+            // maxAge: 36000,
+            cookie: {
+                path: "/",
+                httpOnly: process.env.HTTPS === "false",
+                secure: process.env.HTTPS === "true"
+            }
+        })
     ],
     views: {
         root: `${__dirname}/public`,
@@ -116,24 +137,5 @@ export class Server implements BeforeRoutesInit {
     protected settings: Configuration;
 
     public $beforeRoutesInit(): void {
-        this.app
-            .use(cors())
-            .use(cookieParser())
-            .use(methodOverride())
-            .use(bodyParser.json())
-            .use(bodyParser.urlencoded({
-                extended: true
-            }))
-            .use(session({
-                secret: process.env.SESSION_KEY as string,
-                resave: true,
-                saveUninitialized: true,
-                // maxAge: 36000,
-                cookie: {
-                    path: "/",
-                    httpOnly: process.env.HTTPS === "false",
-                    secure: process.env.HTTPS === "true"
-                }
-            }));
     }
 }

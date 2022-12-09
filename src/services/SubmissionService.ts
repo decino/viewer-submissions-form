@@ -117,6 +117,7 @@ export class SubmissionService implements OnInit {
     }
 
     private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel): void {
+        entry.validate();
         const wadUrl = entry.wadURL;
         const submitterName = entry.submitterName;
         const level = entry.wadLevel;
@@ -128,7 +129,6 @@ export class SubmissionService implements OnInit {
             if (submission.wadURL === wadUrl && entry.wadLevel === level) {
                 throw new Error("This level for this wad has already been submitted. Please submit a different map.");
             }
-
         }
     }
 

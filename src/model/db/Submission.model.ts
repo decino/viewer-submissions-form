@@ -174,4 +174,10 @@ export class SubmissionModel extends AbstractModel {
         return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
     }
 
+    public validate(): void {
+        if (!this.wadURL && !this.customWadFileName) {
+            throw new Error("Either WAD URL or a file must be uploaded");
+        }
+    }
+
 }

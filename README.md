@@ -2,16 +2,18 @@
 
 > **Important!** this requires Node >= 14, Express >= 4 and TypeScript >= 4.
 
+`.env` file must be created for this application to work. rename `.envExample` to `.env` and fill out the SMTP info.
+
 ```batch
 # install dependencies
-$  install
+    npm install
 
 # serve
-$  start
+    npm run start
 
 # build for production
-$  build
-$  start:prod
+    npm run build
+    npm run start:prod
 ```
 
 ## Docker

@@ -15,7 +15,6 @@ import methodOverride from "method-override";
 import {Request} from "express";
 import {FileFilterCallback} from "multer";
 import {BadRequest} from "@tsed/exceptions";
-import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesInit";
 import "@tsed/swagger";
 import {isProduction} from "./config/envs";
 import helmet from "helmet";
@@ -129,13 +128,10 @@ if (!isProduction) {
 }
 
 @Configuration(opts)
-export class Server implements BeforeRoutesInit {
+export class Server {
     @Inject()
     protected app: PlatformApplication;
 
     @Configuration()
     protected settings: Configuration;
-
-    public $beforeRoutesInit(): void {
-    }
 }

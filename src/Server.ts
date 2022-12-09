@@ -17,9 +17,11 @@ import {Request} from "express";
 import {FileFilterCallback} from "multer";
 import {BadRequest} from "@tsed/exceptions";
 import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesInit";
+import "@tsed/swagger";
+import {isProduction} from "./config/envs";
 
 
-@Configuration({
+const opts: Partial<TsED.Configuration> = {
     ...config,
     acceptMimes: ["application/json"],
     httpPort: process.env.PORT ?? 8083,
@@ -94,7 +96,18 @@ import {BeforeRoutesInit} from "@tsed/common/lib/types/interfaces/BeforeRoutesIn
     exclude: [
         "**/*.spec.ts"
     ]
-})
+};
+
+if (!isProduction) {
+    opts["swagger"] = [
+        {
+            path: "/api-docs",
+            specVersion: "3.0.3"
+        }
+    ];
+}
+
+@Configuration(opts)
 export class Server implements BeforeRoutesInit {
     @Inject()
     protected app: PlatformApplication;

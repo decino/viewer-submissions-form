@@ -46,7 +46,7 @@ export class SubmissionController extends BaseRestController {
         if (!entry) {
             throw new InternalServerError("An error has occurred when trying to find this wad's associated entry.");
         }
-        if (!entry.distributable) {
+        if (!entry.downloadable) {
             throw new BadRequest("This wad is not shareable by author's request.");
         }
         res.attachment(entry.customWadFileName);

@@ -6,8 +6,10 @@ import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {NotFound} from "@tsed/exceptions";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
 import {IndexDto} from "../../DTO/IndexDto";
+import {Hidden} from "@tsed/swagger";
 
 @Controller("/")
+@Hidden()
 export class HomeView {
 
     @Inject()

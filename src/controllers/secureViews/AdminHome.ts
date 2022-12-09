@@ -3,8 +3,10 @@ import {Get, View} from "@tsed/schema";
 import {IndexDto} from "../../DTO/IndexDto";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
+import {Hidden} from "@tsed/swagger";
 
 @Controller("/")
+@Hidden()
 export class AdminHome {
 
     @Inject()

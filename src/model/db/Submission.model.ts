@@ -163,8 +163,12 @@ export class SubmissionModel extends AbstractModel {
     @Description("the round id that this entry was chosen for")
     public chosenRoundId: number;
 
+    public get downloadable(): boolean {
+        return !(this.submitterAuthor && !this.distributable);
+    }
+
     public getDownloadUrl(): string | null {
-        if (this.submitterAuthor && !this.distributable) {
+        if (!this.downloadable) {
             return null;
         }
         return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;

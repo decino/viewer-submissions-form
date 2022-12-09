@@ -31,6 +31,7 @@
     "@tsed/platform-response-filter": "^7.7.0",
     "@tsed/platform-views": "^7.7.0",
     "@tsed/schema": "^7.7.0",
+    "@tsed/swagger": "^7.8.2",
     "@types/node-fetch": "^2.6.2",
     "ajv": "^8.11.2",
     "argon2": "^0.30.2",

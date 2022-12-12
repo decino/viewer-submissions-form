@@ -20,6 +20,15 @@ export class SubmissionRoundController extends BaseRestController {
         return this.submissionRoundService.newSubmissionRound();
     }
 
+
+    @Post("/pauseRound")
+    @Returns(StatusCodes.OK, SuccessModel)
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    public async pauseRound(@Res() res: PlatformResponse, @QueryParams("pause") pause: boolean): Promise<unknown> {
+        await this.submissionRoundService.pauseRound(pause);
+        return super.doSuccess(res, `round has been ${pause ? "Paused" : "Resumed"}`);
+    }
+
     @Get("/currentActiveRound")
     @Returns(StatusCodes.OK, SubmissionRoundModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)

@@ -3,6 +3,7 @@ import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
+import {BadRequest} from "@tsed/exceptions";
 
 @Service()
 export class SubmissionRoundService {
@@ -74,5 +75,15 @@ export class SubmissionRoundService {
             return true;
         }
         return false;
+    }
+
+    public async pauseRound(pause: boolean): Promise<void> {
+        const currentActiveRound = await this.getCurrentActiveSubmissionRound();
+        if (!currentActiveRound) {
+            throw new BadRequest("No active round to pause");
+        }
+        const repo = this.ds.getRepository(SubmissionRoundModel);
+        currentActiveRound.paused = pause;
+        await repo.save(currentActiveRound);
     }
 }

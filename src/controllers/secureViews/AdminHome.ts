@@ -21,7 +21,7 @@ export class AdminHome {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         return {
-            model: new IndexDto(currentActiveRound, previousRounds)
+            indexModel: new IndexDto(currentActiveRound, previousRounds)
         };
     }
 

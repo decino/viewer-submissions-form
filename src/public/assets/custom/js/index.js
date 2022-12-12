@@ -114,7 +114,7 @@ Site.loadPage(async function (site) {
             });
         }
 
-        document.getElementById("submit").addEventListener("click", ev => {
+        document.getElementById("submit")?.addEventListener("click", ev => {
             ev.preventDefault();
             ev.stopPropagation();
             const form = document.getElementById("entryForm");
@@ -148,7 +148,7 @@ Site.loadPage(async function (site) {
         site.loading(true);
         let response;
         try {
-            response = await fetch(`${baseUrl}/rest/submission/addEntry`, {
+            response = await fetch(`${baseUrl}/submission/addEntry`, {
                 method: 'POST',
                 body: formData
             });

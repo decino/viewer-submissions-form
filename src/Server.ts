@@ -109,7 +109,7 @@ const opts: Partial<TsED.Configuration> = {
         },
         options: {
             ejs: {
-                rmWhitespace: true
+                rmWhitespace: isProduction
             }
         }
     },

@@ -4,12 +4,134 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/fh-3.3.1/r-2.4.0/sl-1.5.0/datatables.min.css"/>
 <body>
 
+<%
+function getMostRequestedWad(arr) {
+    if (arr.length === 0) {
+        return null;
+    }
+    return arr.sort((a, b) => arr
+                    .filter(v => v.wadName === a.wadName).length
+            - arr.filter(v => v.wadName === b.wadName).length
+    ).pop();
+}
+%>
+
 <div class="container mt-5">
     <main>
-
+        <% if(indexModel.currentActiveRound){ %>
+            <div class="row">
+                <div class="col">
+                    <div class="card border-primary mb-3">
+                        <div class="card-header">Round <%- indexModel.currentActiveRound.id -%></div>
+                        <div class="card-body text-center">
+                            <% if(indexModel.currentActiveRound.paused){ %>
+                                <h5 class="card-title mb-4 text-danger">Round is currently paused</h5>
+                            <% }else{ %>
+                                <h5 class="card-title mb-4 text-success">Round is active</h5>
+                            <% } %>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h5 class="card-title text-primary">Number of submissions</h5>
+                                    <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.length ?? 0 -%></h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="card-title text-primary">Most requested WAD</h5>
+                                    <h5 class="card-text"><%- getMostRequestedWad(indexModel.currentActiveRound.submissions)?.wadName ?? "N/A" -%></h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="card-title text-primary">Number of map authors</h5>
+                                    <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.filter(submission => submission.submitterAuthor)?.length ?? 0 -%></h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-center">
+                            <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                <% if(indexModel.currentActiveRound.paused){ %>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resumeRoundModal">Resume round</button>
+                                <% } else { %>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pauseRoundModal">Pause round</button>
+                                <% } %>
+                                <button type="button" class="btn btn-outline-danger">End round</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
     </main>
 </div>
+
+<% if(indexModel.currentActiveRound.paused){ %>
+    <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id -%></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Resuming this round will allow submissions again?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="resumeRoundButton">Resume</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } else { %>
+    <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id -%></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you wish to pause this round? this will lock the round and prevent anyone from submitting any more entries</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="pauseRoundButton">Pause</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } %>
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/fh-3.3.1/r-2.4.0/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
+<script>
+    Site.loadPage(async site => {
+        loadEventListeners();
+
+        function loadEventListeners() {
+            const resumeRoundButton = document.getElementById("resumeRoundButton") ?? null;
+            const pauseRoundButton = document.getElementById("pauseRoundButton") ?? null;
+
+            resumeRoundButton?.addEventListener("click", async ev => {
+                const resp = await fetch(`${baseUrl}/submissionRound/pauseRound?pause=false`, {
+                    method: "POST"
+                });
+                const json = await resp.json();
+                if (resp.status !== 200) {
+                    alert(json.message);
+                    return;
+                }
+                window.location.reload();
+            });
+            pauseRoundButton?.addEventListener("click", async ev => {
+                const resp = await fetch(`${baseUrl}/submissionRound/pauseRound?pause=true`, {
+                    method: "POST"
+                });
+                const json = await resp.json();
+                if (resp.status !== 200) {
+                    alert(json.message);
+                    return;
+                }
+                window.location.reload();
+            });
+        }
+    });
+</script>
 </body>
 </html>

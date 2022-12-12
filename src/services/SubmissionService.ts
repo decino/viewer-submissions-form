@@ -36,6 +36,9 @@ export class SubmissionService implements OnInit {
             if (!currentActiveRound) {
                 throw new NotFound("Cannot add a submission when there are no currently active rounds.");
             }
+            if (currentActiveRound.paused) {
+                throw new BadRequest("Unable to add entry as the current round is paused");
+            }
             try {
                 this.validateSubmission(entry, currentActiveRound);
             } catch (e) {

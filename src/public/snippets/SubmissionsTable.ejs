@@ -1,35 +1,57 @@
-<div class="table-responsive">
-    <table class="table submissionsTable">
-        <thead>
-        <tr>
-            <th scope="col">No.</th>
-            <th scope="col">WAD</th>
-            <th scope="col">Level</th>
-            <% if(includeDownload){ %>
-                <th scope="col">Download</th>
+<table class="table submissionsTable">
+    <thead>
+    <tr>
+        <th scope="col">No.</th>
+        <th scope="col">WAD</th>
+        <th scope="col">Level</th>
+
+        <% if(isAdmin){ %>
+            <th scope="col">Wad engine</th>
+            <th scope="col">GzDoom actions</th>
+            <th scope="col">Submitter name</th>
+            <th scope="col">Submitter is author</th>
+            <th scope="col">Distributable</th>
+            <th scope="col">info</th>
+            <th scope="col">Submitter email</th>
+        <% } %>
+
+        <% if(includeDownload){ %>
+            <th scope="col">Download</th>
+        <% } %>
+
+    </tr>
+    </thead>
+    <tbody>
+    <% for(let i = 0 ; i < submissions.length; i++){
+        const chosenSubmission = submissions[i];
+    %>
+    <tr>
+        <td><%- i + 1; -%></td>
+        <td title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></td>
+        <td><%- chosenSubmission.wadLevel; -%></td>
+
+        <% if(isAdmin){ %>
+            <td><%- chosenSubmission.getEngineAsString(); -%></td>
+            <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
+            <td><%- chosenSubmission.submitterName; -%></td>
+            <td><%- chosenSubmission.submitterAuthor; -%></td>
+            <td><%- chosenSubmission.distributable; -%></td>
+            <td><%- chosenSubmission.info; -%></td>
+            <td>
+                <a href="mailto:<%- chosenSubmission.submitterEmail; -%>"><%- chosenSubmission.submitterEmail; -%></a>
+            </td>
+        <% } %>
+        <% if(includeDownload){ %>
+            <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
+                <td>
+                    <a type="button" class="btn btn-outline-primary" href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
+                </td>
+            <% } else { %>
+                <td>N/A</td>
             <% } %>
-        </tr>
-        </thead>
-        <tbody>
-        <% for(let i = 0 ; i < submissions.length; i++){
-            const chosenSubmission = submissions[i];
-        %>
-        <tr>
-            <td><%- i + 1; -%></td>
-            <td title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></td>
-            <td><%- chosenSubmission.wadLevel; -%></td>
-            <% if(includeDownload){ %>
-                <% if(chosenSubmission.getDownloadUrl() !== null){ %>
-                    <td>
-                        <a type="button" class="btn btn-outline-primary" href="<%- chosenSubmission.getDownloadUrl(); -%>">Download</a>
-                    </td>
-                <% } else { %>
-                    <td>N/A</td>
-                <% } %>
-        </tr>
-        <% } %>
-        <% } %>
-        </tbody>
-    </table>
-</div>
+    </tr>
+    <% } %>
+    <% } %>
+    </tbody>
+</table>
 

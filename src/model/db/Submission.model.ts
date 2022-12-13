@@ -164,12 +164,15 @@ export class SubmissionModel extends AbstractModel {
     @Description("the round id that this entry was chosen for")
     public chosenRoundId: number;
 
-    public get downloadable(): boolean {
-        return !(this.submitterAuthor && !this.distributable);
+    public downloadable(force = false): boolean {
+        return force ? true : !(this.submitterAuthor && !this.distributable);
     }
 
-    public getDownloadUrl(): string | null {
-        if (!this.downloadable) {
+    public getDownloadUrl(force = false): string | null {
+        if (force) {
+            return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
+        }
+        if (!this.downloadable()) {
             return null;
         }
         return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
@@ -179,6 +182,14 @@ export class SubmissionModel extends AbstractModel {
         if (!this.wadURL && !this.customWadFileName) {
             throw new Error("Either WAD URL or a file must be uploaded");
         }
+    }
+
+    public getEngineAsString(): string {
+        return DOOM_ENGINE[this.wadEngine];
+    }
+
+    public getGzActionAsString(): string[] {
+        return this.gzDoomActions?.map(action => GZDOOM_ACTIONS[action]) ?? [];
     }
 
     @BeforeInsert()

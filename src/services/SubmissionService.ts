@@ -1,6 +1,6 @@
 import {Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource} from "typeorm";
+import {DataSource, In} from "typeorm";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
 import {BadRequest, NotFound} from "@tsed/exceptions";
@@ -93,21 +93,20 @@ export class SubmissionService implements OnInit {
         return entries ?? [];
     }
 
-    public async deleteEntry(id: number): Promise<SubmissionModel | null> {
+    public async deleteEntries(ids: number[]): Promise<SubmissionModel[] | null> {
         const repo = this.ds.getRepository(SubmissionModel);
-        const entry = await repo.findOne({
+        const entries = await repo.find({
             where: {
-                id
+                id: In(ids)
             }
         });
-        if (!entry) {
+        if (!entries || entries.length === 0) {
             return null;
         }
-        const removedItem = await repo.remove(entry);
-        if (entry.customWadFileName) {
-            await this.customWadEngine.deleteCustomWad(id, entry.submissionRoundId);
+        for (const entry of entries) {
+            await this.customWadEngine.deleteCustomWad(entry.id, entry.submissionRoundId);
         }
-        return removedItem;
+        return repo.remove(entries);
     }
 
     public $onInit(): void {
@@ -159,8 +158,8 @@ export class SubmissionService implements OnInit {
                 return;
             }
             this.logger.info(`found ${entriesToDelete.length} pending submission that has expired, deleting...`);
-            const pArr = entriesToDelete.map(entry => this.deleteEntry(entry.id));
-            return Promise.all(pArr);
+            const entryIds = entriesToDelete.map(entry => entry.id);
+            return this.deleteEntries(entryIds);
         });
     }
 }

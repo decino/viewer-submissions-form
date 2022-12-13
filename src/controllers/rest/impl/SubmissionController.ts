@@ -6,7 +6,7 @@ import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
 import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res} from "@tsed/common";
+import {MultipartFile, PlatformMulterFile, PlatformResponse, Res} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 
@@ -27,41 +27,57 @@ export class SubmissionController extends BaseRestController {
         return this.submissionService.addEntry(submission, customWad ?? null);
     }
 
-    @Get("/downloadWad/:roundId/:id")
+    @Get("/downloadWadSecure/:roundId/:id")
     @Returns(StatusCodes.CREATED, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public async downloadWad(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
-        let wad: CustomWadEntry | null;
-        try {
-            wad = await this.customWadEngine.getWad(roundId, id);
-        } catch (e) {
-            throw new NotFound(`Unable to find wad with id: ${id} from round ${roundId}`);
-        }
-
-        if (!wad) {
-            throw new NotFound(`Unable to find wad with id: ${id} from round ${roundId}`);
-        }
-        const entry = await this.submissionService.getEntry(id);
-        if (!entry) {
-            throw new InternalServerError("An error has occurred when trying to find this wad's associated entry.");
-        }
-        if (!entry.downloadable) {
-            throw new BadRequest("This wad is not shareable by author's request.");
-        }
+    public async downloadWadSecure(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
+        const [entry, wad] = await this.getWad(roundId, id, true);
         res.attachment(entry.customWadFileName);
         res.contentType("application/octet-stream");
         return wad.content;
     }
 
-    @Delete("/deleteEntry")
+
+    @Get("/downloadWad/:roundId/:id")
+    @Returns(StatusCodes.CREATED, Buffer)
+    @Returns(StatusCodes.NOT_FOUND, NotFound)
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    public async downloadWad(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
+        const [entry, wad] = await this.getWad(roundId, id);
+        res.attachment(entry.customWadFileName);
+        res.contentType("application/octet-stream");
+        return wad.content;
+    }
+
+    @Delete("/deleteEntries")
     @Returns(StatusCodes.CREATED, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
-    public async deleteEntry(@Res() res: PlatformResponse, @QueryParams("id") submissionId: number): Promise<unknown> {
-        const result = await this.submissionService.deleteEntry(submissionId);
+    public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
+        const result = await this.submissionService.deleteEntries(ids);
         if (!result) {
-            throw new NotFound(`Entry with id ${submissionId} not found.`);
+            throw new NotFound(`No Entry with ids ${ids.join(", ")} found.`);
         }
-        return super.doSuccess(res, `Entry ${submissionId} has been deleted.`);
+        return super.doSuccess(res, `Entries has been deleted.`);
+    }
+
+    private async getWad(roundId: number, entryId: number, secure = false): Promise<[SubmissionModel, CustomWadEntry]> {
+        let wad: CustomWadEntry | null;
+        try {
+            wad = await this.customWadEngine.getWad(roundId, entryId);
+        } catch (e) {
+            throw new NotFound(`Unable to find wad with id: ${entryId} from round ${roundId}`);
+        }
+        if (!wad) {
+            throw new NotFound(`Unable to find wad with id: ${entryId} from round ${roundId}`);
+        }
+        const entry = await this.submissionService.getEntry(entryId);
+        if (!entry) {
+            throw new InternalServerError("An error has occurred when trying to find this wad's associated entry.");
+        }
+        if (!secure && !entry.downloadable()) {
+            throw new BadRequest("This wad is not shareable by author's request.");
+        }
+        return [entry, wad];
     }
 }

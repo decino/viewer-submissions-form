@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <%- include('../snippets/head.ejs'); %>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/fh-3.3.1/r-2.4.0/sl-1.5.0/datatables.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css"/>
 <body>
 
 <%
@@ -59,6 +59,20 @@ function getMostRequestedWad(arr) {
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card border-primary mb-3 ml-3">
+                        <div class="card-header">Current submissions</div>
+                        <div class="card-body">
+                            <%- include('../snippets/SubmissionsTable.ejs', {
+                            submissions: indexModel.currentActiveRound.submissions,
+                            includeDownload: true,
+                            isAdmin: true
+                            }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
         <% } %>
     </main>
 </div>
@@ -100,11 +114,12 @@ function getMostRequestedWad(arr) {
         </div>
     </div>
 <% } %>
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/fh-3.3.1/r-2.4.0/sl-1.5.0/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script>
     Site.loadPage(async site => {
         loadEventListeners();
+        initDt();
 
         function loadEventListeners() {
             ((() => {
@@ -132,6 +147,45 @@ function getMostRequestedWad(arr) {
                     await pauseRound(true);
                 });
             })());
+        }
+
+        function initDt() {
+            $('.submissionsTable').DataTable({
+                dom: 'Bfrtip',
+                stateSave: true,
+                scrollY: 600,
+                scrollX: false,
+                scrollCollapse: true,
+                paging: false,
+                fixedHeader: {
+                    header: true
+                },
+                select: {
+                    style: 'multi'
+                },
+                buttons: [
+                    'colvis',
+                    {
+                        extend: 'selected',
+                        text: 'Delete',
+                        action: function (e, dt, button, config) {
+                            const confirm = window.confirm("Are you sure you wish to delete these entries?");
+                            if (!confirm) {
+                                return;
+                            }
+
+                            dt.rows({selected: true}).remove().draw(false);
+                        }
+                    },
+                    {
+                        extend: 'selectedSingle',
+                        text: 'Full info',
+                        action: function (e, dt, button, config) {
+                            alert(dt.rows({selected: true}).indexes().length + ' row(s) selected');
+                        }
+                    }
+                ]
+            });
         }
     });
 </script>

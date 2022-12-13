@@ -16,7 +16,7 @@
         %>
         <tr>
             <td><%- i + 1; -%></td>
-            <td><%- chosenSubmission.wadName; -%></td>
+            <td title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></td>
             <td><%- chosenSubmission.wadLevel; -%></td>
             <% if(includeDownload){ %>
                 <% if(chosenSubmission.getDownloadUrl() !== null){ %>

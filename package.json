@@ -59,7 +59,8 @@
     "passport-local": "^1.0.0",
     "toad-scheduler": "^2.0.0",
     "typeorm": "^0.3.10",
-    "walk-file-tree": "^1.0.38"
+    "walk-file-tree": "^1.0.38",
+    "xss": "^1.0.14"
   },
   "devDependencies": {
     "@tsed/cli-plugin-passport": "4.2.3",

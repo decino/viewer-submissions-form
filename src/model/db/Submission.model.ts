@@ -1,11 +1,12 @@
 import {AbstractModel} from "./AbstractModel";
-import {Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
+import {BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
 import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 import DOOM_ENGINE from "../constants/DoomEngine";
 import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
 import process from "process";
+import xss from "xss";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -177,6 +178,25 @@ export class SubmissionModel extends AbstractModel {
     public validate(): void {
         if (!this.wadURL && !this.customWadFileName) {
             throw new Error("Either WAD URL or a file must be uploaded");
+        }
+    }
+
+    @BeforeInsert()
+    private sanitiseString(): void {
+        if (this.wadURL) {
+            this.wadURL = xss(this.wadURL);
+        }
+        if (this.wadName) {
+            this.wadName = xss(this.wadName);
+        }
+        if (this.wadLevel) {
+            this.wadLevel = xss(this.wadLevel);
+        }
+        if (this.submitterName) {
+            this.submitterName = xss(this.submitterName);
+        }
+        if (this.info) {
+            this.info = xss(this.info);
         }
     }
 

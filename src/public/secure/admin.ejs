@@ -15,14 +15,16 @@ function getMostRequestedWad(arr) {
     ).pop();
 }
 %>
-
+<div id="overlay" class="hidden">
+    <div id="loader" class="hidden"></div>
+</div>
 <div class="container mt-5">
     <main>
         <% if(indexModel.currentActiveRound){ %>
             <div class="row">
                 <div class="col">
                     <div class="card border-primary mb-3">
-                        <div class="card-header">Round <%- indexModel.currentActiveRound.id -%></div>
+                        <div class="card-header">Round <%- indexModel.currentActiveRound.id; -%></div>
                         <div class="card-body text-center">
                             <% if(indexModel.currentActiveRound.paused){ %>
                                 <h5 class="card-title mb-4 text-danger">Round is currently paused</h5>
@@ -32,15 +34,15 @@ function getMostRequestedWad(arr) {
                             <div class="row">
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Number of submissions</h5>
-                                    <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.length ?? 0 -%></h5>
+                                    <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.length ?? 0; -%></h5>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Most requested WAD</h5>
-                                    <h5 class="card-text"><%- getMostRequestedWad(indexModel.currentActiveRound.submissions)?.wadName ?? "N/A" -%></h5>
+                                    <h5 class="card-text"><%- getMostRequestedWad(indexModel.currentActiveRound.submissions)?.wadName ?? "N/A"; -%></h5>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Number of map authors</h5>
-                                    <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.filter(submission => submission.submitterAuthor)?.length ?? 0 -%></h5>
+                                    <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.filter(submission => submission.submitterAuthor)?.length ?? 0; -%></h5>
                                 </div>
                             </div>
                         </div>
@@ -66,7 +68,7 @@ function getMostRequestedWad(arr) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id -%></h1>
+                    <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id; -%></h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -84,7 +86,7 @@ function getMostRequestedWad(arr) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id -%></h1>
+                    <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id; -%></h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -105,31 +107,31 @@ function getMostRequestedWad(arr) {
         loadEventListeners();
 
         function loadEventListeners() {
-            const resumeRoundButton = document.getElementById("resumeRoundButton") ?? null;
-            const pauseRoundButton = document.getElementById("pauseRoundButton") ?? null;
+            ((() => {
+                const resumeRoundButton = document.getElementById("resumeRoundButton") ?? null;
+                const pauseRoundButton = document.getElementById("pauseRoundButton") ?? null;
 
-            resumeRoundButton?.addEventListener("click", async ev => {
-                const resp = await fetch(`${baseUrl}/submissionRound/pauseRound?pause=false`, {
-                    method: "POST"
-                });
-                const json = await resp.json();
-                if (resp.status !== 200) {
-                    alert(json.message);
-                    return;
+                async function pauseRound(pause) {
+                    site.loading(true);
+                    const resp = await fetch(`${baseUrl}/submissionRound/pauseRound?pause=${pause}`, {
+                        method: "POST"
+                    });
+                    const json = await resp.json();
+                    if (resp.status !== 200) {
+                        alert(json.message);
+                        return;
+                    }
+                    site.loading(false);
+                    window.location.reload();
                 }
-                window.location.reload();
-            });
-            pauseRoundButton?.addEventListener("click", async ev => {
-                const resp = await fetch(`${baseUrl}/submissionRound/pauseRound?pause=true`, {
-                    method: "POST"
+
+                resumeRoundButton?.addEventListener("click", async ev => {
+                    await pauseRound(false);
                 });
-                const json = await resp.json();
-                if (resp.status !== 200) {
-                    alert(json.message);
-                    return;
-                }
-                window.location.reload();
-            });
+                pauseRoundButton?.addEventListener("click", async ev => {
+                    await pauseRound(true);
+                });
+            })());
         }
     });
 </script>

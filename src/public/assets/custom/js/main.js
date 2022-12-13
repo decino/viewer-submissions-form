@@ -1,16 +1,16 @@
 const Site = (function () {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let isInit = false;
 
     const loading = function loading(show) {
         const loader = document.getElementById("loader");
         const overlay = document.getElementById("overlay");
         if (show) {
-            overlay.classList.add("overlay");
+            overlay.classList.remove("hidden");
             loader.classList.remove("hidden");
         } else {
-            overlay.classList.remove("overlay");
+            overlay.classList.add("hidden");
             loader.classList.add("hidden");
-            Site.display(true, loader);
         }
     };
 

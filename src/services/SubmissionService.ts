@@ -149,7 +149,10 @@ export class SubmissionService implements OnInit {
             const now = Date.now();
             const entriesToDelete: SubmissionModel [] = [];
             for (const entry of entries) {
-                const createdAt = entry.confirmation.createdAt.getTime();
+                const createdAt = entry?.confirmation?.createdAt?.getTime() ?? null;
+                if (createdAt === null) {
+                    continue;
+                }
                 if (now - createdAt > twentyMins) {
                     entriesToDelete.push(entry);
                 }

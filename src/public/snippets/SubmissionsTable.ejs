@@ -1,7 +1,7 @@
 <table class="table submissionsTable">
     <thead>
     <tr>
-        <th scope="col">No.</th>
+        <th scope="col">ID</th>
         <th scope="col">WAD</th>
         <th scope="col">Level</th>
 
@@ -22,11 +22,13 @@
     </tr>
     </thead>
     <tbody>
-    <% for(let i = 0 ; i < submissions.length; i++){
+    <%
+    submissions = submissions.sort((a, b) => a.id - b.id);
+    for(let i = 0 ; i < submissions.length; i++){
         const chosenSubmission = submissions[i];
     %>
     <tr>
-        <td><%- i + 1; -%></td>
+        <td><%- chosenSubmission.id; -%></td>
         <td title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></td>
         <td><%- chosenSubmission.wadLevel; -%></td>
 

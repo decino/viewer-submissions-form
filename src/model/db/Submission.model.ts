@@ -19,7 +19,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: false,
     })
     @Name("WADName")
-    @Description("The URL of the wad")
+    @Description("The name of the wad")
     @Example("Alien Vendetta")
     @Example("Sunlust")
     @Required()

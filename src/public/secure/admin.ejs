@@ -5,13 +5,11 @@
 <body>
 
 <%
-function getMostRequestedWad(arr) {
-    if (arr.length === 0) {
-        return null;
-    }
-    return arr.sort((a, b) => arr
-                    .filter(v => v.wadName === a.wadName).length
-            - arr.filter(v => v.wadName === b.wadName).length
+function mode(arr) {
+    const mappedArr = arr.map(submission => submission.wadName);
+    return mappedArr.sort((a, b) =>
+            mappedArr.filter(v => v === a).length
+            - mappedArr.filter(v => v === b).length
     ).pop();
 }
 %>
@@ -38,7 +36,7 @@ function getMostRequestedWad(arr) {
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Most requested WAD</h5>
-                                    <h5 class="card-text"><%- getMostRequestedWad(indexModel.currentActiveRound.submissions)?.wadName ?? "N/A"; -%></h5>
+                                    <h5 class="card-text"><%- mode(indexModel.currentActiveRound.submissions); -%></h5>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Number of map authors</h5>
@@ -86,7 +84,7 @@ function getMostRequestedWad(arr) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Resuming this round will allow submissions again?</p>
+                    <p>Resuming this round will allow submissions again</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="resumeRoundButton">Resume</button>

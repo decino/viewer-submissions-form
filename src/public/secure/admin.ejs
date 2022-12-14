@@ -20,7 +20,7 @@ function mode(arr) {
     <main>
         <% if(indexModel.currentActiveRound){ %>
             <div class="row">
-                <div class="col">
+                <div class="col-md-12">
                     <div class="card border-primary mb-3">
                         <div class="card-header">Round <%- indexModel.currentActiveRound.id; -%></div>
                         <div class="card-body text-center">
@@ -172,7 +172,7 @@ function mode(arr) {
                                 return;
                             }
                             const idArr = [];
-                            dt.rows({selected: true}).every(function (rowIdx, tableLoop, rowLoop) {
+                            dt.rows({selected: true}).every(function () {
                                 const data = this.data();
                                 idArr.push(data[0]);
                             });

@@ -57,7 +57,7 @@ function mode(arr) {
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row mt-5">
                 <div class="col-md-12">
                     <div class="card border-primary mb-3 ml-3">
                         <div class="card-header">Current submissions</div>
@@ -71,53 +71,111 @@ function mode(arr) {
                     </div>
                 </div>
             </div>
+        <% }else { %>
+            make a new one i guess
+        <% } %>
+        <% if(indexModel.previousRounds.length > 0){ %>
+            <div class="row mt-5">
+                <div class="col-md-12">
+                    <%- include('../snippets/resultTable.ejs', {
+                    model: indexModel,
+                    includeDownload: true,
+                    isAdmin: true
+                    }); %>
+                </div>
+            </div>
         <% } %>
     </main>
 </div>
-
-<% if(indexModel.currentActiveRound.paused){ %>
-    <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id; -%></h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Resuming this round will allow submissions again</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="resumeRoundButton">Resume</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-<% } else { %>
-    <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id; -%></h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you wish to pause this round? this will lock the round and prevent anyone from submitting any more entries</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="pauseRoundButton">Pause</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+<% if(indexModel.currentActiveRound){ %>
+    <% if(indexModel.currentActiveRound.paused){ %>
+        <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id; -%></h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Resuming this round will allow submissions again</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="resumeRoundButton">Resume</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    <% } else { %>
+        <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id; -%></h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you wish to pause this round? this will lock the round and prevent anyone from submitting any more entries</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="pauseRoundButton">Pause</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
 <% } %>
+<div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="submissionInfoModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="submissionInfoContent">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pauseRoundButton">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script>
     Site.loadPage(async site => {
+        const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
+
         loadEventListeners();
         initDt();
+
+
+        function showSubmissionInfoModel(id, wadName, wadLevel, wadEngine, gzDoomAction, submitterName, author, distributable, info, email, downloadUrl) {
+            const modalContentWrapper = document.getElementById("submissionInfoContent");
+            const modalTitle = document.getElementById("submissionInfoModalLabel");
+
+            const title = `Info for submission ${id}`;
+            const body = `
+                <p>Id: ${id}</p>
+                <p>Wad Name: ${wadName}</p>
+                <p>Wad Level: ${wadLevel}</p>
+                <p>Wad Engine: ${wadEngine}</p>
+                ${gzDoomAction ? `<p>${gzDoomAction}</p>` : ""}
+                ${submitterName ? `<p>${submitterName}</p>` : ""}
+                <p>Submitter created this map: ${author}</p>
+                <p>distributable: ${distributable}</p>
+                ${info ? `<pre>${info}</pre>` : ""}
+                <p>email: ${email}</p>
+                <p>download: ${downloadUrl}</p>
+            `;
+            modalTitle.innerHTML = title;
+            modalContentWrapper.innerHTML = body;
+            submissionInfoModal.show();
+        }
 
         function loadEventListeners() {
             ((() => {
@@ -148,22 +206,39 @@ function mode(arr) {
         }
 
         function initDt() {
-            $('.submissionsTable').DataTable({
-                dom: 'Bfrtip',
-                stateSave: true,
-                scrollY: 600,
-                scrollX: false,
-                scrollCollapse: true,
-                paging: false,
-                fixedHeader: {
-                    header: true
-                },
-                select: {
-                    style: 'multi'
-                },
-                buttons: [
+            $('.submissionsTable').each(function (index) {
+                const el = $(this);
+                const isPreviousRoundCard = el.closest(".preRoundCard").length > 0;
+                const dtOpts = {
+                    dom: 'Bfrtip',
+                    stateSave: true,
+                    scrollY: 600,
+                    scrollX: false,
+                    scrollCollapse: true,
+                    paging: false,
+                    fixedHeader: {
+                        header: true
+                    },
+                    select: {
+                        style: 'multi'
+                    },
+                };
+
+
+                const buttons = [
                     'colvis',
                     {
+                        extend: 'selectedSingle',
+                        text: 'Full info',
+                        action: (e, dt) => {
+                            const selectedRow = dt.row({selected: true}).data();
+                            showSubmissionInfoModel.apply(undefined, selectedRow);
+                        }
+                    }
+                ];
+
+                if (!isPreviousRoundCard) {
+                    buttons.push({
                         extend: 'selected',
                         text: 'Delete',
                         action: async (e, dt) => {
@@ -200,15 +275,10 @@ function mode(arr) {
                             }
                             dt.rows({selected: true}).remove().draw(false);
                         }
-                    },
-                    {
-                        extend: 'selectedSingle',
-                        text: 'Full info',
-                        action: function (e, dt, button, config) {
-                            alert(dt.rows({selected: true}).indexes().length + ' row(s) selected');
-                        }
-                    }
-                ]
+                    });
+                }
+                dtOpts["buttons"] = buttons;
+                el.DataTable(dtOpts);
             });
         }
     });

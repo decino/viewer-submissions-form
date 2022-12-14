@@ -43,6 +43,7 @@ export class SubmissionRoundService {
         if (!found) {
             return null;
         }
+        found.submissions = found.submissions.filter(submission => submission.submissionValid);
         return found;
     }
 

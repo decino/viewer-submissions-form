@@ -206,7 +206,7 @@ function mode(arr) {
         }
 
         function initDt() {
-            $('.submissionsTable').each(function (index) {
+            $('.submissionsTable').each(function () {
                 const el = $(this);
                 const isPreviousRoundCard = el.closest(".preRoundCard").length > 0;
                 const dtOpts = {
@@ -220,7 +220,7 @@ function mode(arr) {
                         header: true
                     },
                     select: {
-                        style: 'multi'
+                        style: isPreviousRoundCard ? 'single' : 'multi'
                     },
                 };
 

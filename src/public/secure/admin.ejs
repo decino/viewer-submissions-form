@@ -51,7 +51,8 @@ function mode(arr) {
                                 <% } else { %>
                                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pauseRoundModal">Pause round</button>
                                 <% } %>
-                                <button type="button" class="btn btn-outline-danger">End round</button>
+                                <button type="button" class="btn btn-outline-success" id="endRoundButton" data-bs-toggle="modal" data-bs-target="#endRoundModal">End round</button>
+                                <button type="button" class="btn btn-outline-danger" id="deleteRoundButton">Delete round</button>
                             </div>
                         </div>
                     </div>
@@ -125,6 +126,84 @@ function mode(arr) {
             </div>
         </div>
     <% } %>
+
+
+    <div class="modal fade" id="endRoundModal" tabindex="-1" aria-labelledby="endRoundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="endRoundModalLabel">End current round</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="endRoundModalContent">
+                    <form id="endRoundWizard">
+                        <nav>
+                            <div class="nav nav-pills nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-link active" id="step1-tab" data-toggle="tab" href="#step1">Pause round</a>
+                                <a class="nav-link" id="step2-tab" data-toggle="tab" href="#step2">Select winners</a>
+                                <a class="nav-link" id="step3-tab" data-toggle="tab" href="#step3">Review</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content py-4" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="step1">
+                                <div class="alert alert-primary" role="alert">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    In order to finish this round and pick winners, you must first pause the current active round
+                                </div>
+                                <% if(indexModel.currentActiveRound.paused){ %>
+                                    <div class="alert alert-success" role="alert">
+                                        <i class="bi bi-check-circle"></i> Round is paused
+                                    </div>
+                                <% } else { %>
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        Please pause the round to continue
+                                        <button type="button" class="btn btn-outline-success" id="endRoundPauseRoundButton">Pause round</button>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="tab-pane fade" id="step2">
+                                <table class="table" id="endRoundResultsTable">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">WAD</th>
+                                        <th scope="col">Level</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="endRoundResultsTableBody"></tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="step3">
+                                <div class="mb-3">
+                                    <label for="first_name">Required field 1</label>
+                                    <input type="text" class="form-control-plaintext" value="Lorem ipsum dolor sit amet" id="first_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="first_name">Optional field</label>
+                                    <input type="text" class="form-control-plaintext" value="Lorem ipsum dolor sit amet" id="first_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="first_name">Required field 2</label>
+                                    <input type="text" class="form-control-plaintext" value="Lorem ipsum dolor sit amet" id="first_name">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-between">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-primary" data-enchanter="previous">Previous</button>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-primary" data-enchanter="next">Next</button>
+                                <button type="button" class="btn btn-outline-success" data-enchanter="finish">Finish</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <% } %>
 <div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -146,6 +225,7 @@ function mode(arr) {
 
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
+<script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
 <script>
     Site.loadPage(async site => {
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
@@ -196,6 +276,9 @@ function mode(arr) {
                     window.location.reload();
                 }
 
+                document.getElementById("endRoundPauseRoundButton")?.addEventListener("click", async ev => {
+                    await pauseRound(true);
+                });
                 resumeRoundButton?.addEventListener("click", async ev => {
                     await pauseRound(false);
                 });
@@ -203,6 +286,91 @@ function mode(arr) {
                     await pauseRound(true);
                 });
             })());
+            document.getElementById("endRoundModal").addEventListener("show.bs.modal", evt => {
+
+            });
+
+            <% if(indexModel.currentActiveRound){ %>
+            ((() => {
+                let step2Dt;
+                const wizard = new Enchanter('endRoundWizard', {}, {
+                    onNext: () => {
+                        function validate() {
+                            function validateStep1() {
+                                return <%- indexModel.currentActiveRound.paused -%>;
+                            }
+
+                            function validateStep2() {
+                                return true;
+                            }
+
+                            function validateStep3() {
+                                return true;
+                            }
+
+                            const currentIndex = wizard.currentIndex();
+                            switch (currentIndex) {
+                                case 1:
+                                    return validateStep1();
+                                case 2:
+                                    return validateStep2();
+                                case 3:
+                                    return validateStep3();
+                            }
+                        }
+
+                        function buildNextStep() {
+
+                            function buildStep2() {
+                                if (step2Dt) {
+                                    return;
+                                }
+                                step2Dt = $("#endRoundResultsTable").DataTable({
+                                    dom: 'Bfrtip',
+                                    stateSave: true,
+                                    paging: false,
+                                    fixedHeader: {
+                                        header: true
+                                    },
+                                    buttons: [
+                                        {
+                                            text: 'Generate random entry',
+                                            action: (e, dt) => {
+
+                                            }
+                                        }
+                                    ]
+                                });
+                            }
+
+                            function buildStep3() {
+                            }
+
+                            const nextStep = wizard.nextIndex();
+                            switch (nextStep) {
+                                case 2:
+                                    buildStep2();
+                                    break;
+                                case 3:
+                                    buildStep3();
+                            }
+                        }
+
+                        if (!validate()) {
+                            return false;
+                        }
+                        buildNextStep();
+                    },
+                    onPrevious: () => {
+                        const prevStep = wizard.previousIndex();
+                        console.log(prevStep);
+                    },
+                    onFinish: () => {
+                        console.log("finish");
+                    },
+                });
+            })());
+            <% } %>
         }
 
         function initDt() {

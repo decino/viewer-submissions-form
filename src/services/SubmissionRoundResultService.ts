@@ -1,6 +1,5 @@
 import {Inject, Service} from "@tsed/di";
 import {SubmissionModel} from "../model/db/Submission.model";
-import process from "process";
 import {SubmissionService} from "./SubmissionService";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
@@ -19,7 +18,7 @@ export class SubmissionRoundResultService {
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
-    public async generateEntries(count: number = Number.parseInt(process.env.ENTRIES_TO_GENERATE as string)): Promise<SubmissionModel[]> {
+    public async generateEntries(count: number | undefined): Promise<SubmissionModel[]> {
         const allEntries = await this.submissionService.getAllEntries();
         const mergedEntries: Map<string, SubmissionModel[]> = new Map();
 
@@ -39,16 +38,6 @@ export class SubmissionRoundResultService {
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {
-        const allNonActiveRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
-        // this should be done as an inner select on the table join, but this ORM does not support this yet
-        const filteredResult = allNonActiveRounds.map(value => {
-            value.submissions = value.submissions.filter(submission => !!submission.chosenRoundId);
-            return value;
-        });
-        return filteredResult ?? [];
-    }
-
     public async submitEntries(entries: SubmissionModel[]): Promise<void> {
         const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         if (!activeRound) {
@@ -61,6 +50,16 @@ export class SubmissionRoundResultService {
         await repo.save(entries);
     }
 
+    public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {
+        const allNonActiveRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
+        // this should be done as an inner select on the table join, but this ORM does not support this yet
+        const filteredResult = allNonActiveRounds.map(value => {
+            value.submissions = value.submissions.filter(submission => !!submission.chosenRoundId);
+            return value;
+        });
+        return filteredResult ?? [];
+    }
+
     private getMultipleRandom<T>(array: T[], num = -1): T[] {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -69,4 +68,5 @@ export class SubmissionRoundResultService {
         }
         return num === -1 ? shuffled : shuffled.slice(0, num);
     }
+
 }

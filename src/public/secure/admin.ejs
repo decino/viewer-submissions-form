@@ -166,12 +166,38 @@ function mode(arr) {
                     {
                         extend: 'selected',
                         text: 'Delete',
-                        action: function (e, dt, button, config) {
+                        action: async (e, dt) => {
                             const confirm = window.confirm("Are you sure you wish to delete these entries?");
                             if (!confirm) {
                                 return;
                             }
-
+                            const idArr = [];
+                            dt.rows({selected: true}).every(function (rowIdx, tableLoop, rowLoop) {
+                                const data = this.data();
+                                idArr.push(data[0]);
+                            });
+                            site.loading(true);
+                            let response;
+                            try {
+                                response = await fetch(`${baseUrl}/submission/deleteEntries`, {
+                                    method: "DELETE",
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(idArr)
+                                });
+                            } catch (e) {
+                                alert(e.message);
+                                return;
+                            } finally {
+                                site.loading(false);
+                            }
+                            const responseStatus = response.status;
+                            const responseJson = await response.json();
+                            if (responseStatus !== 200) {
+                                return alert(responseJson.message);
+                            }
                             dt.rows({selected: true}).remove().draw(false);
                         }
                     },

@@ -223,12 +223,34 @@ function mode(arr) {
 </div>
 
 
+<div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modifySubmissionModalLabel">Modify submission</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <%- include('../snippets/submitForm.ejs', {
+                model: indexModel,
+                isAdmin: true
+                }); %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="submissionModifySaveButton">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
 <script>
     Site.loadPage(async site => {
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
+        const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
 
         loadEventListeners();
         initDt();
@@ -286,9 +308,6 @@ function mode(arr) {
                     await pauseRound(true);
                 });
             })());
-            document.getElementById("endRoundModal").addEventListener("show.bs.modal", evt => {
-
-            });
 
             <% if(indexModel.currentActiveRound){ %>
             ((() => {
@@ -297,7 +316,7 @@ function mode(arr) {
                     onNext: () => {
                         function validate() {
                             function validateStep1() {
-                                return <%- indexModel.currentActiveRound.paused -%>;
+                                return <%- indexModel.currentActiveRound.paused; -%>;
                             }
 
                             function validateStep2() {
@@ -371,6 +390,11 @@ function mode(arr) {
                 });
             })());
             <% } %>
+
+            document.getElementById("submissionModifySaveButton").addEventListener("click", ev => {
+                const formData = site.serialiseForm();
+                console.log(formData);
+            });
         }
 
         function initDt() {
@@ -401,6 +425,37 @@ function mode(arr) {
                         action: (e, dt) => {
                             const selectedRow = dt.row({selected: true}).data();
                             showSubmissionInfoModel.apply(undefined, selectedRow);
+                        }
+                    },
+                    {
+                        extend: 'selectedSingle',
+                        text: 'Modify',
+                        action: async (e, dt) => {
+                            const selectedRow = dt.row({selected: true}).data();
+                            const id = selectedRow[0];
+                            site.loading(true);
+                            let submission;
+                            try {
+                                submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                            } finally {
+                                site.loading(false);
+                            }
+                            const submissionObj = await submission.json();
+                            const wadName = submissionObj.WADName;
+                            const wadURL = submissionObj.WAD ?? null;
+                            const wadUrlInput = document.getElementById("wadDownloadUrlSection");
+                            wadURL ? wadUrlInput.classList.remove("hidden") : wadUrlInput.classList.add("hidden");
+                            const level = submissionObj.level;
+                            const engine = submissionObj.engine;
+                            const submitterName = submissionObj.authorName;
+                            document.getElementById("wadName").value = wadName;
+                            if (wadURL) {
+                                document.getElementById("wadUrl").value = wadURL;
+                            }
+                            document.getElementById("levelToPlay").value = level;
+                            document.getElementById("gameEngine").value = engine;
+                            document.getElementById("authorName").value = submitterName;
+                            submissionModificationModal.show();
                         }
                     }
                 ];

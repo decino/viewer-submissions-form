@@ -9,6 +9,7 @@ import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
+import {SubmissionModification} from "../utils/typeings";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -63,6 +64,13 @@ export class SubmissionService implements OnInit {
         });
     }
 
+    public async modifyEntry(entry: SubmissionModification): Promise<void> {
+        const repo = this.ds.getRepository(SubmissionModel);
+        await repo.update({
+            ...Object.keys(entry)
+        }, entry);
+    }
+
     public async getEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
         const entry = await repo.findOne({
@@ -95,6 +103,7 @@ export class SubmissionService implements OnInit {
 
     public async deleteEntries(ids: number[]): Promise<SubmissionModel[] | null> {
         const repo = this.ds.getRepository(SubmissionModel);
+
         const entries = await repo.find({
             where: {
                 id: In(ids)

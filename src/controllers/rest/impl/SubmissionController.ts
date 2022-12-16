@@ -9,6 +9,7 @@ import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {MultipartFile, PlatformMulterFile, PlatformResponse, Res} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
+import {SubmissionModification} from "../../../utils/typeings";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -27,6 +28,12 @@ export class SubmissionController extends BaseRestController {
         return this.submissionService.addEntry(submission, customWad ?? null);
     }
 
+    @Post("/modifyEntry")
+    @Returns(StatusCodes.OK, SubmissionModel)
+    public modifyEntry(@BodyParams() submission: Record<string, keyof SubmissionModification>): unknown {
+        return this.submissionService.modifyEntry(submission);
+    }
+
     @Get("/downloadWadSecure/:roundId/:id")
     @Returns(StatusCodes.CREATED, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
@@ -38,6 +45,14 @@ export class SubmissionController extends BaseRestController {
         return wad.content;
     }
 
+
+    @Get("/getSubmission/:id")
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    @Returns(StatusCodes.NOT_FOUND, NotFound)
+    @Returns(StatusCodes.OK, SubmissionModel)
+    public getSubmission(@Res() res: PlatformResponse, @PathParams("id") id: number): Promise<unknown> {
+        return this.submissionService.getEntry(id);
+    }
 
     @Get("/downloadWad/:roundId/:id")
     @Returns(StatusCodes.CREATED, Buffer)
@@ -75,7 +90,7 @@ export class SubmissionController extends BaseRestController {
         if (!entry) {
             throw new InternalServerError("An error has occurred when trying to find this wad's associated entry.");
         }
-        if (!secure && !entry.downloadable()) {
+        if (!entry.downloadable(secure)) {
             throw new BadRequest("This wad is not shareable by author's request.");
         }
         return [entry, wad];

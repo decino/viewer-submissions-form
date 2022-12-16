@@ -14,6 +14,33 @@ const Site = (function () {
         }
     };
 
+    const serialiseForm = function serialiseForm() {
+        function isHidden(el) {
+            const style = window.getComputedStyle(el);
+            return ((style.display === 'none') || (style.visibility === 'hidden') || el.offsetParent === null);
+        }
+
+        const form = document.getElementById("entryForm");
+        const items = form.querySelectorAll("input, textarea, select");
+        const formData = new FormData();
+        for (const item of items) {
+            if (isHidden(item)) {
+                continue;
+            }
+            if (item.type === "radio" || item.type === "checkbox") {
+                if (!item.checked) {
+                    continue;
+                }
+            }
+            if (item.type === "file") {
+                formData.append('file', item.files[0]);
+            } else if (item.value) {
+                formData.append(item.name, item.value);
+            }
+        }
+        return formData;
+    };
+
     const display = function display(hide, element) {
         if (hide) {
             element.closest("div").classList.add("hidden");
@@ -29,6 +56,7 @@ const Site = (function () {
     return {
         loadPage,
         loading,
-        display
+        display,
+        serialiseForm
     };
 }());

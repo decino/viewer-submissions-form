@@ -114,7 +114,7 @@ Site.loadPage(async function (site) {
             });
         }
 
-        document.getElementById("submit")?.addEventListener("click", ev => {
+        document.getElementById("submit")?.addEventListener("click", async ev => {
             ev.preventDefault();
             ev.stopPropagation();
             const form = document.getElementById("entryForm");
@@ -122,55 +122,28 @@ Site.loadPage(async function (site) {
             if (!formValue) {
                 return;
             }
-            serialiseForm();
+            const formData = site.serialiseForm();
+            site.loading(true);
+            let response;
+            try {
+                response = await fetch(`${baseUrl}/submission/addEntry`, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (e) {
+                return showError(e.message);
+            } finally {
+                site.loading(false);
+            }
+
+            const responseStatus = response.status;
+            const responseJson = await response.json();
+            if (responseStatus !== 201) {
+                return showError(responseJson.message);
+            }
+            showSuccess();
         });
     }
-
-    async function serialiseForm() {
-        const form = document.getElementById("entryForm");
-        const items = form.querySelectorAll("input, textarea, select");
-        const formData = new FormData();
-        for (const item of items) {
-            if (isHidden(item)) {
-                continue;
-            }
-            if (item.type === "radio" || item.type === "checkbox") {
-                if (!item.checked) {
-                    continue;
-                }
-            }
-            if (item.type === "file") {
-                formData.append('file', item.files[0]);
-            } else if (item.value) {
-                formData.append(item.name, item.value);
-            }
-        }
-        site.loading(true);
-        let response;
-        try {
-            response = await fetch(`${baseUrl}/submission/addEntry`, {
-                method: 'POST',
-                body: formData
-            });
-        } catch (e) {
-            return showError(e.message);
-        } finally {
-            site.loading(false);
-        }
-
-        const responseStatus = response.status;
-        const responseJson = await response.json();
-        if (responseStatus !== 201) {
-            return showError(responseJson.message);
-        }
-        showSuccess();
-    }
-
-    function isHidden(el) {
-        const style = window.getComputedStyle(el);
-        return ((style.display === 'none') || (style.visibility === 'hidden') || el.offsetParent === null);
-    }
-
 
     function showError(message) {
         const success = document.getElementById("success");

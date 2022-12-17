@@ -236,6 +236,22 @@ function mode(arr) {
                 isAdmin: true
                 }); %>
             </div>
+            <div class="mt-3">
+                <div class="hidden" id="error">
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
+                        <div id="errorContent"></div>
+                    </div>
+                </div>
+                <div class="hidden" id="success">
+                    <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
+                        <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
+                        <div id="successContent">
+                            Entry modified successfully
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="submissionModifySaveButton">Save changes</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -247,6 +263,9 @@ function mode(arr) {
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
+</body>
+</html>
+
 <script>
     Site.loadPage(async site => {
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
@@ -391,9 +410,15 @@ function mode(arr) {
             })());
             <% } %>
 
-            document.getElementById("submissionModifySaveButton").addEventListener("click", ev => {
-                const formData = site.serialiseForm();
-                console.log(formData);
+            document.getElementById("submissionModifySaveButton").addEventListener("click", async ev => {
+                try {
+                    const result = await site.submitEntryForm(ev, "modifyEntry", true);
+                    if (result) {
+                        window.location.reload();
+                    }
+                } catch {
+
+                }
             });
         }
 
@@ -455,6 +480,7 @@ function mode(arr) {
                             document.getElementById("levelToPlay").value = level;
                             document.getElementById("gameEngine").value = engine;
                             document.getElementById("authorName").value = submitterName;
+                            document.getElementById("submissionId").value = id;
                             submissionModificationModal.show();
                         }
                     }
@@ -506,5 +532,3 @@ function mode(arr) {
         }
     });
 </script>
-</body>
-</html>

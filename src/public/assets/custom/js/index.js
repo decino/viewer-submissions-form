@@ -115,52 +115,7 @@ Site.loadPage(async function (site) {
         }
 
         document.getElementById("submit")?.addEventListener("click", async ev => {
-            ev.preventDefault();
-            ev.stopPropagation();
-            const form = document.getElementById("entryForm");
-            const formValue = form.reportValidity();
-            if (!formValue) {
-                return;
-            }
-            const formData = site.serialiseForm();
-            site.loading(true);
-            let response;
-            try {
-                response = await fetch(`${baseUrl}/submission/addEntry`, {
-                    method: 'POST',
-                    body: formData
-                });
-            } catch (e) {
-                return showError(e.message);
-            } finally {
-                site.loading(false);
-            }
-
-            const responseStatus = response.status;
-            const responseJson = await response.json();
-            if (responseStatus !== 201) {
-                return showError(responseJson.message);
-            }
-            showSuccess();
+            await site.submitEntryForm(ev, "addEntry");
         });
-    }
-
-    function showError(message) {
-        const success = document.getElementById("success");
-        if (!success.classList.contains("hidden")) {
-            site.display(true, success);
-        }
-        const error = document.getElementById("error");
-        document.getElementById("errorContent").textContent = message.trim();
-        site.display(false, error);
-    }
-
-    function showSuccess() {
-        const error = document.getElementById("error");
-        const success = document.getElementById("success");
-        site.display(true, error);
-        if (success.classList.contains("hidden")) {
-            site.display(false, success);
-        }
     }
 });

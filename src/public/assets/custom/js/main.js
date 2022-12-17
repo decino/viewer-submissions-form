@@ -14,15 +14,70 @@ const Site = (function () {
         }
     };
 
-    const serialiseForm = function serialiseForm() {
+    const submitEntryForm = async function submitEntryForm(ev, endpoint, urlEncoded = false) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const form = document.getElementById("entryForm");
+        const formValue = form.reportValidity();
+        if (!formValue) {
+            return;
+        }
+        const formData = serialiseForm(urlEncoded);
+        Site.loading(true);
+        let response;
+        try {
+            response = await fetch(`${baseUrl}/submission/${endpoint}`, {
+                method: 'POST',
+                body: formData
+            });
+        } catch (e) {
+            showError(e.message);
+            return false;
+        } finally {
+            Site.loading(false);
+        }
+
+        const responseStatus = response.status;
+        if (responseStatus < 200 || responseStatus >= 400) {
+            const responseJson = await response.json();
+            showError(responseJson.message);
+            return false;
+        }
+        showSuccess();
+        return true;
+    };
+
+    const showError = function showError(message) {
+        const success = document.getElementById("success");
+        if (!success.classList.contains("hidden")) {
+            display(true, success);
+        }
+        const error = document.getElementById("error");
+        document.getElementById("errorContent").textContent = message.trim();
+        display(false, error);
+    };
+
+    const showSuccess = function showSuccess() {
+        const error = document.getElementById("error");
+        const success = document.getElementById("success");
+        display(true, error);
+        if (success.classList.contains("hidden")) {
+            display(false, success);
+        }
+    };
+
+    const serialiseForm = function serialiseForm(urlEncoded = false) {
         function isHidden(el) {
+            if (el instanceof HTMLInputElement && el.type === "hidden") {
+                return false;
+            }
             const style = window.getComputedStyle(el);
             return ((style.display === 'none') || (style.visibility === 'hidden') || el.offsetParent === null);
         }
 
         const form = document.getElementById("entryForm");
         const items = form.querySelectorAll("input, textarea, select");
-        const formData = new FormData();
+        const formData = urlEncoded ? new URLSearchParams() : new FormData();
         for (const item of items) {
             if (isHidden(item)) {
                 continue;
@@ -57,6 +112,9 @@ const Site = (function () {
         loadPage,
         loading,
         display,
-        serialiseForm
+        serialiseForm,
+        submitEntryForm,
+        showSuccess,
+        showError
     };
 }());

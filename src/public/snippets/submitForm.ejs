@@ -1,5 +1,8 @@
 <% const isPaused = model.currentActiveRound.paused; %>
 <form id="entryForm">
+    <% if(isAdmin){ %>
+        <input type="hidden" name="id" id="submissionId"/>
+    <% } %>
     <div class="mb-3">
         <% if(!isAdmin){ %>
             <label class="d-block mb-2">Post a link to the WAD below. Or you can upload it</label>

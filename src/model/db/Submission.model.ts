@@ -1,6 +1,6 @@
 import {AbstractModel} from "./AbstractModel";
 import {BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
-import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Required} from "@tsed/schema";
+import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Nullable, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 import DOOM_ENGINE from "../constants/DoomEngine";
@@ -27,11 +27,13 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         nullable: true,
+        type: "text"
     })
     @Name("WAD")
     @Description("The URL of the wad")
     @Example("https://www.doomworld.com/idgames/levels/doom2/Ports/megawads/sunlust")
-    public wadURL: string;
+    @Nullable(String)
+    public wadURL: string | null;
 
     @Column({
         nullable: false
@@ -68,17 +70,20 @@ export class SubmissionModel extends AbstractModel {
     @Example("mouselook")
     @Example("")
     @Enum(GZDOOM_ACTIONS)
+    @Nullable(GZDOOM_ACTIONS)
     @CollectionOf(Number).MaxItems(3).MinItems(0)
-    public gzDoomActions: GZDOOM_ACTIONS[];
+    public gzDoomActions: GZDOOM_ACTIONS[] | null;
 
     @Column({
-        nullable: true
+        nullable: true,
+        type: "text"
     })
     @Name("authorName")
     @Description("Submitter name")
     @Example("Victoria")
     @Example("")
-    public submitterName: string;
+    @Nullable(String)
+    public submitterName: string | null;
 
     @Column({
         default: false
@@ -99,13 +104,15 @@ export class SubmissionModel extends AbstractModel {
     public distributable: boolean;
 
     @Column({
-        nullable: true
+        nullable: true,
+        type: "text"
     })
     @Name("info")
     @Description("Additional info")
     @Example("This wad was made in 4 years")
     @Example("I like cats")
-    public info: string;
+    @Nullable(String)
+    public info: string | null;
 
     @Name("submissionRoundId")
     @Description("The submission round this entry belongs to")
@@ -117,12 +124,14 @@ export class SubmissionModel extends AbstractModel {
     public submissionRoundId: number;
 
     @Column({
-        nullable: true
+        nullable: true,
+        type: "text"
     })
     @Name("customWad")
     @Description("The custom wad to play")
+    @Nullable(String)
     @Ignore()
-    public customWadFileName: string;
+    public customWadFileName: string | null;
 
     @Column({
         nullable: false

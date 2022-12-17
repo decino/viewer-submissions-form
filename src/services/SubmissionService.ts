@@ -10,6 +10,7 @@ import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 import {SubmissionModification} from "../utils/typeings";
+import DOOM_ENGINE from "../model/constants/DoomEngine";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -64,11 +65,27 @@ export class SubmissionService implements OnInit {
         });
     }
 
-    public async modifyEntry(entry: SubmissionModification): Promise<void> {
+    public async modifyEntry(entry: Record<string, unknown>): Promise<void> {
         const repo = this.ds.getRepository(SubmissionModel);
+        const mappedObj: SubmissionModification = {};
+        if (entry.WADName) {
+            mappedObj["wadName"] = entry.WADName as string;
+        }
+        if (entry.WAD) {
+            mappedObj["wadURL"] = entry.WAD as string;
+        }
+        if (entry.level) {
+            mappedObj["wadLevel"] = entry.level as string;
+        }
+        if (entry.engine) {
+            mappedObj["wadEngine"] = entry.engine as DOOM_ENGINE;
+        }
+        mappedObj["submitterName"] = entry.authorName as string ?? null;
+
+        const model = repo.create(mappedObj);
         await repo.update({
-            ...Object.keys(entry)
-        }, entry);
+            id: Number.parseInt(entry.id as string)
+        }, model);
     }
 
     public async getEntry(id: number): Promise<SubmissionModel | null> {

@@ -9,7 +9,6 @@ import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {MultipartFile, PlatformMulterFile, PlatformResponse, Res} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
-import {SubmissionModification} from "../../../utils/typeings";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -30,7 +29,7 @@ export class SubmissionController extends BaseRestController {
 
     @Post("/modifyEntry")
     @Returns(StatusCodes.OK, SubmissionModel)
-    public modifyEntry(@BodyParams() submission: Record<string, keyof SubmissionModification>): unknown {
+    public modifyEntry(@BodyParams() submission: any): unknown {
         return this.submissionService.modifyEntry(submission);
     }
 
@@ -40,7 +39,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async downloadWadSecure(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
         const [entry, wad] = await this.getWad(roundId, id, true);
-        res.attachment(entry.customWadFileName);
+        res.attachment(entry.customWadFileName as string);
         res.contentType("application/octet-stream");
         return wad.content;
     }
@@ -60,7 +59,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async downloadWad(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
         const [entry, wad] = await this.getWad(roundId, id);
-        res.attachment(entry.customWadFileName);
+        res.attachment(entry.customWadFileName as string);
         res.contentType("application/octet-stream");
         return wad.content;
     }

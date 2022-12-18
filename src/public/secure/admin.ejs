@@ -331,6 +331,38 @@ function mode(arr) {
             <% if(indexModel.currentActiveRound){ %>
             ((() => {
                 let step2Dt;
+
+                function getDuplicateRows() {
+                    const findDuplicates = (arr) => {
+                        let sorted_arr = arr.slice().sort();
+                        let results = [];
+                        for (let i = 0; i < sorted_arr.length - 1; i++) {
+                            if (sorted_arr[i + 1] === sorted_arr[i]) {
+                                results.push(sorted_arr[i]);
+                            }
+                        }
+                        return [...new Set(results)];
+                    };
+
+                    const tableData = step2Dt.rows().data();
+                    const idArr = [];
+                    tableData.each(value => {
+                        idArr.push(value[0]);
+                    });
+                    const dupes = findDuplicates(idArr);
+                    const dupeRows = [];
+                    step2Dt.rows().every(function () {
+                        const data = this.data();
+                        const id = data[0];
+                        const htmlRow = this.node();
+                        if (dupes.includes(id)) {
+                            dupes.splice(dupes.indexOf(id), 1);
+                            dupeRows.push(htmlRow);
+                        }
+                    });
+                    return dupeRows;
+                }
+
                 const wizard = new Enchanter('endRoundWizard', {}, {
                     onNext: () => {
                         function validate() {
@@ -339,7 +371,8 @@ function mode(arr) {
                             }
 
                             function validateStep2() {
-                                return true;
+                                const duplicateRows = getDuplicateRows();
+                                return duplicateRows.length === 0;
                             }
 
                             function validateStep3() {
@@ -363,6 +396,18 @@ function mode(arr) {
                                 if (step2Dt) {
                                     return;
                                 }
+
+                                function highlightDupes() {
+                                    step2Dt.rows().every(function () {
+                                        const htmlRow = this.node();
+                                        htmlRow.classList.remove("text-bg-danger");
+                                    });
+                                    const dupeRows = getDuplicateRows();
+                                    for (let dupeRow of dupeRows) {
+                                        dupeRow.classList.add("text-bg-danger");
+                                    }
+                                }
+
                                 step2Dt = $("#endRoundResultsTable").DataTable({
                                     dom: 'Bfrtip',
                                     stateSave: true,
@@ -370,11 +415,70 @@ function mode(arr) {
                                     fixedHeader: {
                                         header: true
                                     },
+                                    select: {
+                                        style: 'multi'
+                                    },
+                                    ordering: false,
                                     buttons: [
                                         {
                                             text: 'Generate random entry',
-                                            action: (e, dt) => {
+                                            action: async (e, dt) => {
+                                                const generateEntryEndpoint = `${baseUrl}/submissionRoundResult/generateEntries?count=1`;
+                                                site.loading(true);
+                                                let json;
+                                                let result;
+                                                try {
+                                                    result = await fetch(generateEntryEndpoint);
+                                                    json = await result.json();
+                                                } finally {
+                                                    site.loading(false);
+                                                }
 
+                                                if (result.status !== 200) {
+                                                    console.error(json);
+                                                    alert("failed to generate entry, see console for more info");
+                                                    return;
+                                                }
+                                                const entry = json[0];
+                                                dt.row.add([
+                                                    entry.id.toString(),
+                                                    entry.WADName,
+                                                    entry.level
+                                                ]).draw();
+                                                highlightDupes();
+                                            }
+                                        },
+                                        {
+                                            extend: 'selected',
+                                            text: 'Re-generate',
+                                            action: async (e, dt) => {
+                                                const selected = dt.rows({selected: true}).count();
+                                                const generateEntryEndpoint = `${baseUrl}/submissionRoundResult/generateEntries?count=${selected}`;
+                                                site.loading(true);
+                                                let json;
+                                                let result;
+                                                try {
+                                                    result = await fetch(generateEntryEndpoint);
+                                                    json = await result.json();
+                                                } finally {
+                                                    site.loading(false);
+                                                }
+                                                if (result.status !== 200) {
+                                                    console.error(json);
+                                                    alert("failed to update entry, see console for more info");
+                                                    return;
+                                                }
+                                                const selectedRows = dt.rows({selected: true});
+                                                selectedRows.every(function (rowIdx, tableLoop, rowLoop) {
+                                                    const entry = json[tableLoop];
+                                                    this.data([
+                                                        entry.id.toString(),
+                                                        entry.WADName,
+                                                        entry.level
+                                                    ]).draw();
+                                                });
+                                                selectedRows.deselect();
+                                                highlightDupes();
                                             }
                                         }
                                     ]

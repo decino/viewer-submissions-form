@@ -54,7 +54,7 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Get("/downloadWad/:roundId/:id")
-    @Returns(StatusCodes.CREATED, Buffer)
+    @Returns(StatusCodes.OK, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async downloadWad(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {

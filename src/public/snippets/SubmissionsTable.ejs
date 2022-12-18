@@ -35,7 +35,11 @@
             <td><%- chosenSubmission.id; -%></td>
         <% } %>
         <td><%- i + 1; -%></td>
-        <td title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></td>
+        <td>
+            <u>
+                <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></span>
+            </u>
+        </td>
         <td><%- chosenSubmission.wadLevel; -%></td>
 
         <% if(isAdmin){ %>

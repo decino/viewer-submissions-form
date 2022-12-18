@@ -105,6 +105,11 @@ const Site = (function () {
     };
     const loadPage = function loadPage(anon) {
         anon.call(this, Site).then(async () => {
+            function initTooltips() {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            }
+
+            initTooltips();
             isInit = true;
         });
     };

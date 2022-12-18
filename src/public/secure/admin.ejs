@@ -372,7 +372,11 @@ function mode(arr) {
 
                             function validateStep2() {
                                 const duplicateRows = getDuplicateRows();
-                                return duplicateRows.length === 0;
+                                const valid = duplicateRows.length === 0;
+                                if (!valid) {
+                                    alert("Please remove duplicate entries to proceed");
+                                }
+                                return valid;
                             }
 
                             function validateStep3() {

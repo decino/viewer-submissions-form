@@ -536,10 +536,6 @@ function mode(arr) {
                         }
                         buildNextStep();
                     },
-                    onPrevious: () => {
-                        const prevStep = wizard.previousIndex();
-                        console.log(prevStep);
-                    },
                     onFinish: async () => {
                         const chosenIds = [];
                         step2Dt.rows().every(function () {

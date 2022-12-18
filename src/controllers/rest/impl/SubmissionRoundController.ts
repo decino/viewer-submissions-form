@@ -45,15 +45,4 @@ export class SubmissionRoundController extends BaseRestController {
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
         return this.submissionRoundService.getAllSubmissionRounds(includeActive);
     }
-
-    @Post("/endCurrentRound")
-    @Returns(StatusCodes.OK, SuccessModel)
-    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public async endCurrentRound(@Res() res: PlatformResponse): Promise<unknown> {
-        const ended = await this.submissionRoundService.endActiveSubmissionRound();
-        if (ended) {
-            return super.doSuccess(res, "The active submission round has been ended.");
-        }
-        throw new BadRequest("There are no active submission rounds to end.");
-    }
 }

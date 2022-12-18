@@ -52,7 +52,6 @@ function mode(arr) {
                                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pauseRoundModal">Pause round</button>
                                 <% } %>
                                 <button type="button" class="btn btn-outline-success" id="endRoundButton" data-bs-toggle="modal" data-bs-target="#endRoundModal">End round</button>
-                                <button type="button" class="btn btn-outline-danger" id="deleteRoundButton">Delete round</button>
                             </div>
                         </div>
                     </div>
@@ -73,7 +72,15 @@ function mode(arr) {
                 </div>
             </div>
         <% }else { %>
-            make a new one i guess
+            <div class="card text-center">
+                <div class="card-header">
+                    Create a new submission round
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Clicking this button will create a new submission round and enable people to submit entries</p>
+                    <button class="btn btn-primary" id="makeNewRoundButton">make new round</button>
+                </div>
+            </div>
         <% } %>
         <% if(indexModel.previousRounds.length > 0){ %>
             <div class="row mt-5">
@@ -175,18 +182,20 @@ function mode(arr) {
                                 </table>
                             </div>
                             <div class="tab-pane fade" id="step3">
-                                <div class="mb-3">
-                                    <label for="first_name">Required field 1</label>
-                                    <input type="text" class="form-control-plaintext" value="Lorem ipsum dolor sit amet" id="first_name">
+                                <div class="alert alert-primary" role="alert">
+                                    Review the selected entries here, once you finish, this will end the current round and confirm the entries.
                                 </div>
-                                <div class="mb-3">
-                                    <label for="first_name">Optional field</label>
-                                    <input type="text" class="form-control-plaintext" value="Lorem ipsum dolor sit amet" id="first_name">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="first_name">Required field 2</label>
-                                    <input type="text" class="form-control-plaintext" value="Lorem ipsum dolor sit amet" id="first_name">
-                                </div>
+                                <table class="table" id="endRoundReviewTable">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">No.</th>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">WAD</th>
+                                        <th scope="col">Level</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="endRoundReviewTableBody"></tbody>
+                                </table>
                             </div>
                         </div>
                         <div class="row justify-content-between">
@@ -199,6 +208,43 @@ function mode(arr) {
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modifySubmissionModalLabel">Modify submission</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <%- include('../snippets/submitForm.ejs', {
+                    model: indexModel,
+                    isAdmin: true
+                    }); %>
+                </div>
+                <div class="mt-3">
+                    <div class="hidden" id="error">
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
+                            <div id="errorContent"></div>
+                        </div>
+                    </div>
+                    <div class="hidden" id="success">
+                        <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
+                            <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
+                            <div id="successContent">
+                                Entry modified successfully
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submissionModifySaveButton">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -223,43 +269,6 @@ function mode(arr) {
 </div>
 
 
-<div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="modifySubmissionModalLabel">Modify submission</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <%- include('../snippets/submitForm.ejs', {
-                model: indexModel,
-                isAdmin: true
-                }); %>
-            </div>
-            <div class="mt-3">
-                <div class="hidden" id="error">
-                    <div class="alert alert-danger d-flex align-items-center" role="alert">
-                        <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
-                        <div id="errorContent"></div>
-                    </div>
-                </div>
-                <div class="hidden" id="success">
-                    <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
-                        <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
-                        <div id="successContent">
-                            Entry modified successfully
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="submissionModifySaveButton">Save changes</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
@@ -268,14 +277,16 @@ function mode(arr) {
 
 <script>
     Site.loadPage(async site => {
+        <% if(indexModel.currentActiveRound){ %>
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
-
+        <% } %>
         loadEventListeners();
         initDt();
 
 
         function showSubmissionInfoModel(no, id, wadName, wadLevel, wadEngine, gzDoomAction, submitterName, author, distributable, info, email, downloadUrl) {
+
             const modalContentWrapper = document.getElementById("submissionInfoContent");
             const modalTitle = document.getElementById("submissionInfoModalLabel");
 
@@ -356,7 +367,6 @@ function mode(arr) {
                         const id = data[0];
                         const htmlRow = this.node();
                         if (dupes.includes(id)) {
-                            dupes.splice(dupes.indexOf(id), 1);
                             dupeRows.push(htmlRow);
                         }
                     });
@@ -474,7 +484,7 @@ function mode(arr) {
                                                 }
                                                 const selectedRows = dt.rows({selected: true});
                                                 selectedRows.every(function (rowIdx, tableLoop, rowLoop) {
-                                                    const entry = json[tableLoop];
+                                                    const entry = json[rowLoop];
                                                     this.data([
                                                         entry.id.toString(),
                                                         entry.WADName,
@@ -484,12 +494,31 @@ function mode(arr) {
                                                 selectedRows.deselect();
                                                 highlightDupes();
                                             }
+                                        },
+                                        {
+                                            extend: 'selected',
+                                            text: 'Delete',
+                                            action: async (e, dt) => {
+                                                dt.rows({selected: true}).remove().draw(false);
+                                                highlightDupes();
+                                            }
                                         }
                                     ]
                                 });
                             }
 
                             function buildStep3() {
+                                const step2Data = step2Dt.rows().data();
+                                let tableHtml = "";
+                                step2Data.each((rows, index) => {
+                                    tableHtml += "<tr>";
+                                    tableHtml += `<td>${index + 1}</td>`;
+                                    for (const row of rows) {
+                                        tableHtml += `<td>${row}</td>`;
+                                    }
+                                    tableHtml += "</tr>";
+                                });
+                                document.getElementById("endRoundReviewTableBody").innerHTML = tableHtml;
                             }
 
                             const nextStep = wizard.nextIndex();
@@ -511,14 +540,41 @@ function mode(arr) {
                         const prevStep = wizard.previousIndex();
                         console.log(prevStep);
                     },
-                    onFinish: () => {
-                        console.log("finish");
+                    onFinish: async () => {
+                        const chosenIds = [];
+                        step2Dt.rows().every(function () {
+                            const data = this.data();
+                            const id = data[0];
+                            chosenIds.push(Number.parseInt(id));
+                        });
+                        site.loading(true);
+                        let resp;
+                        try {
+                            resp = await fetch(`${baseUrl}/submissionRoundResult/submitEntries`, {
+                                method: "POST",
+                                body: JSON.stringify(chosenIds),
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                        } catch (e) {
+                            alert(e);
+                            return;
+                        } finally {
+                            site.loading(false);
+                        }
+                        if (resp.status !== 200) {
+                            alert("unable to submit entries");
+                            return;
+                        }
+                        window.location.reload();
                     },
                 });
             })());
             <% } %>
 
-            document.getElementById("submissionModifySaveButton").addEventListener("click", async ev => {
+            document.getElementById("submissionModifySaveButton")?.addEventListener("click", async ev => {
                 try {
                     const result = await site.submitEntryForm(ev, "modifyEntry", true);
                     if (result) {
@@ -527,6 +583,23 @@ function mode(arr) {
                 } catch {
 
                 }
+            });
+
+            document.getElementById("makeNewRoundButton")?.addEventListener("click", async ev => {
+                site.loading(true);
+                let newRound;
+                try {
+                    newRound = await fetch(`${baseUrl}/submissionRound/newRound`, {
+                        method: "POST"
+                    });
+                } finally {
+                    site.loading(false);
+                }
+                if (newRound.status !== 201) {
+                    alert("unable to create a new submission round, see server logs for info");
+                    return;
+                }
+                window.location.reload();
             });
         }
 
@@ -546,7 +619,7 @@ function mode(arr) {
                     },
                     select: {
                         style: isPreviousRoundCard ? 'single' : 'multi'
-                    },
+                    }
                 };
 
 
@@ -559,80 +632,87 @@ function mode(arr) {
                             const selectedRow = dt.row({selected: true}).data();
                             showSubmissionInfoModel.apply(undefined, selectedRow);
                         }
-                    },
-                    {
-                        extend: 'selectedSingle',
-                        text: 'Modify',
-                        action: async (e, dt) => {
-                            const selectedRow = dt.row({selected: true}).data();
-                            const id = selectedRow[0];
-                            site.loading(true);
-                            let submission;
-                            try {
-                                submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
-                            } finally {
-                                site.loading(false);
-                            }
-                            const submissionObj = await submission.json();
-                            const wadName = submissionObj.WADName;
-                            const wadURL = submissionObj.WAD ?? null;
-                            const wadUrlInput = document.getElementById("wadDownloadUrlSection");
-                            wadURL ? wadUrlInput.classList.remove("hidden") : wadUrlInput.classList.add("hidden");
-                            const level = submissionObj.level;
-                            const engine = submissionObj.engine;
-                            const submitterName = submissionObj.authorName;
-                            document.getElementById("wadName").value = wadName;
-                            if (wadURL) {
-                                document.getElementById("wadUrl").value = wadURL;
-                            }
-                            document.getElementById("levelToPlay").value = level;
-                            document.getElementById("gameEngine").value = engine;
-                            document.getElementById("authorName").value = submitterName;
-                            document.getElementById("submissionId").value = id;
-                            submissionModificationModal.show();
-                        }
                     }
                 ];
-
+                if (isPreviousRoundCard && <%- !(!!indexModel.currentActiveRound); -%>) {
+                    dtOpts.stateSave = false;
+                }
+                if (isPreviousRoundCard) {
+                    dtOpts["columnDefs"] = [
+                        {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10, 11]}
+                    ];
+                }
                 if (!isPreviousRoundCard) {
                     buttons.push({
-                        extend: 'selected',
-                        text: 'Delete',
-                        action: async (e, dt) => {
-                            const confirm = window.confirm("Are you sure you wish to delete these entries?");
-                            if (!confirm) {
-                                return;
-                            }
-                            const idArr = [];
-                            dt.rows({selected: true}).every(function () {
-                                const data = this.data();
-                                idArr.push(data[0]);
-                            });
-                            site.loading(true);
-                            let response;
-                            try {
-                                response = await fetch(`${baseUrl}/submission/deleteEntries`, {
-                                    method: "DELETE",
-                                    headers: {
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify(idArr)
+                            extend: 'selected',
+                            text: 'Delete',
+                            action: async (e, dt) => {
+                                const confirm = window.confirm("Are you sure you wish to delete these entries?");
+                                if (!confirm) {
+                                    return;
+                                }
+                                const idArr = [];
+                                dt.rows({selected: true}).every(function () {
+                                    const data = this.data();
+                                    idArr.push(data[0]);
                                 });
-                            } catch (e) {
-                                alert(e.message);
-                                return;
-                            } finally {
-                                site.loading(false);
+                                site.loading(true);
+                                let response;
+                                try {
+                                    response = await fetch(`${baseUrl}/submission/deleteEntries`, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(idArr)
+                                    });
+                                } catch (e) {
+                                    alert(e.message);
+                                    return;
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const responseStatus = response.status;
+                                const responseJson = await response.json();
+                                if (responseStatus !== 200) {
+                                    return alert(responseJson.message);
+                                }
+                                dt.rows({selected: true}).remove().draw(false);
                             }
-                            const responseStatus = response.status;
-                            const responseJson = await response.json();
-                            if (responseStatus !== 200) {
-                                return alert(responseJson.message);
+                        },
+                        {
+                            extend: 'selectedSingle',
+                            text: 'Modify',
+                            action: async (e, dt) => {
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                site.loading(true);
+                                let submission;
+                                try {
+                                    submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const submissionObj = await submission.json();
+                                const wadName = submissionObj.WADName;
+                                const wadURL = submissionObj.WAD ?? null;
+                                const wadUrlInput = document.getElementById("wadDownloadUrlSection");
+                                wadURL ? wadUrlInput.classList.remove("hidden") : wadUrlInput.classList.add("hidden");
+                                const level = submissionObj.level;
+                                const engine = submissionObj.engine;
+                                const submitterName = submissionObj.authorName;
+                                document.getElementById("wadName").value = wadName;
+                                if (wadURL) {
+                                    document.getElementById("wadUrl").value = wadURL;
+                                }
+                                document.getElementById("levelToPlay").value = level;
+                                document.getElementById("gameEngine").value = engine;
+                                document.getElementById("authorName").value = submitterName;
+                                document.getElementById("submissionId").value = id;
+                                submissionModificationModal.show();
                             }
-                            dt.rows({selected: true}).remove().draw(false);
-                        }
-                    });
+                        });
                 }
                 dtOpts["buttons"] = buttons;
                 el.DataTable(dtOpts);

@@ -1,6 +1,6 @@
 import {Controller, Inject} from "@tsed/di";
 import {BaseRestController} from "../BaseRestController";
-import {Get, Post, Returns} from "@tsed/schema";
+import {Get, Integer, Post, Returns} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {SubmissionModel} from "../../../model/db/Submission.model";
@@ -22,7 +22,7 @@ export class SubmissionRoundResultController extends BaseRestController {
 
     @Post("/submitEntries")
     @Returns(StatusCodes.OK, SuccessModel)
-    public async submitEntries(@Res() res: PlatformResponse, @BodyParams() entries: SubmissionModel[]): Promise<unknown> {
+    public async submitEntries(@Res() res: PlatformResponse, @BodyParams() @Integer() entries: number[]): Promise<unknown> {
         await this.submissionRoundResultService.submitEntries(entries);
         return super.doSuccess(res, "Entries have been saved");
     }

@@ -5,6 +5,7 @@ import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
+import {InternalServerError} from "@tsed/exceptions";
 
 @Service()
 export class SubmissionRoundResultService {
@@ -38,16 +39,23 @@ export class SubmissionRoundResultService {
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    public async submitEntries(entries: SubmissionModel[]): Promise<void> {
+    public async submitEntries(enryIds: number[]): Promise<void> {
         const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         if (!activeRound) {
             return;
         }
-        for (const entry of entries) {
+        const entries: SubmissionModel[] = [];
+        for (const entryId of enryIds) {
+            const entry = activeRound.submissions.find(submission => submission.id === entryId);
+            if (!entry) {
+                throw new InternalServerError(`Entry if id ${entryId} not found in current active round`);
+            }
             entry.chosenRoundId = activeRound.id;
+            entries.push(entry);
         }
         const repo = this.ds.getRepository(SubmissionModel);
         await repo.save(entries);
+        await this.submissionRoundService.endActiveSubmissionRound();
     }
 
     public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {

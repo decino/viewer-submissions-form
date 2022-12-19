@@ -24,6 +24,6 @@ export class SubmissionRoundResultController extends BaseRestController {
     @Returns(StatusCodes.OK, SuccessModel)
     public async submitEntries(@Res() res: PlatformResponse, @BodyParams() @Integer() entries: number[]): Promise<unknown> {
         await this.submissionRoundResultService.submitEntries(entries);
-        return super.doSuccess(res, "Entries have been saved");
+        return super.doSuccess(res, "Entries have been saved.");
     }
 }

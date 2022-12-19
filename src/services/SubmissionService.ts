@@ -39,7 +39,7 @@ export class SubmissionService implements OnInit {
                 throw new NotFound("Cannot add a submission when there are no currently active rounds.");
             }
             if (currentActiveRound.paused) {
-                throw new BadRequest("Unable to add entry as the current round is paused");
+                throw new BadRequest("Unable to add entry as the current round is paused.");
             }
             try {
                 this.validateSubmission(entry, currentActiveRound);
@@ -50,7 +50,7 @@ export class SubmissionService implements OnInit {
                 const allowed = await this.customWadEngine.validateFile(customWad);
                 if (!allowed) {
                     await this.customWadEngine.deleteCustomWad(customWad);
-                    throw new BadRequest("Invalid file, header mismatch");
+                    throw new BadRequest("Invalid file: header mismatch.");
                 }
                 entry.customWadFileName = customWad.originalname;
             }
@@ -105,7 +105,7 @@ export class SubmissionService implements OnInit {
         if (roundId === -1) {
             const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
             if (!currentActiveRound) {
-                throw new Error("No round exists");
+                throw new Error("No round exists.");
             }
             roundId = currentActiveRound?.id;
         }
@@ -156,7 +156,7 @@ export class SubmissionService implements OnInit {
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${process.env.HELP_EMAIL ?? "decino"} to change your submission.`);
             }
             if ((submission.wadURL === wadUrl || submission.wadName === wadName) && entry.wadLevel === level) {
-                throw new Error("This level for this wad has already been submitted. Please submit a different map.");
+                throw new Error("This level for this WAD has already been submitted. Please submit a different map.");
             }
         }
     }
@@ -187,7 +187,7 @@ export class SubmissionService implements OnInit {
             if (entriesToDelete.length === 0) {
                 return;
             }
-            this.logger.info(`found ${entriesToDelete.length} pending submission that has expired, deleting...`);
+            this.logger.info(`Found ${entriesToDelete.length} pending submissions that have expired. Deleting...`);
             const entryIds = entriesToDelete.map(entry => entry.id);
             return this.deleteEntries(entryIds);
         });

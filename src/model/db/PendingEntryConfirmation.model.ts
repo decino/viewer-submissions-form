@@ -10,8 +10,8 @@ import {Description, Example, Format, Name, Required} from "@tsed/schema";
 })
 export class PendingEntryConfirmationModel extends AbstractModel {
 
-    @Name("confirmationUid")
-    @Description("Uid of the confirmation")
+    @Name("confirmationUID")
+    @Description("UID of the confirmation")
     @Column({
         nullable: false
     })
@@ -27,7 +27,7 @@ export class PendingEntryConfirmationModel extends AbstractModel {
     @Format("email")
     public submitterEmail: string;
 
-    @Name("submissionRoundId")
+    @Name("submissionRoundID")
     @Description("The submission round this entry belongs to")
     @Example("1")
     @Example("2")

@@ -10,8 +10,8 @@ export abstract class AbstractModel {
     };
 
     @PrimaryGeneratedColumn("increment")
-    @Name("id")
-    @Description("The id of this entry")
+    @Name("ID")
+    @Description("The ID of this entry")
     public id: number;
 
     @CreateDateColumn()

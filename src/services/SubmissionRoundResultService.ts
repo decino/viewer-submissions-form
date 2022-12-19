@@ -48,7 +48,7 @@ export class SubmissionRoundResultService {
         for (const entryId of enryIds) {
             const entry = activeRound.submissions.find(submission => submission.id === entryId);
             if (!entry) {
-                throw new InternalServerError(`Entry if id ${entryId} not found in current active round`);
+                throw new InternalServerError(`Entry if ID ${entryId} is not found in current active round.`);
             }
             entry.chosenRoundId = activeRound.id;
             entries.push(entry);

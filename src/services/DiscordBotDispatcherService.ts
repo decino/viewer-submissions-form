@@ -31,7 +31,7 @@ export class DiscordBotDispatcherService {
             },
             body: JSON.stringify(payload)
         }).catch(e => {
-            this.logger.warn(`Unable to send entry to bot`, e);
+            this.logger.warn(`Unable to send entry to bot.`, e);
         }) as Promise<void>;
     }
 }

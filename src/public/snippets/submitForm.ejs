@@ -5,7 +5,7 @@
     <% } %>
     <div class="mb-3">
         <% if(!isAdmin){ %>
-            <label class="d-block mb-2">Post a link to the WAD below. Or you can upload it</label>
+            <label class="d-block mb-2">Post a link to the WAD below, or you can upload it.</label>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="uploadOrUrl" id="link" value="url" checked>
                 <label class="form-check-label" for="link">Link</label>
@@ -16,7 +16,7 @@
             </div>
         <% } %>
         <div id="wadDownloadUrlSection">
-            <label for="wadUrl" class="form-label">Wad download URL
+            <label for="wadUrl" class="form-label">Wad Download URL
                 <span title="required" class="text-danger">*</span></label>
             <input required type="url" class="form-control" id="wadUrl" name="WAD">
         </div>
@@ -29,7 +29,7 @@
         <% } %>
     </div>
     <div class="mb-3">
-        <label for="wadName" class="form-label">Name of the wad
+        <label for="wadName" class="form-label">Name of the WAD
             <span title="required" class="text-danger">*</span></label>
         <input name="WADName" type="text" class="form-control" id="wadName" required>
     </div>
@@ -63,7 +63,7 @@
         </div>
     <% } %>
     <div class="mb-3">
-        <label for="authorName" class="form-label">Under what name would you like to submit? Leave empty to remain anonymous.</label>
+        <label for="authorName" class="form-label">Under what name would you like to submit? Leave the field empty to remain anonymous.</label>
         <input name="authorName" type="text" class="form-control" id="authorName" placeholder="anonymous">
     </div>
     <% if(!isAdmin){ %>
@@ -81,7 +81,7 @@
         </div>
     <% } %>
     <div class="mb-3 hidden" id="distributableSection">
-        <label class="d-block mb-2">If you've made the WAD, and it's not hosted or available anywhere, am I allowed to provide it to the viewers?</label>
+        <label class="d-block mb-2">If you've made the WAD and it's not hosted or available publicly, am I allowed to provide it to the viewers?</label>
         <div class="form-check form-check-inline">
             <input name="distributable" class="form-check-input" type="radio" id="distributableYes" value="true">
             <label class="form-check-label" for="distributableYes">Yes</label>
@@ -93,13 +93,13 @@
     </div>
     <% if(!isAdmin){ %>
         <div class="mb-3">
-            <label for="extraInfo" class="form-label">Tell me something about the level, its backstory, inspiration, yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
+            <label for="extraInfo" class="form-label">Tell me something about the level: its backstory, inspiration, yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
             <textarea name="info" class="form-control" id="extraInfo" rows="3"></textarea>
         </div>
     <% } %>
     <% if(!isAdmin){ %>
         <div class="mb-3">
-            <label for="email" class="form-label">Your Email address
+            <label for="email" class="form-label">Your email address
                 <span title="required" class="text-danger">*</span></label>
             <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" required>
         </div>

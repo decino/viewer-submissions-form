@@ -15,7 +15,7 @@
         <% if (model.currentActiveRound === null && model.previousRounds.length === 0){ %>
             <div class="card border-primary">
                 <div class="card-body">
-                    <h5 class="card-title">No Submission Rounds have taken place</h5>
+                    <h5 class="card-title">No submission rounds have taken place.</h5>
                     <p class="card-text">Please come back when an announcement has been made!</p>
                 </div>
             </div>
@@ -29,7 +29,7 @@
                             <div class="card-body">
                                 <% if(isPaused){ %>
                                     <div id="overlay">
-                                        <h2 class="text-white">Submissions are paused</h2>
+                                        <h2 class="text-white">Submissions are paused.</h2>
                                     </div>
                                 <% } %>
                                 <%- include('snippets/submitForm.ejs', {
@@ -47,8 +47,8 @@
                                         <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
                                             <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
                                             <div id="successContent">
-                                                An Email has been sent to your address provided, please click the link in the email to confirm your entry.
-                                                <strong>NOTE:</strong> this link will expire in 20 minutes
+                                                An email has been sent to the address provided. Please click the link in your email to confirm your entry.
+                                                <strong>NOTE:</strong> this link will expire in 20 minutes.
                                             </div>
                                         </div>
                                     </div>

@@ -77,8 +77,8 @@ function mode(arr) {
                     Create a new submission round
                 </div>
                 <div class="card-body">
-                    <p class="card-text">Clicking this button will create a new submission round and enable people to submit entries</p>
-                    <button class="btn btn-primary" id="makeNewRoundButton">make new round</button>
+                    <p class="card-text">Clicking this button will create a new submission round and enable people to submit entries.</p>
+                    <button class="btn btn-primary" id="makeNewRoundButton">Make new round</button>
                 </div>
             </div>
         <% } %>
@@ -123,7 +123,7 @@ function mode(arr) {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Are you sure you wish to pause this round? this will lock the round and prevent anyone from submitting any more entries</p>
+                        <p>Are you sure you wish to pause this round? This will lock the round and prevent anyone from submitting any more entries.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" id="pauseRoundButton">Pause</button>
@@ -155,7 +155,7 @@ function mode(arr) {
                             <div class="tab-pane fade show active" id="step1">
                                 <div class="alert alert-primary" role="alert">
                                     <i class="bi bi-exclamation-triangle"></i>
-                                    In order to finish this round and pick winners, you must first pause the current active round
+                                    In order to finish this round and pick winners, you must first pause the current active round.
                                 </div>
                                 <% if(indexModel.currentActiveRound.paused){ %>
                                     <div class="alert alert-success" role="alert">
@@ -164,7 +164,7 @@ function mode(arr) {
                                 <% } else { %>
                                     <div class="alert alert-warning" role="alert">
                                         <i class="bi bi-exclamation-triangle"></i>
-                                        Please pause the round to continue
+                                        Please pause the round to continue.
                                         <button type="button" class="btn btn-outline-success" id="endRoundPauseRoundButton">Pause round</button>
                                     </div>
                                 <% } %>
@@ -183,7 +183,7 @@ function mode(arr) {
                             </div>
                             <div class="tab-pane fade" id="step3">
                                 <div class="alert alert-primary" role="alert">
-                                    Review the selected entries here, once you finish, this will end the current round and confirm the entries.
+                                    Review the selected entries here. Once you finish, this will end the current round and confirm the entries.
                                 </div>
                                 <table class="table" id="endRoundReviewTable">
                                     <thead>
@@ -237,7 +237,7 @@ function mode(arr) {
                         <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
                             <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
                             <div id="successContent">
-                                Entry modified successfully
+                                Entry modified successfully.
                             </div>
                         </div>
                     </div>
@@ -450,7 +450,7 @@ function mode(arr) {
 
                                                 if (result.status !== 200) {
                                                     console.error(json);
-                                                    alert("failed to generate entry, see console for more info");
+                                                    alert("Failed to generate entry. See console for more info.");
                                                     return;
                                                 }
                                                 const entry = json[0];
@@ -479,7 +479,7 @@ function mode(arr) {
                                                 }
                                                 if (result.status !== 200) {
                                                     console.error(json);
-                                                    alert("failed to update entry, see console for more info");
+                                                    alert("Failed to generate entry. See console for more info.");
                                                     return;
                                                 }
                                                 const selectedRows = dt.rows({selected: true});
@@ -561,7 +561,7 @@ function mode(arr) {
                             site.loading(false);
                         }
                         if (resp.status !== 200) {
-                            alert("unable to submit entries");
+                            alert("Unable to submit entries.");
                             return;
                         }
                         window.location.reload();
@@ -592,7 +592,7 @@ function mode(arr) {
                     site.loading(false);
                 }
                 if (newRound.status !== 201) {
-                    alert("unable to create a new submission round, see server logs for info");
+                    alert("Unable to create a new submission round. See server logs for info.");
                     return;
                 }
                 window.location.reload();

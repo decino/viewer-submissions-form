@@ -50,7 +50,7 @@ Site.loadPage(async function (site) {
                 }
             });
         }
-        document.getElementById("wadUrl").addEventListener("change", async ev => {
+        document.getElementById("wadUrl")?.addEventListener("change", async ev => {
             const value = ev.target.value;
             const wadNameInput = document.getElementById("wadName");
             if (!value) {

@@ -90,7 +90,7 @@ Site.loadPage(async function (site) {
             wadNameInput.value = wadName;
             site.loading(false);
         });
-        document.getElementById("gameEngine").addEventListener("change", evt => {
+        document.getElementById("gameEngine")?.addEventListener("change", evt => {
             const selectedOption = evt.target.options[evt.target.selectedIndex];
             const selectedValue = selectedOption.dataset.value;
             const gzActionsContainer = document.getElementById("gzActionsContainer");
@@ -102,16 +102,18 @@ Site.loadPage(async function (site) {
         });
 
         const distributableRadios = document.querySelectorAll("#authorYes,#authorNo");
-        for (const distributableRadio of distributableRadios) {
-            distributableRadio.addEventListener("change", evt => {
-                const value = evt.target.value;
-                const distributableSection = document.getElementById("distributableSection");
-                if (value === "true") {
-                    site.display(false, distributableSection);
-                } else {
-                    site.display(true, distributableSection);
-                }
-            });
+        if (distributableRadios) {
+            for (const distributableRadio of distributableRadios) {
+                distributableRadio.addEventListener("change", evt => {
+                    const value = evt.target.value;
+                    const distributableSection = document.getElementById("distributableSection");
+                    if (value === "true") {
+                        site.display(false, distributableSection);
+                    } else {
+                        site.display(true, distributableSection);
+                    }
+                });
+            }
         }
 
         document.getElementById("submit")?.addEventListener("click", async ev => {

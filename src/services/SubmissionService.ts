@@ -49,7 +49,7 @@ export class SubmissionService implements OnInit {
             if (customWad) {
                 const allowed = await this.customWadEngine.validateFile(customWad);
                 if (!allowed) {
-                    await this.customWadEngine.deleteCustomWad(customWad);
+                    await this.customWadEngine.deleteCustomWad(customWad, currentActiveRound.id);
                     throw new BadRequest("Invalid file: header mismatch.");
                 }
                 entry.customWadFileName = customWad.originalname;

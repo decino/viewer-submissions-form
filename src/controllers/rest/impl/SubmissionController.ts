@@ -70,9 +70,9 @@ export class SubmissionController extends BaseRestController {
     public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
         const result = await this.submissionService.deleteEntries(ids);
         if (!result) {
-            throw new NotFound(`No Entry with ids ${ids.join(", ")} found.`);
+            throw new NotFound(`No entry with IDs ${ids.join(", ")} found.`);
         }
-        return super.doSuccess(res, `Entries has been deleted.`);
+        return super.doSuccess(res, `Entries have been deleted.`);
     }
 
     private async getWad(roundId: number, entryId: number, secure = false): Promise<[SubmissionModel, CustomWadEntry]> {
@@ -80,17 +80,17 @@ export class SubmissionController extends BaseRestController {
         try {
             wad = await this.customWadEngine.getWad(roundId, entryId);
         } catch (e) {
-            throw new NotFound(`Unable to find wad with id: ${entryId} from round ${roundId}`);
+            throw new NotFound(`Unable to find WAD with ID: ${entryId} from round ${roundId}.`);
         }
         if (!wad) {
-            throw new NotFound(`Unable to find wad with id: ${entryId} from round ${roundId}`);
+            throw new NotFound(`Unable to find WAD with ID: ${entryId} from round ${roundId}.`);
         }
         const entry = await this.submissionService.getEntry(entryId);
         if (!entry) {
-            throw new InternalServerError("An error has occurred when trying to find this wad's associated entry.");
+            throw new InternalServerError("An error has occurred when trying to find this WAD's associated entry.");
         }
         if (!entry.downloadable(secure)) {
-            throw new BadRequest("This wad is not shareable by author's request.");
+            throw new BadRequest("This WAD is not shareable by author's request.");
         }
         return [entry, wad];
     }

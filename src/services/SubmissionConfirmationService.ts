@@ -35,7 +35,7 @@ export class SubmissionConfirmationService implements OnInit {
                 relations: ["submission"]
             });
             if (!confirmationEntry) {
-                throw new NotFound(`Unable to find submission with id: ${confirmationUid}, maybe it has expired.`);
+                throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
             }
             const submission = confirmationEntry.submission;
             submission.submissionValid = true;
@@ -67,7 +67,7 @@ export class SubmissionConfirmationService implements OnInit {
     private sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<string> {
         const baseUrl = process.env.BASE_URL;
         const confirmationUrl = `${baseUrl}/processSubmission?uid=${pendingEntry.confirmationUid}`;
-        const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes\n${confirmationUrl}`;
+        const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;
         return this.emailService.sendMail(body, pendingEntry.submitterEmail);
     }
 

@@ -26,7 +26,7 @@ export class LoginLocalProtocol implements OnVerify {
         const {email, password} = credentials;
         const user = await this.usersService.getUser(email, password);
         if (!user) {
-            throw new NotAuthorized("Wrong credentials", StatusCodes.UNAUTHORIZED);
+            throw new NotAuthorized("Wrong credentials.", StatusCodes.UNAUTHORIZED);
         }
         return user;
     }

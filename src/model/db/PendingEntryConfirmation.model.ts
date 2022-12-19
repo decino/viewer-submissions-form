@@ -11,7 +11,7 @@ import {Description, Example, Format, Name, Required} from "@tsed/schema";
 export class PendingEntryConfirmationModel extends AbstractModel {
 
     @Name("confirmationUid")
-    @Description("Uid of the confirmation")
+    @Description("UID of the confirmation")
     @Column({
         nullable: false
     })

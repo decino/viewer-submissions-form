@@ -98,7 +98,7 @@ export class SubmissionModel extends AbstractModel {
         default: false
     })
     @Name("distributable")
-    @Description("If you made this, am i allowed to distribute it to the public?")
+    @Description("If you made this, am I allowed to distribute it to the public?")
     @Example("yes")
     @Example("no")
     public distributable: boolean;
@@ -170,7 +170,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true
     })
     @Name("chosenRound")
-    @Description("the round id that this entry was chosen for")
+    @Description("The round ID that this entry was chosen for")
     public chosenRoundId: number;
 
     public downloadable(force = false): boolean {
@@ -189,7 +189,7 @@ export class SubmissionModel extends AbstractModel {
 
     public validate(): void {
         if (!this.wadURL && !this.customWadFileName) {
-            throw new Error("Either WAD URL or a file must be uploaded");
+            throw new Error("Either WAD URL or a file must be uploaded.");
         }
     }
 

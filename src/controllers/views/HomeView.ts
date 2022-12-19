@@ -40,7 +40,7 @@ export class HomeView {
         };
         try {
             if (!uid) {
-                throw new NotFound("No UID supplied");
+                throw new NotFound("No UID supplied.");
             }
             await this.submissionConfirmationService.processConfirmation(uid);
         } catch (e) {

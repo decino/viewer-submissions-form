@@ -81,7 +81,7 @@ export class SubmissionRoundService {
     public async pauseRound(pause: boolean): Promise<void> {
         const currentActiveRound = await this.getCurrentActiveSubmissionRound();
         if (!currentActiveRound) {
-            throw new BadRequest("No active round to pause");
+            throw new BadRequest("No active round to pause.");
         }
         const repo = this.ds.getRepository(SubmissionRoundModel);
         currentActiveRound.paused = pause;

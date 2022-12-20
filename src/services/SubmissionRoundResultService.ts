@@ -27,7 +27,7 @@ export class SubmissionRoundResultService {
             if (!entry.submissionValid) {
                 continue;
             }
-            const wadIdentifier = entry.wadURL ? entry.wadURL : entry.wadName;
+            const wadIdentifier = entry.wadName;
             if (mergedEntries.has(wadIdentifier)) {
                 mergedEntries.get(wadIdentifier)?.push(entry);
             } else {

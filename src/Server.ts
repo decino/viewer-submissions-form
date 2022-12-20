@@ -139,7 +139,7 @@ export class Server implements BeforeRoutesInit {
             store: new TypeormStore({
                 cleanupLimit: 2,
             }).connect(this.ds.getRepository(SessionModel)),
-            saveUninitialized: true,
+            saveUninitialized: false,
             cookie: {
                 path: "/",
                 httpOnly: process.env.HTTPS === "false",

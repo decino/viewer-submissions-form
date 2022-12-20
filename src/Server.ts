@@ -20,6 +20,10 @@ import {isProduction} from "./config/envs";
 import helmet from "helmet";
 import process from "process";
 import cors from "cors";
+import {TypeormStore} from "connect-typeorm";
+import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
+import {DataSource} from "typeorm";
+import {SessionModel} from "./model/db/Session.model";
 
 const opts: Partial<TsED.Configuration> = {
     ...config,
@@ -90,17 +94,6 @@ const opts: Partial<TsED.Configuration> = {
         bodyParser.urlencoded({
             extended: true
         }),
-        session({
-            secret: process.env.SESSION_KEY as string,
-            resave: true,
-            saveUninitialized: true,
-            cookie: {
-                path: "/",
-                httpOnly: process.env.HTTPS === "false",
-                maxAge: 36000,
-                secure: process.env.HTTPS === "true"
-            }
-        })
     ],
     views: {
         root: `${__dirname}/public`,
@@ -131,13 +124,29 @@ if (!isProduction) {
 export class Server implements BeforeRoutesInit {
     @Inject()
     protected app: PlatformApplication;
-
     @Configuration()
     protected settings: Configuration;
+    @Inject(SQLITE_DATA_SOURCE)
+    private ds: DataSource;
 
     public $beforeRoutesInit(): void | Promise<any> {
         if (isProduction) {
             this.app.getApp().set("trust proxy", 1);
         }
+        this.app.use(session({
+            secret: process.env.SESSION_KEY as string,
+            resave: true,
+            store: new TypeormStore({
+                cleanupLimit: 2,
+                ttl: 86400
+            }).connect(this.ds.getRepository(SessionModel)),
+            saveUninitialized: true,
+            cookie: {
+                path: "/",
+                httpOnly: process.env.HTTPS === "false",
+                maxAge: 36000,
+                secure: process.env.HTTPS === "true"
+            }
+        }));
     }
 }

@@ -6,6 +6,7 @@ import {IStrategyOptions, Strategy} from "passport-local";
 import {UserModel} from "../model/db/User.model";
 import {UsersService} from "../services/UserService";
 import {StatusCodes} from "http-status-codes";
+import {NotAuthorized} from "../exceptions/NotAuthorized";
 
 @Protocol<IStrategyOptions>({
     name: "login",
@@ -25,7 +26,7 @@ export class LoginLocalProtocol implements OnVerify {
         const {email, password} = credentials;
         const user = await this.usersService.getUser(email, password);
         if (!user) {
-            return null;
+            throw new NotAuthorized("Wrong credentials.", StatusCodes.UNAUTHORIZED);
         }
         return user;
     }
@@ -33,8 +34,8 @@ export class LoginLocalProtocol implements OnVerify {
 
 @Catch(PassportException)
 export class PassportExceptionFilter implements ExceptionFilterMethods {
-    public catch(exception: PassportException, ctx: PlatformContext): void {
+    public catch(exception: PassportException, ctx: PlatformContext): unknown {
         const {response} = ctx;
-        response.redirect(StatusCodes.NOT_MODIFIED, "/login?fail=true");
+        return response.status(StatusCodes.UNAUTHORIZED).body("Unauthorised");
     }
 }

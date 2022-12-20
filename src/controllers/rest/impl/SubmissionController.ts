@@ -9,6 +9,7 @@ import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {MultipartFile, PlatformMulterFile, PlatformResponse, Res} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
+import {Authorize} from "@tsed/passport";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -28,12 +29,14 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Post("/modifyEntry")
+    @Authorize("login")
     @Returns(StatusCodes.OK, SubmissionModel)
     public modifyEntry(@BodyParams() submission: any): unknown {
         return this.submissionService.modifyEntry(submission);
     }
 
     @Get("/downloadWadSecure/:roundId/:id")
+    @Authorize("login")
     @Returns(StatusCodes.CREATED, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
@@ -46,6 +49,7 @@ export class SubmissionController extends BaseRestController {
 
 
     @Get("/getSubmission/:id")
+    @Authorize("login")
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.OK, SubmissionModel)
@@ -65,6 +69,7 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Delete("/deleteEntries")
+    @Authorize("login")
     @Returns(StatusCodes.CREATED, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {

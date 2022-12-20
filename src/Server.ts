@@ -136,7 +136,6 @@ export class Server implements BeforeRoutesInit {
         this.app.use(session({
             secret: process.env.SESSION_KEY as string,
             resave: false,
-            proxy: process.env.HTTPS === "true",
             store: new TypeormStore({
                 cleanupLimit: 2,
             }).connect(this.ds.getRepository(SessionModel)),

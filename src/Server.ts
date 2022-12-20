@@ -142,9 +142,10 @@ export class Server implements BeforeRoutesInit {
             saveUninitialized: false,
             cookie: {
                 path: "/",
-                httpOnly: process.env.HTTPS === "false",
+                httpOnly: true,
                 maxAge: 86400000,
-                secure: process.env.HTTPS === "true"
+                secure: process.env.HTTPS === "true",
+                sameSite: "strict"
             }
         }));
     }

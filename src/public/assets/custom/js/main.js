@@ -104,6 +104,7 @@ const Site = (function () {
         }
     };
     const loadPage = function loadPage(anon) {
+        // eslint-disable-next-line require-await
         anon.call(this, Site).then(async () => {
             function initTooltips() {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

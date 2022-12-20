@@ -1,5 +1,5 @@
 import {Configuration, Inject} from "@tsed/di";
-import {PlatformApplication} from "@tsed/common";
+import {BeforeRoutesInit, PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
 import {config} from "./config";
@@ -94,10 +94,10 @@ const opts: Partial<TsED.Configuration> = {
             secret: process.env.SESSION_KEY as string,
             resave: true,
             saveUninitialized: true,
-            // maxAge: 36000,
             cookie: {
                 path: "/",
                 httpOnly: process.env.HTTPS === "false",
+                maxAge: 36000,
                 secure: process.env.HTTPS === "true"
             }
         })
@@ -128,10 +128,16 @@ if (!isProduction) {
 }
 
 @Configuration(opts)
-export class Server {
+export class Server implements BeforeRoutesInit {
     @Inject()
     protected app: PlatformApplication;
 
     @Configuration()
     protected settings: Configuration;
+
+    public $beforeRoutesInit(): void | Promise<any> {
+        if (isProduction) {
+            this.app.getApp().set("trust proxy", 1);
+        }
+    }
 }

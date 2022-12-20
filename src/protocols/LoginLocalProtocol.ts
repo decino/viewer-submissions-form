@@ -1,11 +1,10 @@
-import {Req} from "@tsed/common";
+import {Catch, ExceptionFilterMethods, PlatformContext, Req} from "@tsed/common";
 import {Inject} from "@tsed/di";
 import {BodyParams} from "@tsed/platform-params";
-import {OnVerify, Protocol} from "@tsed/passport";
+import {OnVerify, PassportException, Protocol} from "@tsed/passport";
 import {IStrategyOptions, Strategy} from "passport-local";
 import {UserModel} from "../model/db/User.model";
 import {UsersService} from "../services/UserService";
-import {NotAuthorized} from "../exceptions/NotAuthorized";
 import {StatusCodes} from "http-status-codes";
 
 @Protocol<IStrategyOptions>({
@@ -22,12 +21,20 @@ export class LoginLocalProtocol implements OnVerify {
     @Inject()
     private usersService: UsersService;
 
-    public async $onVerify(@Req() request: Req, @BodyParams() credentials: UserModel): Promise<UserModel> {
+    public async $onVerify(@Req() request: Req, @BodyParams() credentials: UserModel): Promise<UserModel | null> {
         const {email, password} = credentials;
         const user = await this.usersService.getUser(email, password);
         if (!user) {
-            throw new NotAuthorized("Wrong credentials.", StatusCodes.UNAUTHORIZED);
+            return null;
         }
         return user;
+    }
+}
+
+@Catch(PassportException)
+export class PassportExceptionFilter implements ExceptionFilterMethods {
+    public catch(exception: PassportException, ctx: PlatformContext): void {
+        const {response} = ctx;
+        response.redirect(StatusCodes.NOT_MODIFIED, "/login?fail=true");
     }
 }

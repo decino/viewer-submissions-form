@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<%- include('snippets/head.ejs'); %>
+<style>
+    .profile-image-pic {
+        height: 200px;
+        width: 200px;
+        object-fit: cover;
+    }
+
+    .cardbody-color {
+        background-color: #ebf2fa;
+    }
+
+    a {
+        text-decoration: none;
+    }
+</style>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center text-dark mt-5">Login</h2>
+            <div class="card my-5">
+                <form class="card-body cardbody-color p-lg-5" action="/rest/auth/login" method="post">
+                    <div class="text-center">
+                        <img src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397__340.png" class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
+                             width="200px" alt="profile">
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input name="email" type="email" class="form-control" id="floatingInputPassword" placeholder="name@example.com">
+                        <label for="floatingInputPassword">Email address</label>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+                            <label for="floatingPassword">Password</label>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary px-5 mb-5 w-100">Login</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<%- include('snippets/scripts.ejs'); %>
+</body>
+</html>

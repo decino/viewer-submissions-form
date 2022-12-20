@@ -3,8 +3,8 @@ import {Property} from "@tsed/schema";
 export class CustomUserInfoModel {
 
     @Property()
-    id: string;
+    public id: string;
 
     @Property()
-    token: string;
+    public token: string;
 }

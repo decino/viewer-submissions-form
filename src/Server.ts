@@ -135,7 +135,7 @@ export class Server implements BeforeRoutesInit {
         }
         this.app.use(session({
             secret: process.env.SESSION_KEY as string,
-            resave: true,
+            resave: false,
             store: new TypeormStore({
                 cleanupLimit: 2,
             }).connect(this.ds.getRepository(SessionModel)),

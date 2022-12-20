@@ -138,7 +138,7 @@ export class Server implements BeforeRoutesInit {
             resave: true,
             store: new TypeormStore({
                 cleanupLimit: 2,
-                ttl: 86400
+                ttl: 86400,
             }).connect(this.ds.getRepository(SessionModel)),
             saveUninitialized: true,
             cookie: {

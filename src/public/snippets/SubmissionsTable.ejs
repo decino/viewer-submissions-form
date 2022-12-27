@@ -56,7 +56,7 @@
         <% if(includeDownload){ %>
             <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
                 <td>
-                    <a type="button" class="btn btn-outline-primary" href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
+                    <a type="button" class="btn btn-outline-primary" target="_blank" href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
                 </td>
             <% } else { %>
                 <td>N/A</td>

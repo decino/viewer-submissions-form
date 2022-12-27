@@ -174,23 +174,23 @@ export class SubmissionModel extends AbstractModel {
     public chosenRoundId: number;
 
     public downloadable(force = false): boolean {
-        return force ? true : !(this.submitterAuthor && !this.distributable);
+        if (force) {
+            return true;
+        }
+        if (this.submissionRound?.active) {
+            return false;
+        }
+        return this.submitterAuthor && this.distributable;
     }
 
     public getDownloadUrl(force = false): string | null {
         if (force) {
-            return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
+            return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
         }
         if (!this.downloadable()) {
             return null;
         }
-        return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
-    }
-
-    public validate(): void {
-        if (!this.wadURL && !this.customWadFileName) {
-            throw new Error("Either WAD URL or a file must be uploaded.");
-        }
+        return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
     }
 
     public getEngineAsString(): string {

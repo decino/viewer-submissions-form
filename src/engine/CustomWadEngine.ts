@@ -1,7 +1,7 @@
 import {Injectable, ProviderScope} from "@tsed/di";
-import * as fs from "fs";
+import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
-import * as process from "process";
+import process from "process";
 
 export type CustomWadEntry = {
     content: Buffer,

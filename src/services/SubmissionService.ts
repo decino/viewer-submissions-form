@@ -42,7 +42,7 @@ export class SubmissionService implements OnInit {
                 throw new BadRequest("Unable to add entry as the current round is paused.");
             }
             try {
-                this.validateSubmission(entry, currentActiveRound);
+                this.validateSubmission(entry, currentActiveRound, customWad);
             } catch (e) {
                 throw new BadRequest(e.message);
             }
@@ -91,6 +91,7 @@ export class SubmissionService implements OnInit {
     public async getEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
         const entry = await repo.findOne({
+            relations: ["submissionRound"],
             where: {
                 id
             }
@@ -144,8 +145,10 @@ export class SubmissionService implements OnInit {
         this.scheduler.addSimpleIntervalJob(job);
     }
 
-    private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel): void {
-        entry.validate();
+    private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel, customWad?: PlatformMulterFile): void {
+        if (!customWad && !entry.wadURL) {
+            throw new Error("Either WAD URL or a file must be uploaded.");
+        }
         const wadUrl = entry.wadURL;
         const submitterName = entry.submitterName;
         const level = entry.wadLevel;

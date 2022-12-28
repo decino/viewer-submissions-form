@@ -108,7 +108,7 @@ export class SubmissionService implements OnInit {
             if (!currentActiveRound) {
                 throw new Error("No round exists.");
             }
-            roundId = currentActiveRound?.id;
+            roundId = currentActiveRound.id;
         }
         const repo = this.ds.getRepository(SubmissionModel);
         const entries = await repo.find({
@@ -130,9 +130,13 @@ export class SubmissionService implements OnInit {
         if (!entries || entries.length === 0) {
             return null;
         }
+        const pArr: Promise<void>[] = [];
         for (const entry of entries) {
-            await this.customWadEngine.deleteCustomWad(entry.id, entry.submissionRoundId);
+            if (entry.customWadFileName) {
+                pArr.push(this.customWadEngine.deleteCustomWad(entry.id, entry.submissionRoundId));
+            }
         }
+        await Promise.all(pArr);
         return repo.remove(entries);
     }
 

@@ -174,8 +174,8 @@ export class SubmissionModel extends AbstractModel {
     @Description("The round ID that this entry was chosen for")
     public chosenRoundId: number | null;
 
-    public downloadable(force = false): boolean {
-        if (force) {
+    public downloadable(admin = false): boolean {
+        if (admin) {
             return true;
         }
         if (this.submissionRound?.active || !(typeof this.chosenRoundId === "number")) {
@@ -184,12 +184,12 @@ export class SubmissionModel extends AbstractModel {
         return this.submitterAuthor && this.distributable;
     }
 
-    public getDownloadUrl(force = false): string | null {
-        if (force) {
-            return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
-        }
-        if (!this.downloadable()) {
+    public getDownloadUrl(admin = false): string | null {
+        if (!this.downloadable(admin)) {
             return null;
+        }
+        if (admin) {
+            return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
         }
         return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
     }

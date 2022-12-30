@@ -159,7 +159,7 @@ export class SubmissionModel extends AbstractModel {
         name: "submissionRoundId",
         referencedColumnName: "id"
     })
-    public submissionRound: SubmissionRoundModel;
+    public submissionRound?: SubmissionRoundModel;
 
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
@@ -167,17 +167,18 @@ export class SubmissionModel extends AbstractModel {
     public confirmation: PendingEntryConfirmationModel;
 
     @Column({
-        nullable: true
+        nullable: true,
+        type: "integer"
     })
     @Name("chosenRound")
     @Description("The round ID that this entry was chosen for")
-    public chosenRoundId: number;
+    public chosenRoundId: number | null;
 
     public downloadable(force = false): boolean {
         if (force) {
             return true;
         }
-        if (this.submissionRound?.active) {
+        if (this.submissionRound?.active || !(typeof this.chosenRoundId === "number")) {
             return false;
         }
         return this.submitterAuthor && this.distributable;

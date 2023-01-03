@@ -6,10 +6,11 @@ import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
 import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, Res} from "@tsed/common";
+import {MultipartFile, PlatformMulterFile, PlatformResponse, Res, UseBefore} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 import {Authorize} from "@tsed/passport";
+import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/reCAPTCHAMiddleWare";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -21,14 +22,16 @@ export class SubmissionController extends BaseRestController {
     private customWadEngine: CustomWadEngine;
 
     @Post("/addEntry")
+    @UseBefore(ReCAPTCHAMiddleWare)
     @Returns(StatusCodes.CREATED, SubmissionModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public addEntry(@BodyParams() submission: SubmissionModel, @MultipartFile("file") customWad: PlatformMulterFile): unknown {
-        return this.submissionService.addEntry(submission, customWad ?? null);
+    public addEntry(@BodyParams() submission: SubmissionModel, @MultipartFile("file") customWad?: PlatformMulterFile): Promise<unknown> {
+        return this.submissionService.addEntry(submission, customWad);
     }
 
     @Post("/modifyEntry")
+    @UseBefore(ReCAPTCHAMiddleWare)
     @Authorize("login")
     @Returns(StatusCodes.OK, SubmissionModel)
     public modifyEntry(@BodyParams() submission: any): unknown {

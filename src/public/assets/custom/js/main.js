@@ -20,13 +20,18 @@ const Site = (function () {
         const form = document.getElementById("entryForm");
         const formValue = form.reportValidity();
         if (!formValue) {
-            return;
+            return false;
+        }
+        const reCAPTCHAResponse = grecaptcha.getResponse();
+        if (reCAPTCHAResponse === '') {
+            showError("Please activate reCAPTCHA.");
+            return false;
         }
         const formData = serialiseForm(urlEncoded);
         Site.loading(true);
         let response;
         try {
-            response = await fetch(`${baseUrl}/submission/${endpoint}`, {
+            response = await fetch(`${baseUrl}/submission/${endpoint}?reCAPTCHA=${reCAPTCHAResponse}`, {
                 method: 'POST',
                 body: formData
             });

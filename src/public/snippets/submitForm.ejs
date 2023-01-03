@@ -104,17 +104,20 @@
             <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" required>
         </div>
     <% } %>
+    <div class="mb-3 text-center">
+        <div class="g-recaptcha" data-sitekey="<%- process.env.RECAPTCHA_SITE_KEY; -%>"></div>
+    </div>
     <% if(!isAdmin && !isPaused){ %>
-            <div class="text-center">
-                <button id="submit" type="submit" class="btn btn-outline-primary">
+        <div class="text-center">
+            <button id="submit" type="submit" class="btn btn-outline-primary">
 			<span id="loading" class="hidden">
 				<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
 				Loading...
 			</span>
-                    <span id="submitEntry">
+                <span id="submitEntry">
 				Submit
 			</span>
-                </button>
-            </div>
-        <% } %>
+            </button>
+        </div>
+    <% } %>
 </form>

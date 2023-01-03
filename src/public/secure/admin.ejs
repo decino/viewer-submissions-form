@@ -72,17 +72,17 @@ function mode(arr) {
                 </div>
             </div>
         <% }else { %>
-                <div class="card text-center">
-                    <div class="card-header">
-                        Create a new submission round
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Clicking this button will create a new submission round and enable people
-                            to submit entries.</p>
-                        <button class="btn btn-outline-primary" id="makeNewRoundButton">Make new round</button>
-                    </div>
+            <div class="card text-center">
+                <div class="card-header">
+                    Create a new submission round
                 </div>
-            <% } %>
+                <div class="card-body">
+                    <p class="card-text">Clicking this button will create a new submission round and enable people
+                        to submit entries.</p>
+                    <button class="btn btn-outline-primary" id="makeNewRoundButton">Make new round</button>
+                </div>
+            </div>
+        <% } %>
         <% if(indexModel.previousRounds.length > 0){ %>
             <div class="row mt-5">
                 <div class="col-md-12">
@@ -94,13 +94,13 @@ function mode(arr) {
                 </div>
             </div>
         <% } %>
-            <div class="row mt-5">
-                <div class="col-md-12 text-center">
-                    <form method="get" action="/rest/auth/logout">
-                        <button class="btn btn-outline-primary" type="submit">Logout</button>
-                    </form>
-                </div>
+        <div class="row mt-5">
+            <div class="col-md-12 text-center">
+                <form method="get" action="/rest/auth/logout">
+                    <button class="btn btn-outline-primary" type="submit">Logout</button>
+                </form>
             </div>
+        </div>
     </main>
 </div>
 <% if(indexModel.currentActiveRound){ %>

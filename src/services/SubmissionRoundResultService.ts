@@ -39,16 +39,16 @@ export class SubmissionRoundResultService {
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    public async submitEntries(enryIds: number[]): Promise<void> {
+    public async submitEntries(entryIds: number[]): Promise<void> {
         const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         if (!activeRound) {
             return;
         }
         const entries: SubmissionModel[] = [];
-        for (const entryId of enryIds) {
+        for (const entryId of entryIds) {
             const entry = activeRound.submissions.find(submission => submission.id === entryId);
             if (!entry) {
-                throw new InternalServerError(`Entry if ID ${entryId} is not found in current active round.`);
+                throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
             entry.chosenRoundId = activeRound.id;
             entries.push(entry);

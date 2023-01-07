@@ -181,7 +181,7 @@ export class SubmissionModel extends AbstractModel {
         if (this.submissionRound?.active || !(typeof this.chosenRoundId === "number")) {
             return false;
         }
-        return this.submitterAuthor && this.distributable;
+        return !(this.submitterAuthor && !this.distributable);
     }
 
     public getDownloadUrl(admin = false): string | null {

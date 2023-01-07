@@ -34,7 +34,7 @@ export class SubmissionService implements OnInit {
 
     public addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {
         return this.ds.manager.transaction(async entityManager => {
-            const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+            const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
             if (!currentActiveRound) {
                 throw new NotFound("Cannot add a submission when there are no currently active rounds.");
             }
@@ -162,7 +162,7 @@ export class SubmissionService implements OnInit {
             if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${process.env.HELP_EMAIL ?? "decino"} to change your submission.`);
             }
-            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && entry.wadLevel === level) {
+            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && submission.wadLevel === level) {
                 throw new Error("This level for this WAD has already been submitted. Please submit a different map.");
             }
         }

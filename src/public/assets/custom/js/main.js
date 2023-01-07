@@ -40,6 +40,7 @@ const Site = (function () {
             return false;
         } finally {
             Site.loading(false);
+            grecaptcha.reset();
         }
 
         const responseStatus = response.status;

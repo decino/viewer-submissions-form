@@ -33,7 +33,7 @@ export class SubmissionRoundService {
         });
     }
 
-    public async getCurrentActiveSubmissionRound(): Promise<SubmissionRoundModel | null> {
+    public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {
         const found = await this.ds.manager.findOne(SubmissionRoundModel, {
             where: {
                 active: true
@@ -43,7 +43,9 @@ export class SubmissionRoundService {
         if (!found) {
             return null;
         }
-        found.submissions = found.submissions.filter(submission => submission.submissionValid);
+        if (filterInvalidEntries) {
+            found.submissions = found.submissions.filter(submission => submission.submissionValid);
+        }
         return found;
     }
 

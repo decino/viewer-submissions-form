@@ -4,6 +4,7 @@ import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {BadRequest} from "@tsed/exceptions";
+import {SubmissionModel} from "../model/db/Submission.model";
 
 @Service()
 export class SubmissionRoundService {
@@ -65,23 +66,34 @@ export class SubmissionRoundService {
         return foundWithoutActive ?? [];
     }
 
-    public async endActiveSubmissionRound(): Promise<boolean> {
-        const repo = this.ds.getRepository(SubmissionRoundModel);
-        const currentlyActive = await repo.findOne({
-            where: {
-                active: true
+    public endActiveSubmissionRound(): Promise<boolean> {
+        return this.ds.transaction(async entityManager => {
+            const submissionRepo = entityManager.getRepository(SubmissionRoundModel);
+            const submissionModelRepository = entityManager.getRepository(SubmissionModel);
+            const currentlyActive = await submissionRepo.findOne({
+                where: {
+                    active: true
+                }
+            });
+            // remove any pending/invalid entries
+            const invalidEntries = await submissionModelRepository.find({
+                where: {
+                    submissionValid: false
+                },
+                relations: ["confirmation"]
+            });
+            if (currentlyActive) {
+                currentlyActive.active = false;
+                await submissionRepo.save(currentlyActive);
+                await submissionModelRepository.remove(invalidEntries);
+                return true;
             }
+            return false;
         });
-        if (currentlyActive) {
-            currentlyActive.active = false;
-            await repo.save(currentlyActive);
-            return true;
-        }
-        return false;
     }
 
     public async pauseRound(pause: boolean): Promise<void> {
-        const currentActiveRound = await this.getCurrentActiveSubmissionRound();
+        const currentActiveRound = await this.getCurrentActiveSubmissionRound(false);
         if (!currentActiveRound) {
             throw new BadRequest("No active round to pause.");
         }

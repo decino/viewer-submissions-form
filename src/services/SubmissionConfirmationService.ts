@@ -47,6 +47,7 @@ export class SubmissionConfirmationService implements OnInit {
         });
     }
 
+
     public async generateConfirmationEntry(email: string, round: number): Promise<PendingEntryConfirmationModel> {
         const confirmationModelRepository = this.ds.getRepository(PendingEntryConfirmationModel);
         const newEntry = this.ds.manager.create(PendingEntryConfirmationModel, {

@@ -464,6 +464,9 @@ function mode(arr) {
                                                     alert("Failed to generate entry. See console for more info.");
                                                     return;
                                                 }
+                                                if (json.length === 0) {
+                                                    return;
+                                                }
                                                 const entry = json[0];
                                                 dt.row.add([
                                                     entry.id.toString(),

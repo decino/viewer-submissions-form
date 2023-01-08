@@ -1,0 +1,36 @@
+{
+  "targets": {
+    "node": "current"
+  },
+  "assumptions": {
+    "setPublicClassFields": true
+  },
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "debug": true
+      }
+    ],
+    "@babel/typescript",
+    [
+      "minify",
+      {
+        "builtIns": false,
+        "mangle": true,
+        "keepClassName": true,
+        "keepFnName": true
+      }
+    ]
+  ],
+  "plugins": [
+    "babel-plugin-transform-typescript-metadata",
+    [
+      "@babel/plugin-proposal-decorators",
+      {
+        "legacy": true
+      }
+    ],
+    "@babel/plugin-proposal-class-properties"
+  ]
+}

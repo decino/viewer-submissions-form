@@ -6,7 +6,7 @@ import {Logger} from "@tsed/common";
 type SubmissionPayload = {
     wadName: string,
     wadLevel: string,
-    info?: string | null
+    info: string | null
 }
 
 @Service()

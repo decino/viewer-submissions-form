@@ -4,14 +4,14 @@
     "baseUrl": ".",
     "outDir": "./dist",
     "moduleResolution": "node",
-    "declaration": true,
+    "declaration": false,
     "noResolve": false,
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,
     "target": "esnext",
-    "noEmit": false,
+    "noEmit": true,
     "emitDeclarationOnly": false,
     "inlineSources": true
   }

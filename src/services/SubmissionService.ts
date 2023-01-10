@@ -88,18 +88,14 @@ export class SubmissionService implements OnInit {
         }, model);
     }
 
-    public async getEntry(id: number): Promise<SubmissionModel | null> {
+    public getEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
-        const entry = await repo.findOne({
+        return repo.findOne({
             relations: ["submissionRound"],
             where: {
                 id
             }
         });
-        if (!entry) {
-            return null;
-        }
-        return entry;
     }
 
     public async getAllEntries(roundId = -1): Promise<SubmissionModel[]> {

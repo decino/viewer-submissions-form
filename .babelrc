@@ -32,5 +32,12 @@
       }
     ],
     "@babel/plugin-proposal-class-properties"
+  ],
+  "exclude": [
+    "**/*.min.js",
+    "**/__tests__"
+  ],
+  "include": [
+    "./src"
   ]
 }

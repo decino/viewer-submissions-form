@@ -44,6 +44,13 @@ export class SubmissionService implements OnInit {
             try {
                 this.validateSubmission(entry, currentActiveRound, customWad);
             } catch (e) {
+                if (customWad) {
+                    try {
+                        await this.customWadEngine.deleteCustomWad(customWad);
+                    } catch {
+                        this.logger.error(`Unable to delete file ${customWad.path}`);
+                    }
+                }
                 throw new BadRequest(e.message);
             }
             if (customWad) {

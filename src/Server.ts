@@ -122,10 +122,13 @@ if (!isProduction) {
 
 @Configuration(opts)
 export class Server implements BeforeRoutesInit {
+
     @Inject()
     protected app: PlatformApplication;
+
     @Configuration()
     protected settings: Configuration;
+
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 

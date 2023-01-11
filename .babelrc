@@ -12,7 +12,12 @@
         "debug": true
       }
     ],
-    "@babel/typescript",
+    [
+      "@babel/preset-typescript",
+      {
+        "onlyRemoveTypeImports": true
+      }
+    ],
     [
       "minify",
       {

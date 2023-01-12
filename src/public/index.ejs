@@ -51,7 +51,7 @@
                         </div>
                         <div class="card border-primary mb-3 ml-3">
                             <div class="card-header">Current submissions</div>
-                            <div class="card-body" style="max-height: 900px; overflow-y: scroll;">
+                            <div class="card-body" style="max-height: 900px; overflow-y: auto;">
                                 <%- include('snippets/SubmissionsTable.ejs', {
                                 submissions: model.currentActiveRound.submissions,
                                 includeDownload: false,

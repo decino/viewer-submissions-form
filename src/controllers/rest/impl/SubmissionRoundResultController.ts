@@ -22,6 +22,14 @@ export class SubmissionRoundResultController extends BaseRestController {
         return this.submissionRoundResultService.generateEntries(count);
     }
 
+    @Post("/buildResultSet")
+    @Authorize("login")
+    @Returns(StatusCodes.OK, SuccessModel)
+    public async buildResultSet(@Res() res: PlatformResponse): Promise<unknown> {
+        await this.submissionRoundResultService.buildResultSet();
+        return super.doSuccess(res, "Entry cache generated");
+    }
+
     @Post("/submitEntries")
     @Authorize("login")
     @Returns(StatusCodes.OK, SuccessModel)

@@ -19,23 +19,30 @@ export class SubmissionRoundResultService {
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
-    public async generateEntries(count: number | undefined): Promise<SubmissionModel[]> {
-        const allEntries = await this.submissionService.getAllEntries();
-        const mergedEntries: Map<string, SubmissionModel[]> = new Map();
+    private readonly entryCache: Map<string, SubmissionModel[]> = new Map();
 
+    public async buildResultSet(): Promise<void> {
+        this.entryCache.clear();
+        const allEntries = await this.submissionService.getAllEntries();
         for (const entry of allEntries) {
             if (!entry.submissionValid) {
                 continue;
             }
             const wadIdentifier = entry.wadName;
-            if (mergedEntries.has(wadIdentifier)) {
-                mergedEntries.get(wadIdentifier)?.push(entry);
+            if (this.entryCache.has(wadIdentifier)) {
+                this.entryCache.get(wadIdentifier)?.push(entry);
             } else {
-                mergedEntries.set(wadIdentifier, [entry]);
+                this.entryCache.set(wadIdentifier, [entry]);
             }
         }
-        const keysToGet = this.getMultipleRandom([...mergedEntries.keys()], count);
-        const chosenEntries = keysToGet.flatMap(key => mergedEntries.get(key)) as SubmissionModel[];
+    }
+
+    public generateEntries(count: number | undefined): SubmissionModel[] {
+        if (this.entryCache.size === 0) {
+            throw new Error("Unable to generate entries as the cache has not been built");
+        }
+        const keysToGet = this.getMultipleRandom([...this.entryCache.keys()], count);
+        const chosenEntries = keysToGet.flatMap(key => this.entryCache.get(key)) as SubmissionModel[];
         return this.getMultipleRandom(chosenEntries, count);
     }
 
@@ -56,6 +63,7 @@ export class SubmissionRoundResultService {
         const repo = this.ds.getRepository(SubmissionModel);
         await repo.save(entries);
         await this.submissionRoundService.endActiveSubmissionRound();
+        this.entryCache.clear();
     }
 
     public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {

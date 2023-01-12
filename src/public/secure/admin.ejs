@@ -419,10 +419,7 @@ function mode(arr) {
 
                         function buildNextStep() {
 
-                            function buildStep2() {
-                                if (step2Dt) {
-                                    return;
-                                }
+                            async function buildStep2() {
 
                                 function highlightDupes() {
                                     step2Dt.rows().every(function () {
@@ -433,6 +430,32 @@ function mode(arr) {
                                     for (let dupeRow of dupeRows) {
                                         dupeRow.classList.add("text-bg-danger");
                                     }
+                                }
+
+                                async function buildResultCache() {
+                                    site.loading(true);
+                                    let json;
+                                    let result;
+                                    try {
+                                        result = await fetch(`${baseUrl}/submissionRoundResult/buildResultSet`, {
+                                            method: "POST"
+                                        });
+                                        json = await result.json();
+                                    } finally {
+                                        site.loading(false);
+                                    }
+
+                                    if (result.status !== 200) {
+                                        console.error(json);
+                                        alert("Failed to build result cache.");
+                                        return false;
+                                    }
+                                    return true;
+                                }
+
+                                const built = await buildResultCache();
+                                if (step2Dt || !built) {
+                                    return;
                                 }
 
                                 step2Dt = $("#endRoundResultsTable").DataTable({

@@ -10,7 +10,7 @@ import {MultipartFile, PlatformMulterFile, PlatformResponse, Res, UseBefore} fro
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 import {Authorize} from "@tsed/passport";
-import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/reCAPTCHAMiddleWare";
+import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/ReCAPTCHAMiddleWare";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {

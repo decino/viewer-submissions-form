@@ -3,7 +3,7 @@ import {Authenticate} from "@tsed/passport";
 import {Get, Post, Returns} from "@tsed/schema";
 import {Req, Res, UseBefore} from "@tsed/common";
 import {StatusCodes} from "http-status-codes";
-import {ReCAPTCHAMiddleWare} from "../../../../middleware/endpoint/reCAPTCHAMiddleWare";
+import {ReCAPTCHAMiddleWare} from "../../../../middleware/endpoint/ReCAPTCHAMiddleWare";
 
 @Controller("/auth")
 @Scope(ProviderScope.SINGLETON)

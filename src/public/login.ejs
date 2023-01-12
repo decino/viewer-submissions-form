@@ -1,21 +1,23 @@
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
-<%- include('snippets/head.ejs'); %>
-<style>
-    .profile-image-pic {
-        height: 200px;
-        width: 200px;
-        object-fit: cover;
-    }
+<head>
+    <%- include('snippets/head.ejs'); %>
+    <style>
 
-    .cardbody-color {
-        background-color: #ebf2fa;
-    }
+        a {
+            text-decoration: none;
+        }
 
-    a {
-        text-decoration: none;
-    }
-</style>
+        .g-recaptcha > div {
+            margin-top: 1em;
+
+            text-align: center;
+            width: auto !important;
+            height: auto !important;
+        }
+
+    </style>
+</head>
 <body>
 
 <div class="container">
@@ -40,6 +42,9 @@
                                 <label for="floatingPassword">Password</label>
                             </div>
                         </div>
+                        <div class="mb-3 text-center">
+                            <div class="g-recaptcha" data-theme="dark" data-sitekey="<%- process.env.RECAPTCHA_SITE_KEY; -%>"></div>
+                        </div>
                         <div class="text-center">
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-outline-success">Login</button>
@@ -48,7 +53,6 @@
                     </form>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

@@ -2,7 +2,7 @@ import {Middleware, MiddlewareMethods} from "@tsed/platform-middlewares";
 import {Inject} from "@tsed/di";
 import {ReCAPTCHAService} from "../../services/ReCAPTCHAService";
 import {BadRequest} from "@tsed/exceptions";
-import {QueryParams} from "@tsed/common";
+import {BodyParams} from "@tsed/platform-params";
 
 @Middleware()
 export class ReCAPTCHAMiddleWare implements MiddlewareMethods {
@@ -10,7 +10,7 @@ export class ReCAPTCHAMiddleWare implements MiddlewareMethods {
     @Inject()
     private reCAPTCHAService: ReCAPTCHAService;
 
-    public async use(@QueryParams("reCAPTCHA") reCAPTCHA: string): Promise<void> {
+    public async use(@BodyParams('g-recaptcha-response') reCAPTCHA: string): Promise<void> {
         if (!reCAPTCHA) {
             throw new BadRequest("reCAPTCHA missing");
         }

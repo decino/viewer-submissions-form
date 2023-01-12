@@ -28,10 +28,11 @@ const Site = (function () {
             return false;
         }
         const formData = serialiseForm(urlEncoded);
+        formData.append("g-recaptcha-response", reCAPTCHAResponse);
         Site.loading(true);
         let response;
         try {
-            response = await fetch(`${baseUrl}/submission/${endpoint}?reCAPTCHA=${reCAPTCHAResponse}`, {
+            response = await fetch(`${baseUrl}/submission/${endpoint}`, {
                 method: 'POST',
                 body: formData
             });

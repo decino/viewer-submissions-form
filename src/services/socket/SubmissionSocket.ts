@@ -14,7 +14,11 @@ export class SubmissionSocket {
     private nsp: SocketIO.Namespace;
 
     public emitSubmission(payload: SubmissionModel): boolean {
-        return this.nsp.emit("newSubmission", payload);
+        return this.nsp.emit("newSubmission", {
+            id: payload.id,
+            wadName: payload.wadName,
+            wadLevel: payload.wadLevel
+        });
     }
 
     public emitSubmissionDelete(ids: number[]): boolean {

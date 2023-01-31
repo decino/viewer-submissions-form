@@ -1,6 +1,7 @@
 const Site = (function () {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let isInit = false;
+    const socket = io(`${mainRul}/submission`, {path: '/socket.io/submission/'});
 
     const loading = function loading(show) {
         const loader = document.getElementById("loader");
@@ -64,6 +65,26 @@ const Site = (function () {
         display(false, error);
     };
 
+    const onEntry = function onEntry(callBack) {
+        socket.on("newSubmission", callBack);
+    };
+
+    const onDelete = function onDelete(callBack) {
+        socket.on("deleteSubmission", callBack);
+    };
+
+    function initWs() {
+        socket.on("connect", () => {
+            document.getElementById("WSNotConnectedLabel")?.classList.add("hidden");
+            document.getElementById("WSConnectedLabel")?.classList.remove("hidden");
+        });
+
+        socket.on("disconnect", () => {
+            document.getElementById("WSNotConnectedLabel")?.classList.remove("hidden");
+            document.getElementById("WSConnectedLabel")?.classList.add("hidden");
+        });
+    }
+
     const showSuccess = function showSuccess() {
         const error = document.getElementById("error");
         const success = document.getElementById("success");
@@ -117,6 +138,7 @@ const Site = (function () {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
             }
 
+            initWs();
             initTooltips();
             isInit = true;
         });
@@ -128,6 +150,8 @@ const Site = (function () {
         serialiseForm,
         submitEntryForm,
         showSuccess,
-        showError
+        showError,
+        onEntry,
+        onDelete
     };
 }());

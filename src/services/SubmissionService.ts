@@ -11,6 +11,7 @@ import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
+import {SubmissionSocket} from "./socket/SubmissionSocket";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -28,6 +29,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private submissionConfirmationService: SubmissionConfirmationService;
+
+    @Inject()
+    private submissionSocket: SubmissionSocket;
 
     @Inject()
     private logger: Logger;
@@ -140,7 +144,9 @@ export class SubmissionService implements OnInit {
             }
         }
         await Promise.all(pArr);
-        return repo.remove(entries);
+        const remove = await repo.remove(entries);
+        this.submissionSocket.emitSubmissionDelete(ids);
+        return remove;
     }
 
     public $onInit(): void {

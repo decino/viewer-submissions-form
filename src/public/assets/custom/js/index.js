@@ -28,6 +28,27 @@ Site.loadPage(async function (site) {
             return url.protocol === "http:" || url.protocol === "https:" ? url : null;
         }
 
+        site.onDelete(ids => {
+            const table = document.getElementsByClassName("submissionsTable")[0];
+            for (const id of ids) {
+                table.querySelector(`tbody tr[data-id="${id}"]`).remove();
+            }
+        });
+
+        site.onEntry(data => {
+            const table = document.getElementsByClassName("submissionsTable")[0];
+            const no = document.getElementsByClassName("submissionsTable tbody tr").length + 1;
+            const tbody = table.querySelector("tbody");
+            const newRow = `
+                <tr data-id="${data.id}">
+                    <td>${no}</td>
+                    <td><u><span>${data.wadName}</span></u></td>
+                    <td>${data.wadLevel}</td>
+                </tr>
+            `;
+            tbody.innerHTML += newRow;
+        });
+
         const wadRadios = document.querySelectorAll("#link,#Upload");
         for (const wadRadio of wadRadios) {
             wadRadio.addEventListener("change", evt => {

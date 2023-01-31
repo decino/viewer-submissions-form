@@ -30,7 +30,7 @@
     for(let i = 0 ; i < submissions.length; i++){
         const chosenSubmission = submissions[i];
     %>
-    <tr>
+    <tr data-id="<%- chosenSubmission.id; -%>">
         <% if(isAdmin){ %>
             <td><%- chosenSubmission.id; -%></td>
         <% } %>

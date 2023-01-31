@@ -78,6 +78,11 @@ const opts: Partial<TsED.Configuration> = {
             }
         ]
     },
+    socketIO: {
+        cors: {
+            origin: process.env.BASE_URL
+        }
+    },
     middlewares: [
         helmet({
             contentSecurityPolicy: false,

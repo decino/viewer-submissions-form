@@ -8,6 +8,7 @@ import {Logger} from "@tsed/common";
 import {EmailService} from "./EmailService";
 import process from "process";
 import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
+import {SubmissionSocket} from "./socket/SubmissionSocket";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -23,6 +24,9 @@ export class SubmissionConfirmationService implements OnInit {
 
     @Inject()
     private discordBotDispatcherService: DiscordBotDispatcherService;
+
+    @Inject()
+    private submissionSocket: SubmissionSocket;
 
     public processConfirmation(confirmationUid: string): Promise<void> {
         return this.ds.manager.transaction(async entityManager => {
@@ -43,6 +47,7 @@ export class SubmissionConfirmationService implements OnInit {
             await confirmationModelRepository.remove(confirmationEntry);
             return submission;
         }).then(submission => {
+            this.submissionSocket.emitSubmission(submission);
             this.discordBotDispatcherService.dispatch(submission);
         });
     }

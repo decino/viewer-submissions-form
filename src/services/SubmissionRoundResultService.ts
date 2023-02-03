@@ -37,7 +37,7 @@ export class SubmissionRoundResultService {
         }
     }
 
-    public generateEntries(count: number | undefined): SubmissionModel[] {
+    public generateEntries(count: number): SubmissionModel[] {
         if (this.entryCache.size === 0) {
             throw new Error("Unable to generate entries as the cache has not been built");
         }

@@ -19,7 +19,7 @@ export class SubmissionRoundResultController extends BaseRestController {
     @Authorize("login")
     @Returns(StatusCodes.OK, Array).Of(SubmissionModel)
     public generateEntries(@Res() res: PlatformResponse, @QueryParams("count") count?: number): unknown {
-        return this.submissionRoundResultService.generateEntries(count);
+        return this.submissionRoundResultService.generateEntries(count ?? -1);
     }
 
     @Post("/buildResultSet")

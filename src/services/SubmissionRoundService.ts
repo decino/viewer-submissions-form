@@ -15,7 +15,7 @@ export class SubmissionRoundService {
     @Inject()
     private customWadEngine: CustomWadEngine;
 
-    public newSubmissionRound(): Promise<SubmissionRoundModel> {
+    public newSubmissionRound(name: string): Promise<SubmissionRoundModel> {
         return this.ds.transaction(async entityManager => {
             const repo = entityManager.getRepository(SubmissionRoundModel);
             const activeRound = await repo.findOne({
@@ -28,7 +28,8 @@ export class SubmissionRoundService {
                 await repo.save(activeRound);
             }
             const newModel = entityManager.create(SubmissionRoundModel, {
-                active: true
+                active: true,
+                name
             });
             return repo.save(newModel);
         });

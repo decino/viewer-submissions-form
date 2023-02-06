@@ -5,7 +5,9 @@
                 const round = model.previousRounds[i];
             %>
             <li class="nav-item" role="presentation">
-                <button class="nav-link <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>" data-bs-toggle="tab" data-bs-target="#entry<%- round.id; -%>-pane" type="button" role="tab" aria-controls="entry<%- round.id; -%>-pane" aria-selected="true">Submission round <%- round.id; -%></button>
+                <button class="nav-link <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>"
+                        data-bs-toggle="tab" data-bs-target="#entry<%- round.id; -%>-pane" type="button" role="tab"
+                        aria-controls="entry<%- round.id; -%>-pane" aria-selected="true"><%- round.name; -%></button>
             </li>
             <% } %>
         </ul>
@@ -15,7 +17,8 @@
             <% for(let i = 0; i < model.previousRounds.length; i++){
                 const round = model.previousRounds[i];
             %>
-            <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane" role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0">
+            <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane"
+                 role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0">
                 <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round); -%></p>
                 <%- include('SubmissionsTable.ejs', {submissions: round.submissions, includeDownload: true, isAdmin: isAdmin}); %>
             </div>

@@ -18,8 +18,8 @@ export class SubmissionRoundController extends BaseRestController {
     @Post("/newRound")
     @Authorize("login")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)
-    public createRound(): unknown {
-        return this.submissionRoundService.newSubmissionRound();
+    public createRound(@QueryParams("name") name: string): unknown {
+        return this.submissionRoundService.newSubmissionRound(name);
     }
 
 

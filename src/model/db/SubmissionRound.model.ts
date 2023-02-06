@@ -1,7 +1,8 @@
-import {Column, Entity, OneToMany} from "typeorm";
+import {BeforeInsert, Column, Entity, OneToMany} from "typeorm";
 import {AbstractModel} from "./AbstractModel";
 import {SubmissionModel} from "./Submission.model";
 import {Description, Name} from "@tsed/schema";
+import xss from "xss";
 
 @Entity()
 export class SubmissionRoundModel extends AbstractModel {
@@ -12,6 +13,13 @@ export class SubmissionRoundModel extends AbstractModel {
     @Name("active")
     @Description("If this round is active or not")
     public active: boolean;
+
+    @Column({
+        nullable: false
+    })
+    @Name("name")
+    @Description("The name of this round")
+    public name: string;
 
     @Column({
         nullable: false,
@@ -25,4 +33,9 @@ export class SubmissionRoundModel extends AbstractModel {
     @Description("List of submissions that belong to this round")
     @OneToMany(() => SubmissionModel, submissions => submissions.submissionRound)
     public submissions: SubmissionModel[];
+
+    @BeforeInsert()
+    private sanitiseString(): void {
+        this.name = xss(this.name);
+    }
 }

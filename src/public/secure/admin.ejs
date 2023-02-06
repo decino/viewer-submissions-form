@@ -24,7 +24,7 @@ function mode(arr) {
             <div class="row">
                 <div class="col-md-12">
                     <div class="card border-primary mb-3">
-                        <div class="card-header">Round <%- indexModel.currentActiveRound.id; -%></div>
+                        <div class="card-header"><%- indexModel.currentActiveRound.name; -%></div>
                         <div class="card-body text-center">
                             <% if(indexModel.currentActiveRound.paused){ %>
                                 <h5 class="card-title mb-4 text-danger">Round is currently paused</h5>
@@ -621,10 +621,15 @@ function mode(arr) {
             });
 
             document.getElementById("makeNewRoundButton")?.addEventListener("click", async ev => {
+                const roundName = prompt("Submission round name");
+                if (!roundName?.trim()) {
+                    alert("Please supply a round name");
+                    return;
+                }
                 site.loading(true);
                 let newRound;
                 try {
-                    newRound = await fetch(`${baseUrl}/submissionRound/newRound`, {
+                    newRound = await fetch(`${baseUrl}/submissionRound/newRound?name=${roundName}`, {
                         method: "POST"
                     });
                 } finally {

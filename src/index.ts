@@ -13,7 +13,7 @@ function resolve(...paths: string[]): string[] {
     return paths.flatMap(ps => glob.sync(ps.split(path.sep).join("/")));
 }
 
-async function getdbModules(): Promise<EntitySchema[]> {
+async function getDbModules(): Promise<EntitySchema[]> {
     const files = resolve(`${__dirname}/model/db/**/*.model.{ts,js}`);
     const pArr = files.map((file) => import(file));
     const modules: Awaited<EntitySchema>[] = await Promise.all(pArr);
@@ -21,7 +21,7 @@ async function getdbModules(): Promise<EntitySchema[]> {
 }
 
 async function bootstrap(): Promise<void> {
-    const models = await getdbModules();
+    const models = await getDbModules();
     const dataSource = new DataSource({
         type: "better-sqlite3",
         entities: models,
@@ -40,7 +40,7 @@ async function bootstrap(): Promise<void> {
         },
         hooks: {
             $onDestroy(dataSource) {
-                return dataSource.isInitialized && dataSource.close();
+                return dataSource.isInitialized && dataSource.destroy();
             }
         }
     });

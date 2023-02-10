@@ -11,7 +11,9 @@
         <% if(isAdmin){ %>
             <th scope="col">Wad engine</th>
             <th scope="col">GzDoom actions</th>
-            <th scope="col">Submitter name</th>
+        <% } %>
+        <th scope="col">Submitter name</th>
+        <% if(isAdmin){ %>
             <th scope="col">Submitter is author</th>
             <th scope="col">Distributable</th>
             <th scope="col">Info</th>
@@ -37,7 +39,8 @@
         <td><%- i + 1; -%></td>
         <td>
             <u>
-                <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></span>
+                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                      data-bs-title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></span>
             </u>
         </td>
         <td><%- chosenSubmission.wadLevel; -%></td>
@@ -45,7 +48,9 @@
         <% if(isAdmin){ %>
             <td><%- chosenSubmission.getEngineAsString(); -%></td>
             <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
-            <td><%- chosenSubmission.submitterName; -%></td>
+        <% } %>
+        <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
+        <% if(isAdmin){ %>
             <td><%- chosenSubmission.submitterAuthor; -%></td>
             <td><%- chosenSubmission.distributable; -%></td>
             <td><%- chosenSubmission.info; -%></td>

@@ -184,9 +184,10 @@ function mode(arr) {
                                 <table class="table" id="endRoundResultsTable">
                                     <thead>
                                     <tr>
-                                        <th scope="col">ID</th>
                                         <th scope="col">WAD</th>
                                         <th scope="col">Level</th>
+                                        <th scope="col">Submitter</th>
+                                        <th scope="col">Author</th>
                                     </tr>
                                     </thead>
                                     <tbody id="endRoundResultsTableBody"></tbody>
@@ -194,15 +195,17 @@ function mode(arr) {
                             </div>
                             <div class="tab-pane fade" id="step3">
                                 <div class="alert alert-primary" role="alert">
-                                    Review the selected entries here. Once you finish, this will end the current round and confirm the entries.
+                                    Review the selected entries here. Once you finish, this will end the current round
+                                    and confirm the entries.
                                 </div>
                                 <table class="table" id="endRoundReviewTable">
                                     <thead>
                                     <tr>
                                         <th scope="col">No.</th>
-                                        <th scope="col">ID</th>
                                         <th scope="col">WAD</th>
                                         <th scope="col">Level</th>
+                                        <th scope="col">Submitter</th>
+                                        <th scope="col">Author</th>
                                     </tr>
                                     </thead>
                                     <tbody id="endRoundReviewTableBody"></tbody>
@@ -211,7 +214,9 @@ function mode(arr) {
                         </div>
                         <div class="row justify-content-between">
                             <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary" data-enchanter="previous">Previous</button>
+                                <button type="button" class="btn btn-outline-primary" data-enchanter="previous">
+                                    Previous
+                                </button>
                             </div>
                             <div class="col-auto">
                                 <button type="button" class="btn btn-outline-primary" data-enchanter="next">Next</button>
@@ -494,9 +499,10 @@ function mode(arr) {
                                                 }
                                                 const entry = json[0];
                                                 dt.row.add([
-                                                    entry.id.toString(),
                                                     entry.WADName,
-                                                    entry.level
+                                                    entry.level,
+                                                    entry.authorName ?? "anonymous",
+                                                    entry.author
                                                 ]).draw();
                                                 highlightDupes();
                                             }
@@ -525,9 +531,10 @@ function mode(arr) {
                                                 selectedRows.every(function (rowIdx, tableLoop, rowLoop) {
                                                     const entry = json[rowLoop];
                                                     this.data([
-                                                        entry.id.toString(),
                                                         entry.WADName,
-                                                        entry.level
+                                                        entry.level,
+                                                        entry.authorName ?? "anonymous",
+                                                        entry.author
                                                     ]).draw();
                                                 });
                                                 selectedRows.deselect();
@@ -679,7 +686,7 @@ function mode(arr) {
                 }
                 if (isPreviousRoundCard) {
                     dtOpts["columnDefs"] = [
-                        {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10, 11]}
+                        {"visible": false, "targets": [0, 4, 5, 7, 8, 9, 10, 11]}
                     ];
                 }
                 if (!isPreviousRoundCard) {

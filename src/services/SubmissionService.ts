@@ -12,6 +12,7 @@ import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
+import STATUS from "../model/constants/STATUS";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -74,6 +75,22 @@ export class SubmissionService implements OnInit {
             saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.submissionRoundId);
             return saveEntry;
         });
+    }
+
+    public async modifyStatus(id: number, status: STATUS, reason?: string): Promise<void> {
+        const repo = this.ds.getRepository(SubmissionModel);
+        const submission = await repo.findOne({
+            where: {
+                id
+            }
+        });
+        if (!submission) {
+            throw new BadRequest(`Unable to find submission with id ${id}`);
+        }
+        submission.status = status;
+        submission.reason = reason ? reason : null;
+
+        await repo.save(submission);
     }
 
     public async modifyEntry(entry: Record<string, unknown>): Promise<void> {

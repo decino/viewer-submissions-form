@@ -7,6 +7,7 @@ import DOOM_ENGINE from "../constants/DoomEngine";
 import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
 import process from "process";
 import xss from "xss";
+import STATUS from "../constants/STATUS";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -57,6 +58,29 @@ export class SubmissionModel extends AbstractModel {
     @Enum(DOOM_ENGINE)
     @Required()
     public wadEngine: DOOM_ENGINE;
+
+    @Column({
+        type: "text",
+        nullable: false,
+        default: STATUS.NONE
+    })
+    @Name("status")
+    @Description("The current status of the submission")
+    @Example("Completed")
+    @Example("Rejected")
+    @Example("In Progress")
+    @Example("None")
+    @Enum(STATUS)
+    public status: STATUS;
+
+    @Column({
+        type: "text",
+        nullable: true,
+        default: null
+    })
+    @Name("reason")
+    @Description("The reason why this submission was rejected")
+    public reason?: string | null;
 
     @Column({
         type: "simple-array",

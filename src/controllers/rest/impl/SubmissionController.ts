@@ -6,11 +6,12 @@ import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
 import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, Res, UseBefore} from "@tsed/common";
+import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res, UseBefore} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 import {Authorize} from "@tsed/passport";
 import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/ReCAPTCHAMiddleWare";
+import STATUS from "../../../model/constants/STATUS";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -36,6 +37,17 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.OK, SubmissionModel)
     public modifyEntry(@BodyParams() submission: any): unknown {
         return this.submissionService.modifyEntry(submission);
+    }
+
+    @Post("/changeStatus/:id")
+    @Authorize("login")
+    @Returns(StatusCodes.OK)
+    public async changeStatus(@Res() res: PlatformResponse,
+                              @PathParams("id") id: number,
+                              @QueryParams("status") status: STATUS,
+                              @QueryParams("reason") reason?: string): Promise<unknown> {
+        await this.submissionService.modifyStatus(id, status, reason);
+        return super.doSuccess(res, `Submission status has been changed`);
     }
 
     @Get("/downloadWadSecure/:roundId/:id")

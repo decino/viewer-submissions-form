@@ -143,6 +143,7 @@ export class SubmissionService implements OnInit {
         return entries ?? [];
     }
 
+
     public async deleteEntries(ids: number[]): Promise<SubmissionModel[] | null> {
         const repo = this.ds.getRepository(SubmissionModel);
 

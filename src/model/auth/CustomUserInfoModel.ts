@@ -6,5 +6,5 @@ export class CustomUserInfoModel {
     public id: string;
 
     @Property()
-    public token: string;
+    public email: string;
 }

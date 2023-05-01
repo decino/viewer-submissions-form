@@ -13,6 +13,7 @@ import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import STATUS from "../model/constants/STATUS";
+import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -78,7 +79,7 @@ export class SubmissionService implements OnInit {
     }
 
     public async modifyStatus(id: number, status: STATUS, reason?: string): Promise<void> {
-        const repo = this.ds.getRepository(SubmissionModel);
+        const repo = this.ds.getRepository(SubmissionStatusModel);
         const submission = await repo.findOne({
             where: {
                 id
@@ -88,7 +89,7 @@ export class SubmissionService implements OnInit {
             throw new BadRequest(`Unable to find submission with id ${id}`);
         }
         submission.status = status;
-        submission.reason = reason ? reason : null;
+        submission.additionalInfo = reason ? reason : null;
 
         await repo.save(submission);
     }

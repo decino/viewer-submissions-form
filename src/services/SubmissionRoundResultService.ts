@@ -6,6 +6,7 @@ import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
 import {InternalServerError} from "@tsed/exceptions";
+import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 
 @Service()
 export class SubmissionRoundResultService {
@@ -57,7 +58,10 @@ export class SubmissionRoundResultService {
             if (!entry) {
                 throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
-            entry.chosenRoundId = activeRound.id;
+            entry.isChosen = true;
+            entry.status = this.ds.manager.create(SubmissionStatusModel, {
+                submissionRoundId: entry.submissionRoundId
+            });
             entries.push(entry);
         }
         const repo = this.ds.getRepository(SubmissionModel);
@@ -70,7 +74,7 @@ export class SubmissionRoundResultService {
         const allNonActiveRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
         // this should be done as an inner select on the table join, but this ORM does not support this yet
         const filteredResult = allNonActiveRounds.map(value => {
-            value.submissions = value.submissions.filter(submission => !!submission.chosenRoundId);
+            value.submissions = value.submissions.filter(submission => submission.isChosen);
             return value;
         });
         return filteredResult ?? [];

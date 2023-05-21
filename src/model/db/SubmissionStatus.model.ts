@@ -21,14 +21,14 @@ export class SubmissionStatusModel extends AbstractModel {
     @Enum(STATUS)
     public status: STATUS;
 
-    @Name("submissionRoundId")
-    @Description("The submission round this entry belongs to")
+    @Name("submissionId")
+    @Description("The submission this entry belongs to")
     @Example("1")
     @Example("2")
     @Column({
         nullable: false
     })
-    public submissionRoundId: number;
+    public submissionId: number;
 
 
     @Column({
@@ -40,13 +40,11 @@ export class SubmissionStatusModel extends AbstractModel {
     @Description("Any additional info added by decino")
     public additionalInfo?: string | null;
 
-    @OneToOne("SubmissionModel", "status", AbstractModel.cascadeOps)
-    @JoinColumn([
-        {
-            name: "submissionRoundId",
-            referencedColumnName: "submissionRoundId"
-        }
-    ])
+    @OneToOne("SubmissionModel", "status")
+    @JoinColumn({
+        name: "submissionId",
+        referencedColumnName: "id"
+    })
     public submission: SubmissionModel;
 
 }

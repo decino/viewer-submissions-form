@@ -7,7 +7,7 @@
     "build": "npm run tsc && npm run barrels && babel src --out-dir dist --extensions \".ts,.tsx,.js\" --copy-files",
     "barrels": "barrelsby --config .barrelsby.json",
     "start_js": "node dist/index.js",
-    "start": "npm run barrels && tsnd --inspect --exit-child --cls --ignore-watch node_modules --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "start": "ts-node-esm src/index.ts",
     "start:prod": "cross-env NODE_ENV=production nodemon dist/index.js",
     "update_deps": "npx npm-check-updates"
   },

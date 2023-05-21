@@ -12,7 +12,6 @@ import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
-import STATUS from "../model/constants/STATUS";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 
 @Service()
@@ -38,47 +37,45 @@ export class SubmissionService implements OnInit {
     @Inject()
     private logger: Logger;
 
-    public addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {
-        return this.ds.manager.transaction(async entityManager => {
-            const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
-            if (!currentActiveRound) {
-                throw new NotFound("Cannot add a submission when there are no currently active rounds.");
-            }
-            if (currentActiveRound.paused) {
-                throw new BadRequest("Unable to add entry as the current round is paused.");
-            }
-            try {
-                this.validateSubmission(entry, currentActiveRound, customWad);
-            } catch (e) {
-                if (customWad) {
-                    try {
-                        await this.customWadEngine.deleteCustomWad(customWad);
-                    } catch {
-                        this.logger.error(`Unable to delete file ${customWad.path}`);
-                    }
-                }
-                throw new BadRequest(e.message);
-            }
+    public async addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {
+        const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
+        if (!currentActiveRound) {
+            throw new NotFound("Cannot add a submission when there are no currently active rounds.");
+        }
+        if (currentActiveRound.paused) {
+            throw new BadRequest("Unable to add entry as the current round is paused.");
+        }
+        try {
+            this.validateSubmission(entry, currentActiveRound, customWad);
+        } catch (e) {
             if (customWad) {
-                const allowed = await this.customWadEngine.validateFile(customWad);
-                if (!allowed) {
+                try {
                     await this.customWadEngine.deleteCustomWad(customWad);
-                    throw new BadRequest("Invalid file: header mismatch.");
+                } catch {
+                    this.logger.error(`Unable to delete file ${customWad.path}`);
                 }
-                entry.customWadFileName = customWad.originalname;
             }
-            entry.submissionRoundId = currentActiveRound.id;
-            const repo = entityManager.getRepository(SubmissionModel);
-            const saveEntry = await repo.save(entry);
-            if (customWad) {
-                await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
+            throw new BadRequest(e.message);
+        }
+        if (customWad) {
+            const allowed = await this.customWadEngine.validateFile(customWad);
+            if (!allowed) {
+                await this.customWadEngine.deleteCustomWad(customWad);
+                throw new BadRequest("Invalid file: header mismatch.");
             }
-            saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.submissionRoundId);
-            return saveEntry;
-        });
+            entry.customWadFileName = customWad.originalname;
+        }
+        entry.submissionRoundId = currentActiveRound.id;
+        const repo = this.ds.getRepository(SubmissionModel);
+        const saveEntry = await repo.save(entry);
+        if (customWad) {
+            await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
+        }
+        saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.id);
+        return saveEntry;
     }
 
-    public async modifyStatus(id: number, status: STATUS, reason?: string): Promise<void> {
+    public async modifyStatus(status: SubmissionStatusModel): Promise<void> {
         const repo = this.ds.getRepository(SubmissionStatusModel);
         const submission = await repo.findOne({
             where: {
@@ -120,7 +117,7 @@ export class SubmissionService implements OnInit {
     public getEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
         return repo.findOne({
-            relations: ["submissionRound"],
+            relations: ["submissionRound", "status"],
             where: {
                 id
             }

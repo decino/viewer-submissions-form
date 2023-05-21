@@ -169,7 +169,9 @@ export class SubmissionModel extends AbstractModel {
 
     @Name("status")
     @Description("The current status of this submission")
-    @OneToOne("SubmissionStatusModel", "submission")
+    @OneToOne("SubmissionStatusModel", "submission", {
+        cascade: true
+    })
     public status: SubmissionStatusModel;
 
     @Column({

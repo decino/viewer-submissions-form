@@ -56,11 +56,19 @@ export class SubmissionConfirmationService implements OnInit {
     public async generateConfirmationEntry(email: string, round: number): Promise<PendingEntryConfirmationModel> {
         const confirmationModelRepository = this.ds.getRepository(PendingEntryConfirmationModel);
         const newEntry = this.ds.manager.create(PendingEntryConfirmationModel, {
-            submitterEmail: email,
-            submissionRoundId: round
+            submissionId: round
         });
         const saveEntry = await confirmationModelRepository.save(newEntry);
-        await this.sendConfirmationEmail(saveEntry);
+        const entry = await confirmationModelRepository.findOne({
+            relations: ["submission"],
+            where: {
+                id: saveEntry.id
+            }
+        });
+        if (!entry) {
+            throw Error("Unable to query DB");
+        }
+        await this.sendConfirmationEmail(entry);
         return saveEntry;
     }
 
@@ -74,7 +82,7 @@ export class SubmissionConfirmationService implements OnInit {
         const baseUrl = process.env.BASE_URL;
         const confirmationUrl = `${baseUrl}/processSubmission?uid=${pendingEntry.confirmationUid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;
-        return this.emailService.sendMail(body, pendingEntry.submitterEmail);
+        return this.emailService.sendMail(body, pendingEntry.submission.submitterEmail);
     }
 
 }

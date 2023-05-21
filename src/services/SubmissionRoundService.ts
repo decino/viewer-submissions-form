@@ -55,14 +55,14 @@ export class SubmissionRoundService {
         const repo = this.ds.getRepository(SubmissionRoundModel);
         if (includeActive) {
             return (await repo.find({
-                relations: ["submissions"]
+                relations: ["submissions", "submissions.status"]
             })) ?? [];
         }
         const foundWithoutActive = await repo.find({
             where: {
                 active: false
             },
-            relations: ["submissions"]
+            relations: ["submissions", "submissions.status"]
         });
         return foundWithoutActive ?? [];
     }

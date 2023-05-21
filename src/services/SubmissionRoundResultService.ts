@@ -60,12 +60,11 @@ export class SubmissionRoundResultService {
             }
             entry.isChosen = true;
             entry.status = this.ds.manager.create(SubmissionStatusModel, {
-                submissionRoundId: entry.submissionRoundId
+                submissionId: entry.submissionRoundId
             });
             entries.push(entry);
         }
-        const repo = this.ds.getRepository(SubmissionModel);
-        await repo.save(entries);
+        await this.ds.manager.save(SubmissionModel, entries);
         await this.submissionRoundService.endActiveSubmissionRound();
         this.entryCache.clear();
     }

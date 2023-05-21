@@ -12,8 +12,8 @@
             <th scope="col">Wad engine</th>
             <th scope="col">GzDoom actions</th>
         <% } %>
-        <th scope="col">Submitter name</th>
         <% if(isAdmin){ %>
+            <th scope="col">Submitter name</th>
             <th scope="col">Submitter is author</th>
             <th scope="col">Distributable</th>
             <th scope="col">Info</th>
@@ -49,8 +49,8 @@
             <td><%- chosenSubmission.getEngineAsString(); -%></td>
             <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
         <% } %>
-        <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
         <% if(isAdmin){ %>
+            <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
             <td><%- chosenSubmission.submitterAuthor; -%></td>
             <td><%- chosenSubmission.distributable; -%></td>
             <td><%- chosenSubmission.info; -%></td>
@@ -61,7 +61,8 @@
         <% if(includeDownload){ %>
             <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
                 <td>
-                    <a type="button" class="btn btn-outline-primary" target="_blank" href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
+                    <a type="button" class="btn btn-outline-primary" target="_blank"
+                       href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
                 </td>
             <% } else { %>
                 <td>N/A</td>

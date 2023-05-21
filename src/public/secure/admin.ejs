@@ -2,7 +2,8 @@
 <html lang="en" data-bs-theme="dark">
 <head>
     <%- include('../snippets/head.ejs'); %>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css"/>
 </head>
 <body>
 
@@ -49,11 +50,17 @@ function mode(arr) {
                         <div class="card-footer text-center">
                             <div class="btn-group" role="group" aria-label="Basic outlined example">
                                 <% if(indexModel.currentActiveRound.paused){ %>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resumeRoundModal">Resume round</button>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#resumeRoundModal">Resume round
+                                    </button>
                                 <% } else { %>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pauseRoundModal">Pause round</button>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#pauseRoundModal">Pause round
+                                    </button>
                                 <% } %>
-                                <button type="button" class="btn btn-outline-success" id="endRoundButton" data-bs-toggle="modal" data-bs-target="#endRoundModal">End round</button>
+                                <button type="button" class="btn btn-outline-success" id="endRoundButton"
+                                        data-bs-toggle="modal" data-bs-target="#endRoundModal">End round
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -107,11 +114,13 @@ function mode(arr) {
 </div>
 <% if(indexModel.currentActiveRound){ %>
     <% if(indexModel.currentActiveRound.paused){ %>
-        <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel" aria-hidden="true">
+        <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel"
+             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id; -%></h1>
+                        <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume
+                            round <%- indexModel.currentActiveRound.id; -%></h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -125,11 +134,13 @@ function mode(arr) {
             </div>
         </div>
     <% } else { %>
-        <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel" aria-hidden="true">
+        <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel"
+             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id; -%></h1>
+                        <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause
+                            round <%- indexModel.currentActiveRound.id; -%></h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -157,7 +168,8 @@ function mode(arr) {
                     <form id="endRoundWizard">
                         <nav>
                             <div class="nav nav-pills nav-fill" id="nav-tab" role="tablist">
-                                <a class="nav-link active" id="step1-tab" data-toggle="tab" href="#step1">Pause round</a>
+                                <a class="nav-link active" id="step1-tab" data-toggle="tab" href="#step1">Pause
+                                    round</a>
                                 <a class="nav-link" id="step2-tab" data-toggle="tab" href="#step2">Select winners</a>
                                 <a class="nav-link" id="step3-tab" data-toggle="tab" href="#step3">Review</a>
                             </div>
@@ -166,7 +178,8 @@ function mode(arr) {
                             <div class="tab-pane fade show active" id="step1">
                                 <div class="alert alert-primary" role="alert">
                                     <i class="bi bi-exclamation-triangle"></i>
-                                    In order to finish this round and pick winners, you must first pause the current active round.
+                                    In order to finish this round and pick winners, you must first pause the current
+                                    active round.
                                 </div>
                                 <% if(indexModel.currentActiveRound.paused){ %>
                                     <div class="alert alert-success" role="alert">
@@ -176,7 +189,9 @@ function mode(arr) {
                                     <div class="alert alert-warning" role="alert">
                                         <i class="bi bi-exclamation-triangle"></i>
                                         Please pause the round to continue.
-                                        <button type="button" class="btn btn-outline-success" id="endRoundPauseRoundButton">Pause round</button>
+                                        <button type="button" class="btn btn-outline-success"
+                                                id="endRoundPauseRoundButton">Pause round
+                                        </button>
                                     </div>
                                 <% } %>
                             </div>
@@ -184,6 +199,7 @@ function mode(arr) {
                                 <table class="table" id="endRoundResultsTable">
                                     <thead>
                                     <tr>
+                                        <th scope="col">ID</th>
                                         <th scope="col">WAD</th>
                                         <th scope="col">Level</th>
                                         <th scope="col">Submitter</th>
@@ -219,8 +235,10 @@ function mode(arr) {
                                 </button>
                             </div>
                             <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary" data-enchanter="next">Next</button>
-                                <button type="button" class="btn btn-outline-success" data-enchanter="finish">Finish</button>
+                                <button type="button" class="btn btn-outline-primary" data-enchanter="next">Next
+                                </button>
+                                <button type="button" class="btn btn-outline-success" data-enchanter="finish">Finish
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -229,7 +247,8 @@ function mode(arr) {
         </div>
     </div>
 
-    <div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -268,7 +287,8 @@ function mode(arr) {
     </div>
 
 <% } %>
-<div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel" aria-hidden="true">
+<div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -286,6 +306,42 @@ function mode(arr) {
 </div>
 
 
+<div class="modal fade" id="submissionStatusModal" tabindex="-1" aria-labelledby="submissionStatusModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="submissionStatusModalLabel">Modify submission status</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="submissionStatusModalInfoContent">
+                <form id="statusForm">
+                    <input type="hidden" name="id" id="submissionId"/>
+                    <div class="mb-3">
+                        <label for="statusSelect" class="form-label">Status</label>
+                        <select class="form-select" aria-label="Status Select" id="statusSelect" name="status">
+                            <option selected value="NONE">None</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="REJECTED">Rejected</option>
+                            <option value="COMPLETED">Completed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusComments" class="form-label">Comments</label>
+                        <textarea class="form-control" id="statusComments" rows="3" name="additionalInfo"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="submissionStatusModalOk"
+                        data-bs-dismiss="modal">Ok
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script type="text/javascript"
         src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
@@ -295,8 +351,9 @@ function mode(arr) {
 
 <script>
     Site.loadPage(async site => {
-        <% if(indexModel.currentActiveRound){ %>
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
+        const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
+        <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
         <% } %>
         loadEventListeners();
@@ -328,6 +385,13 @@ function mode(arr) {
         }
 
         function loadEventListeners() {
+
+            ((() => {
+                document.getElementById("submissionStatusModalOk").addEventListener("click", ev => {
+
+                });
+            })());
+
             ((() => {
                 const resumeRoundButton = document.getElementById("resumeRoundButton") ?? null;
                 const pauseRoundButton = document.getElementById("pauseRoundButton") ?? null;
@@ -473,6 +537,12 @@ function mode(arr) {
                                     select: {
                                         style: 'multi'
                                     },
+                                    columnDefs: [
+                                        {
+                                            "visible": false,
+                                            "targets": 0
+                                        }
+                                    ],
                                     ordering: false,
                                     buttons: [
                                         {
@@ -499,6 +569,7 @@ function mode(arr) {
                                                 }
                                                 const entry = json[0];
                                                 dt.row.add([
+                                                    entry.id,
                                                     entry.WADName,
                                                     entry.level,
                                                     entry.authorName ?? "anonymous",
@@ -531,6 +602,7 @@ function mode(arr) {
                                                 selectedRows.every(function (rowIdx, tableLoop, rowLoop) {
                                                     const entry = json[rowLoop];
                                                     this.data([
+                                                        entry.id,
                                                         entry.WADName,
                                                         entry.level,
                                                         entry.authorName ?? "anonymous",
@@ -559,8 +631,8 @@ function mode(arr) {
                                 step2Data.each((rows, index) => {
                                     tableHtml += "<tr>";
                                     tableHtml += `<td>${index + 1}</td>`;
-                                    for (const row of rows) {
-                                        tableHtml += `<td>${row}</td>`;
+                                    for (let i = 1; i < rows.length; i++) {
+                                        tableHtml += `<td>${rows[i]}</td>`;
                                     }
                                     tableHtml += "</tr>";
                                 });
@@ -760,6 +832,32 @@ function mode(arr) {
                                 submissionModificationModal.show();
                             }
                         });
+                } else {
+                    buttons.push({
+                        extend: 'selectedSingle',
+                        text: 'change status',
+                        action: async (e, dt) => {
+                            const selectedRow = dt.row({selected: true}).data();
+                            const id = selectedRow[0];
+                            let submission;
+                            try {
+                                submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                            } finally {
+                                site.loading(false);
+                            }
+                            const submissionObj = await submission.json();
+                            const statusObj = submissionObj.status;
+                            const dd = document.getElementById('statusSelect');
+                            const input = document.getElementById("statusComments");
+                            document.getElementById("submissionId").value = submissionObj.id;
+                            input.value = null;
+                            dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
+                            if (statusObj.additionalInfo) {
+                                input.value = statusObj.additionalInfo;
+                            }
+                            submissionStatusModal.show();
+                        }
+                    })
                 }
                 dtOpts["buttons"] = buttons;
                 el.DataTable(dtOpts);

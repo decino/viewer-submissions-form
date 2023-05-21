@@ -67,11 +67,22 @@
             <% } %>
         <% } %>
         <% if(isResults){ %>
-            <% if(chosenSubmission.status.status === "Rejected"){ %>
-                <td class="text-danger"><%- chosenSubmission.status.status; -%></td>
-            <% }else { %>
-                <td><%- chosenSubmission.status.status; -%></td>
-            <% } %>
+            <% let clazz = ""; %>
+            <% switch (chosenSubmission.status.status) {
+                case "Rejected":
+                    clazz = "text-danger";
+                    break;
+                case "In Progress":
+                    clazz = "text-info";
+                    break;
+                case "Queued":
+                    clazz = "";
+                    break;
+                case "Completed":
+                    clazz = "text-success";
+                    break;
+            } %>
+            <td class="<%- clazz -%>"><%- chosenSubmission.status.status; -%></td>
             <td><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
         <% } %>
     </tr>

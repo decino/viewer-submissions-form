@@ -39,7 +39,7 @@ export class SubmissionController extends BaseRestController {
         return this.submissionService.modifyEntry(submission);
     }
 
-    @Post("/changeStatus/:id")
+    @Post("/changeStatus")
     @Authorize("login")
     @Returns(StatusCodes.OK)
     public async changeStatus(@Res() res: PlatformResponse, @BodyParams() status: SubmissionStatusModel): Promise<unknown> {

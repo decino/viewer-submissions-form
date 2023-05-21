@@ -74,7 +74,8 @@ function mode(arr) {
                             <%- include('../snippets/SubmissionsTable.ejs', {
                             submissions: indexModel.currentActiveRound.submissions,
                             includeDownload: true,
-                            isAdmin: true
+                            isAdmin: true,
+                            isResults: false
                             }); %>
                         </div>
                     </div>
@@ -316,14 +317,14 @@ function mode(arr) {
             </div>
             <div class="modal-body" id="submissionStatusModalInfoContent">
                 <form id="statusForm">
-                    <input type="hidden" name="id" id="submissionId"/>
+                    <input type="hidden" name="id" id="statusSubmissionId"/>
                     <div class="mb-3">
                         <label for="statusSelect" class="form-label">Status</label>
                         <select class="form-select" aria-label="Status Select" id="statusSelect" name="status">
-                            <option selected value="NONE">None</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="REJECTED">Rejected</option>
-                            <option value="COMPLETED">Completed</option>
+                            <option selected value="Queued">Queued</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Completed">Completed</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -333,9 +334,7 @@ function mode(arr) {
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-primary" id="submissionStatusModalOk"
-                        data-bs-dismiss="modal">Ok
-                </button>
+                <button type="button" class="btn btn-outline-primary" id="submissionStatusModalOk">Ok</button>
             </div>
         </div>
     </div>
@@ -387,8 +386,29 @@ function mode(arr) {
         function loadEventListeners() {
 
             ((() => {
-                document.getElementById("submissionStatusModalOk").addEventListener("click", ev => {
-
+                document.getElementById("submissionStatusModalOk").addEventListener("click", async ev => {
+                    const submissionId = document.getElementById("statusSubmissionId").value;
+                    const status = document.getElementById("statusSelect").value;
+                    const additionalInfo = document.getElementById("statusComments").value || null;
+                    const formData = new URLSearchParams();
+                    formData.append("submissionId", submissionId);
+                    formData.append("status", status);
+                    if (additionalInfo) {
+                        formData.append("additionalInfo", additionalInfo);
+                    }
+                    site.loading(true);
+                    try {
+                        await fetch(`${baseUrl}/submission/changeStatus`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    } catch (e) {
+                        alert(e.message);
+                        return;
+                    } finally {
+                        Site.loading(false);
+                    }
+                    window.location.reload();
                 });
             })());
 
@@ -849,7 +869,7 @@ function mode(arr) {
                             const statusObj = submissionObj.status;
                             const dd = document.getElementById('statusSelect');
                             const input = document.getElementById("statusComments");
-                            document.getElementById("submissionId").value = submissionObj.id;
+                            document.getElementById("statusSubmissionId").value = submissionObj.id;
                             input.value = null;
                             dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
                             if (statusObj.additionalInfo) {

@@ -79,14 +79,14 @@ export class SubmissionService implements OnInit {
         const repo = this.ds.getRepository(SubmissionStatusModel);
         const submission = await repo.findOne({
             where: {
-                id
+                submissionId: status.submissionId
             }
         });
         if (!submission) {
-            throw new BadRequest(`Unable to find submission with id ${id}`);
+            throw new BadRequest(`Unable to find submission with id ${status.submissionId}`);
         }
-        submission.status = status;
-        submission.additionalInfo = reason ? reason : null;
+        submission.status = status.status;
+        submission.additionalInfo = status.additionalInfo ?? null;
 
         await repo.save(submission);
     }

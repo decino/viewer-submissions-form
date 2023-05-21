@@ -20,7 +20,7 @@
             <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane"
                  role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0">
                 <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round); -%></p>
-                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, includeDownload: true, isAdmin: isAdmin}); %>
+                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, includeDownload: true, isAdmin: isAdmin, isResults: true}); %>
             </div>
             <% } %>
         </div>

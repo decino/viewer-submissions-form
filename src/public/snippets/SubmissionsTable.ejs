@@ -7,12 +7,9 @@
         <th scope="col">No.</th>
         <th scope="col">WAD</th>
         <th scope="col">Level</th>
-
         <% if(isAdmin){ %>
             <th scope="col">Wad engine</th>
             <th scope="col">GzDoom actions</th>
-        <% } %>
-        <% if(isAdmin){ %>
             <th scope="col">Submitter name</th>
             <th scope="col">Submitter is author</th>
             <th scope="col">Distributable</th>
@@ -23,7 +20,10 @@
         <% if(includeDownload){ %>
             <th scope="col">Download</th>
         <% } %>
-
+        <% if(isResults){ %>
+            <th scope="col">Status</th>
+            <th scope="col">Comments</th>
+        <% } %>
     </tr>
     </thead>
     <tbody>
@@ -48,8 +48,6 @@
         <% if(isAdmin){ %>
             <td><%- chosenSubmission.getEngineAsString(); -%></td>
             <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
-        <% } %>
-        <% if(isAdmin){ %>
             <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
             <td><%- chosenSubmission.submitterAuthor; -%></td>
             <td><%- chosenSubmission.distributable; -%></td>
@@ -67,6 +65,14 @@
             <% } else { %>
                 <td>N/A</td>
             <% } %>
+        <% } %>
+        <% if(isResults){ %>
+            <% if(chosenSubmission.status.status === "Rejected"){ %>
+                <td class="text-danger"><%- chosenSubmission.status.status; -%></td>
+            <% }else { %>
+                <td><%- chosenSubmission.status.status; -%></td>
+            <% } %>
+            <td><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
         <% } %>
     </tr>
     <% } %>

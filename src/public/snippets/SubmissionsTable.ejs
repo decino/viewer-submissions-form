@@ -75,15 +75,12 @@
                 case "In Progress":
                     clazz = "text-info";
                     break;
-                case "Queued":
-                    clazz = "";
-                    break;
                 case "Completed":
                     clazz = "text-success";
                     break;
             } %>
-            <td class="<%- clazz -%>"><%- chosenSubmission.status.status; -%></td>
-            <td><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
+            <td class="<%- clazz; -%>"><%- chosenSubmission.status.status; -%></td>
+            <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
         <% } %>
     </tr>
     <% } %>

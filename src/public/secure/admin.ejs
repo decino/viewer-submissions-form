@@ -485,6 +485,23 @@ function mode(arr) {
                     window.location.reload();
                 });
             })());
+            ((() => {
+                const distributableRadios = document.querySelectorAll("#authorYes,#authorNo");
+                if (distributableRadios) {
+                    for (const distributableRadio of distributableRadios) {
+                        distributableRadio.addEventListener("change", evt => {
+                            const value = evt.target.value;
+                            const distributableSection = document.getElementById("distributableSection");
+                            if (value === "true") {
+                                site.display(false, distributableSection);
+                            } else {
+                                site.display(true, distributableSection);
+                            }
+                        });
+                    }
+                }
+            })());
+
 
             ((() => {
                 const resumeRoundButton = document.getElementById("resumeRoundButton") ?? null;
@@ -910,8 +927,34 @@ function mode(arr) {
                                 const submissionObj = await submission.json();
                                 const wadName = submissionObj.WADName;
                                 const wadURL = submissionObj.WAD ?? null;
+                                const isAuthor = submissionObj.author;
+                                const distributable = isAuthor && submissionObj.distributable;
+                                const changeEv = new Event('change');
+                                const authorYes = document.getElementById("authorYes");
+                                const authorNo = document.getElementById("authorNo");
+                                const distributableYes = document.getElementById("distributableYes");
+                                const distributableNo = document.getElementById("distributableNo");
+                                if (isAuthor) {
+                                    authorYes.checked = true;
+                                    authorYes.dispatchEvent(changeEv);
+                                } else {
+                                    authorNo.checked = true;
+                                    authorNo.dispatchEvent(changeEv);
+                                }
+                                if (distributable) {
+                                    distributableYes.checked = true;
+                                } else {
+                                    distributableNo.checked = true;
+                                }
+
                                 const wadUrlInput = document.getElementById("wadDownloadUrlSection");
-                                wadURL ? wadUrlInput.classList.remove("hidden") : wadUrlInput.classList.add("hidden");
+                                if (!wadURL) {
+                                    wadUrlInput.classList.add("hidden");
+                                    wadUrlInput.querySelector("input").setAttribute("disabled", "true");
+                                } else {
+                                    wadUrlInput.classList.remove("hidden");
+                                    wadUrlInput.querySelector("input").removeAttribute("disabled");
+                                }
                                 const level = submissionObj.level;
                                 const engine = submissionObj.engine;
                                 const submitterName = submissionObj.authorName;
@@ -951,7 +994,7 @@ function mode(arr) {
                             }
                             submissionStatusModal.show();
                         }
-                    })
+                    });
                 }
                 dtOpts["buttons"] = buttons;
                 el.DataTable(dtOpts);

@@ -106,6 +106,13 @@ export class SubmissionService implements OnInit {
         if (entry.engine) {
             mappedObj["wadEngine"] = entry.engine as DOOM_ENGINE;
         }
+        if (entry.author) {
+            mappedObj["submitterAuthor"] = entry.author === "true";
+        }
+        if (mappedObj["submitterAuthor"] && entry.distributable) {
+            mappedObj["distributable"] = entry.distributable === "true";
+        }
+
         mappedObj["submitterName"] = entry.authorName as string ?? null;
 
         const model = repo.create(mappedObj);

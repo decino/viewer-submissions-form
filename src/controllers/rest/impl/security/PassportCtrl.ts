@@ -1,13 +1,21 @@
-import {Controller, ProviderScope, Scope} from "@tsed/di";
-import {Authenticate} from "@tsed/passport";
+import {Controller, Inject, ProviderScope, Scope} from "@tsed/di";
+import {Authenticate, Authorize} from "@tsed/passport";
 import {Get, Post, Returns} from "@tsed/schema";
-import {Req, Res, UseBefore} from "@tsed/common";
+import {PlatformResponse, Req, Res, UseBefore} from "@tsed/common";
 import {StatusCodes} from "http-status-codes";
 import {ReCAPTCHAMiddleWare} from "../../../../middleware/endpoint/ReCAPTCHAMiddleWare";
+import {BodyParams} from "@tsed/platform-params";
+import {UserModel} from "../../../../model/db/User.model";
+import {UsersService} from "../../../../services/UserService";
+import {BaseRestController} from "../../BaseRestController";
+import {CustomUserInfoModel} from "../../../../model/auth/CustomUserInfoModel";
 
 @Controller("/auth")
 @Scope(ProviderScope.SINGLETON)
-export class PassportCtrl {
+export class PassportCtrl extends BaseRestController {
+
+    @Inject()
+    private usersService: UsersService;
 
     @Post("/login")
     @UseBefore(ReCAPTCHAMiddleWare)
@@ -24,5 +32,14 @@ export class PassportCtrl {
         request.session.destroy(function () {
             res.redirect('/');
         });
+    }
+
+    @Post("/changeDetails")
+    @Authorize("login")
+    @Returns(StatusCodes.OK)
+    public async changeDetails(@Res() res: PlatformResponse, @Req() req: Req, @BodyParams() userDetails: UserModel): Promise<PlatformResponse> {
+        const loggedInUser = req.user as CustomUserInfoModel;
+        await this.usersService.changeDetails(userDetails, loggedInUser);
+        return this.doSuccess(res, "User details changed");
     }
 }

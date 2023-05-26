@@ -86,6 +86,8 @@ Site.loadPage(async function (site) {
                 return;
             }
             site.loading(true);
+            wadNameInput.setAttribute("placeholder", "Attempting to obtain name from url...");
+            wadNameInput.setAttribute("disabled", "true");
             const proxyURl = new URL(`https://api.codetabs.com/v1/proxy?quest=${url}`);
             let result;
             try {
@@ -93,6 +95,9 @@ Site.loadPage(async function (site) {
             } catch {
                 site.loading(false);
                 return;
+            } finally {
+                wadNameInput.removeAttribute("placeholder");
+                wadNameInput.removeAttribute("disabled");
             }
             if (result.status !== 200) {
                 return;

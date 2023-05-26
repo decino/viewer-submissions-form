@@ -1,6 +1,6 @@
 import {AbstractModel} from "./AbstractModel";
 import {BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
-import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Nullable, Required} from "@tsed/schema";
+import {Any, Description, Enum, Example, Format, Ignore, Name, Nullable, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 import DOOM_ENGINE from "../constants/DoomEngine";
@@ -70,9 +70,7 @@ export class SubmissionModel extends AbstractModel {
     @Example("jump")
     @Example("mouselook")
     @Example("")
-    @Enum(GZDOOM_ACTIONS)
-    @Nullable(GZDOOM_ACTIONS)
-    @CollectionOf(Number).MaxItems(3).MinItems(0)
+    @Any()
     public gzDoomActions: GZDOOM_ACTIONS[] | null;
 
     @Column({

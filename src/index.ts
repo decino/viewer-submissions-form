@@ -4,27 +4,13 @@ import {PlatformExpress} from "@tsed/platform-express";
 import {Server} from "./Server";
 import {DataSource, Logger as TypeOrmLogger} from "typeorm";
 import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
-import glob from "glob-promise";
-import path from "path";
-import {EntitySchema} from "typeorm/entity-schema/EntitySchema";
 
-
-function resolve(...paths: string[]): string[] {
-    return paths.flatMap(ps => glob.sync(ps.split(path.sep).join("/")));
-}
-
-async function getDbModules(): Promise<EntitySchema[]> {
-    const files = resolve(`${__dirname}/model/db/**/*.model.{ts,js}`);
-    const pArr = files.map((file) => import(file));
-    const modules: Awaited<EntitySchema>[] = await Promise.all(pArr);
-    return modules.map(module => Object.values(module)[0]);
-}
 
 async function bootstrap(): Promise<void> {
-    const models = await getDbModules();
+    // const models = await getDbModules();
     const dataSource = new DataSource({
         type: "better-sqlite3",
-        entities: models,
+        entities: [`${__dirname}/model/db/**/*.model.{ts,js}`],
         synchronize: true,
         database: "main.sqlite"
     });
@@ -48,8 +34,6 @@ async function bootstrap(): Promise<void> {
                     public log(level: "log" | "info" | "warn", message: any): void {
                         switch (level) {
                             case "log":
-                                logger.info(message);
-                                break;
                             case "info":
                                 logger.info(message);
                                 break;

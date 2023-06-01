@@ -37,4 +37,12 @@ export class SubmissionRoundResultController extends BaseRestController {
         await this.submissionRoundResultService.submitEntries(entries);
         return super.doSuccess(res, "Entries have been saved.");
     }
+
+    @Post("/addRandomEntry")
+    @Authorize("login")
+    @Returns(StatusCodes.OK)
+    public async addRandomEntry(@Res() res: PlatformResponse, @QueryParams("roundId") roundId: number): Promise<unknown> {
+        const entryAdded = await this.submissionRoundResultService.addRandomEntry(roundId);
+        return super.doSuccess(res, `${entryAdded.wadName} map ${entryAdded.wadLevel} has been chosen`);
+    }
 }

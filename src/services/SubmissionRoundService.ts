@@ -51,6 +51,15 @@ export class SubmissionRoundService {
         return found;
     }
 
+    public getSubmissionRound(roundId: number): Promise<SubmissionRoundModel | null> {
+        return this.ds.manager.findOne(SubmissionRoundModel, {
+            where: {
+                id: roundId
+            },
+            relations: ["submissions", "submissions.status"]
+        });
+    }
+
     public async getAllSubmissionRounds(includeActive = true): Promise<SubmissionRoundModel[]> {
         const repo = this.ds.getRepository(SubmissionRoundModel);
         if (includeActive) {

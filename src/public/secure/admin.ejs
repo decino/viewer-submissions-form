@@ -336,6 +336,14 @@ function mode(arr) {
                         <label for="statusComments" class="form-label">Comments</label>
                         <textarea class="form-control" id="statusComments" rows="3" name="additionalInfo"></textarea>
                     </div>
+                    <div class="mb-3 hidden" id="generateRandomWrapper">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="generateRandomEntryCheck">
+                            <label class="form-check-label" for="generateRandomEntryCheck">
+                                generate another random entry for this round
+                            </label>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -361,7 +369,7 @@ function mode(arr) {
                            value="<%- user.email; -%>">
                 </div>
                 <div class="mb-3">
-                    <label for="changePassword" class="form-label">Password</label>
+                    <label for="changePassword" class="form-label">New Password</label>
                     <input type="password" class="form-control" name="password" id="changePassword">
                 </div>
                 <div class="mb-3">
@@ -426,7 +434,7 @@ function mode(arr) {
                 document.getElementById("changePasswordRepeat").value = null;
             });
             ((() => {
-                document.getElementById("changeDetailsModelOk").addEventListener("click", async () => {
+                document.getElementById("changeDetailsModelOk").addEventListener("click", async e => {
                     const formData = new URLSearchParams();
                     const email = document.getElementById("changeEmail").value;
                     const password = document.getElementById("changePassword").value;
@@ -460,7 +468,19 @@ function mode(arr) {
             })());
 
             ((() => {
+                document.getElementById("statusSelect").addEventListener("change", ev => {
+                    const value = ev.target.value;
+                    const checkBoxWrapper = document.getElementById("generateRandomWrapper");
+                    const generateRandomEntryCheck = document.getElementById("generateRandomEntryCheck");
+                    generateRandomEntryCheck.checked = false;
+                    if (value === "Rejected") {
+                        Site.display(false, checkBoxWrapper);
+                    } else {
+                        Site.display(true, checkBoxWrapper);
+                    }
+                });
                 document.getElementById("submissionStatusModalOk").addEventListener("click", async ev => {
+                    const generateRandomEntryCheck = document.getElementById("generateRandomEntryCheck");
                     const submissionId = document.getElementById("statusSubmissionId").value;
                     const status = document.getElementById("statusSelect").value;
                     const additionalInfo = document.getElementById("statusComments").value || null;
@@ -481,6 +501,20 @@ function mode(arr) {
                         return;
                     } finally {
                         Site.loading(false);
+                    }
+                    if (generateRandomEntryCheck.checked) {
+                        const submissionEntryId = ev.target.dataset.entryid;
+                        site.loading(true);
+                        try {
+                            await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${submissionEntryId}`, {
+                                method: 'POST'
+                            });
+                        } catch (e) {
+                            alert(e.message);
+                            return;
+                        } finally {
+                            Site.loading(false);
+                        }
                     }
                     window.location.reload();
                 });
@@ -974,6 +1008,7 @@ function mode(arr) {
                         extend: 'selectedSingle',
                         text: 'change status',
                         action: async (e, dt) => {
+                            const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
                             const selectedRow = dt.row({selected: true}).data();
                             const id = selectedRow[0];
                             let submission;
@@ -992,6 +1027,7 @@ function mode(arr) {
                             if (statusObj.additionalInfo) {
                                 input.value = statusObj.additionalInfo;
                             }
+                            document.getElementById("submissionStatusModalOk").dataset.entryid = submissionEntryId;
                             submissionStatusModal.show();
                         }
                     });

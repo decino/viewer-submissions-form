@@ -5,7 +5,7 @@ import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
-import {InternalServerError} from "@tsed/exceptions";
+import {BadRequest, InternalServerError} from "@tsed/exceptions";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 
 @Service()
@@ -22,9 +22,14 @@ export class SubmissionRoundResultService {
 
     private readonly entryCache: Map<string, SubmissionModel[]> = new Map();
 
-    public async buildResultSet(): Promise<void> {
+    public async buildResultSet(entries?: SubmissionModel[]): Promise<void> {
         this.entryCache.clear();
-        const allEntries = await this.submissionService.getAllEntries();
+        let allEntries: SubmissionModel[];
+        if (entries) {
+            allEntries = entries;
+        } else {
+            allEntries = await this.submissionService.getAllEntries();
+        }
         for (const entry of allEntries) {
             if (!entry.submissionValid) {
                 continue;
@@ -47,8 +52,13 @@ export class SubmissionRoundResultService {
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    public async submitEntries(entryIds: number[]): Promise<void> {
-        const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+    public async submitEntries(entryIds: number[], round?: SubmissionRoundModel): Promise<void> {
+        let activeRound: SubmissionRoundModel | null;
+        if (round) {
+            activeRound = round;
+        } else {
+            activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        }
         if (!activeRound) {
             return;
         }
@@ -59,9 +69,11 @@ export class SubmissionRoundResultService {
                 throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
             entry.isChosen = true;
-            entry.status = this.ds.manager.create(SubmissionStatusModel, {
-                submissionId: entry.submissionRoundId
-            });
+            if (!entry.status) {
+                entry.status = this.ds.manager.create(SubmissionStatusModel, {
+                    submissionId: entry.submissionRoundId
+                });
+            }
             entries.push(entry);
         }
         await this.ds.manager.save(SubmissionModel, entries);
@@ -79,6 +91,17 @@ export class SubmissionRoundResultService {
         return filteredResult ?? [];
     }
 
+    public async addRandomEntry(roundId: number): Promise<SubmissionModel> {
+        const round = await this.submissionRoundService.getSubmissionRound(roundId);
+        if (!round) {
+            throw new BadRequest(`Round ${roundId} does not exist`);
+        }
+        await this.buildResultSet(round.submissions);
+        const entry = this.generateEntries(1)[0];
+        await this.submitEntries([entry.id], round);
+        return entry;
+    }
+
     private getMultipleRandom<T>(array: T[], num = -1): T[] {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -87,5 +110,4 @@ export class SubmissionRoundResultService {
         }
         return num === -1 ? shuffled : shuffled.slice(0, num);
     }
-
 }

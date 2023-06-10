@@ -638,11 +638,11 @@ function mode(arr) {
                                 function highlightDupes() {
                                     step2Dt.rows().every(function () {
                                         const htmlRow = this.node();
-                                        htmlRow.classList.remove("text-bg-danger");
+                                        htmlRow.classList.remove("table-danger");
                                     });
                                     const dupeRows = getDuplicateRows();
                                     for (let dupeRow of dupeRows) {
-                                        dupeRow.classList.add("text-bg-danger");
+                                        dupeRow.classList.add("table-danger");
                                     }
                                 }
 

@@ -78,6 +78,9 @@
                 case "Completed":
                     clazz = "text-success";
                     break;
+                case "Queued":
+                    clazz = "text-warning";
+                    break;
             } %>
             <td class="<%- clazz; -%>"><%- chosenSubmission.status.status; -%></td>
             <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>

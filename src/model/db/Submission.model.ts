@@ -133,6 +133,15 @@ export class SubmissionModel extends AbstractModel {
     public customWadFileName: string | null;
 
     @Column({
+        nullable: true,
+        type: "text"
+    })
+    @Name("youtubeLink")
+    @Description("The link to the youtube play of this entry")
+    @Nullable(String)
+    public youtubeLink: string | null;
+
+    @Column({
         nullable: false
     })
     @Name("email")

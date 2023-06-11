@@ -75,6 +75,18 @@ export class SubmissionService implements OnInit {
         return saveEntry;
     }
 
+    public async addYoutubeToSubmission(submissionId: number, youtubeLink: string | null): Promise<void> {
+        const repo = this.ds.getRepository(SubmissionModel);
+        const submission = await repo.findOneBy({
+            id: submissionId
+        });
+        if (!submission) {
+            throw new BadRequest(`Unable to find submission of id ${submissionId}`);
+        }
+        submission.youtubeLink = youtubeLink;
+        await repo.save(submission);
+    }
+
     public async modifyStatus(status: SubmissionStatusModel): Promise<void> {
         const repo = this.ds.getRepository(SubmissionStatusModel);
         const submission = await repo.findOne({

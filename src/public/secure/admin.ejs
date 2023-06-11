@@ -312,6 +312,35 @@ function mode(arr) {
 </div>
 
 
+<div class="modal fade" id="setYoutubeLinkModal" tabindex="-1" aria-labelledby="setYoutubeLinkModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="setYoutubeLinkModalLabel">Set YouTube link</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="submissionInfoContent">
+                <div class="alert alert-success" role="alert">
+                    Use this to set a YouTube link after you have published the video
+                </div>
+                <input type="hidden" id="setYoutubeLinkSubmissionId">
+                <div class="mb-3 mt-3">
+                    <label for="youtubeLinkUrl" class="form-label">Enter YouTube extension</label>
+                    <div class="input-group">
+                        <span class="input-group-text">https://www.youtube.com/</span>
+                        <input id="youtubeLinkUrl" type="text" class="form-control" placeholder="watch?v=t7BW5ZiTmrE">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="youtubeLinkOk">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal fade" id="submissionStatusModal" tabindex="-1" aria-labelledby="submissionStatusModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
@@ -396,6 +425,7 @@ function mode(arr) {
     Site.loadPage(async site => {
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
         const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
+        const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
         <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
         <% } %>
@@ -433,6 +463,36 @@ function mode(arr) {
                 document.getElementById("changePassword").value = null;
                 document.getElementById("changePasswordRepeat").value = null;
             });
+
+            ((() => {
+                document.getElementById("youtubeLinkOk").addEventListener("click", async e => {
+                    const submissionId = document.getElementById("setYoutubeLinkSubmissionId").value;
+                    const linkExt = document.getElementById("youtubeLinkUrl").value;
+
+                    let endpoint;
+                    if (!linkExt) {
+                        endpoint = `${baseUrl}/submission/${submissionId}/setYoutubeLink?link`;
+                    } else {
+                        const link = `https://www.youtube.com/${linkExt}`;
+                        const encodedLink = encodeURIComponent(link);
+                        endpoint = `${baseUrl}/submission/${submissionId}/setYoutubeLink?link=${encodedLink}`;
+                    }
+
+                    site.loading(true);
+                    try {
+                        await fetch(endpoint, {
+                            method: 'POST'
+                        });
+                    } catch (e) {
+                        alert(e.message);
+                        return;
+                    } finally {
+                        Site.loading(false);
+                    }
+                    alert(`YouTube link ${linkExt ? "set" : "cleared"}`);
+                    window.location.reload();
+                });
+            })());
             ((() => {
                 document.getElementById("changeDetailsModelOk").addEventListener("click", async e => {
                     const formData = new URLSearchParams();
@@ -1005,32 +1065,42 @@ function mode(arr) {
                         });
                 } else {
                     buttons.push({
-                        extend: 'selectedSingle',
-                        text: 'change status',
-                        action: async (e, dt) => {
-                            const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
-                            const selectedRow = dt.row({selected: true}).data();
-                            const id = selectedRow[0];
-                            let submission;
-                            try {
-                                submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
-                            } finally {
-                                site.loading(false);
+                            extend: 'selectedSingle',
+                            text: 'Change status',
+                            action: async (e, dt) => {
+                                const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                let submission;
+                                try {
+                                    submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const submissionObj = await submission.json();
+                                const statusObj = submissionObj.status;
+                                const dd = document.getElementById('statusSelect');
+                                const input = document.getElementById("statusComments");
+                                document.getElementById("statusSubmissionId").value = submissionObj.id;
+                                input.value = null;
+                                dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
+                                if (statusObj.additionalInfo) {
+                                    input.value = statusObj.additionalInfo;
+                                }
+                                document.getElementById("submissionStatusModalOk").dataset.entryid = submissionEntryId;
+                                submissionStatusModal.show();
                             }
-                            const submissionObj = await submission.json();
-                            const statusObj = submissionObj.status;
-                            const dd = document.getElementById('statusSelect');
-                            const input = document.getElementById("statusComments");
-                            document.getElementById("statusSubmissionId").value = submissionObj.id;
-                            input.value = null;
-                            dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
-                            if (statusObj.additionalInfo) {
-                                input.value = statusObj.additionalInfo;
+                        },
+                        {
+                            extend: 'selectedSingle',
+                            text: 'Set YouTube link',
+                            action: async (e, dt) => {
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                document.getElementById("setYoutubeLinkSubmissionId").value = id;
+                                setYoutubeLinkModal.show();
                             }
-                            document.getElementById("submissionStatusModalOk").dataset.entryid = submissionEntryId;
-                            submissionStatusModal.show();
-                        }
-                    });
+                        });
                 }
                 dtOpts["buttons"] = buttons;
                 el.DataTable(dtOpts);

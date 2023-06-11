@@ -6,7 +6,7 @@ import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
 import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, Res, UseBefore} from "@tsed/common";
+import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res, UseBefore} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 import {Authorize} from "@tsed/passport";
@@ -45,6 +45,16 @@ export class SubmissionController extends BaseRestController {
     public async changeStatus(@Res() res: PlatformResponse, @BodyParams() status: SubmissionStatusModel): Promise<unknown> {
         await this.submissionService.modifyStatus(status);
         return super.doSuccess(res, `Submission status has been changed`);
+    }
+
+    @Post("/:id/setYoutubeLink")
+    @Authorize("login")
+    @Returns(StatusCodes.OK)
+    public async setYoutubeLink(@Res() res: PlatformResponse,
+                                @PathParams("id") submissionId: number,
+                                @QueryParams("link") youtubeLink?: string): Promise<unknown> {
+        await this.submissionService.addYoutubeToSubmission(submissionId, youtubeLink ?? null);
+        return super.doSuccess(res, `Submission youtube link has been assigned`);
     }
 
     @Get("/downloadWadSecure/:roundId/:id")

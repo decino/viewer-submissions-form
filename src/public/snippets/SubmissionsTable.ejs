@@ -38,10 +38,11 @@
         <% } %>
         <td><%- i + 1; -%></td>
         <td>
-            <u>
-                <span data-bs-toggle="tooltip" data-bs-placement="top"
-                      data-bs-title="<%- chosenSubmission.wadName; -%>"><%- chosenSubmission.wadName; -%></span>
-            </u>
+            <% const toShow = chosenSubmission.youtubeLink ?
+                    `<a target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}" href="${chosenSubmission.youtubeLink}">${chosenSubmission.wadName}</a>`
+                    :
+                    `<u><span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">${chosenSubmission.wadName}</span></u>`; %>
+            <%- toShow; -%>
         </td>
         <td><%- chosenSubmission.wadLevel; -%></td>
 

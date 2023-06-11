@@ -7,17 +7,19 @@
         <th scope="col">No.</th>
         <th scope="col">WAD</th>
         <th scope="col">Level</th>
+        <% if(isAdmin || isPReviousResults){ %>
+            <th scope="col">Submitter name</th>
+        <% } %>
         <% if(isAdmin){ %>
             <th scope="col">Wad engine</th>
             <th scope="col">GzDoom actions</th>
-            <th scope="col">Submitter name</th>
             <th scope="col">Submitter is author</th>
             <th scope="col">Distributable</th>
             <th scope="col">Info</th>
             <th scope="col">Submitter email</th>
         <% } %>
 
-        <% if(includeDownload){ %>
+        <% if(isPReviousResults){ %>
             <th scope="col">Download</th>
         <% } %>
         <% if(isResults){ %>
@@ -45,11 +47,12 @@
             <%- toShow; -%>
         </td>
         <td><%- chosenSubmission.wadLevel; -%></td>
-
+        <% if(isAdmin || isPReviousResults){ %>
+            <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
+        <% } %>
         <% if(isAdmin){ %>
             <td><%- chosenSubmission.getEngineAsString(); -%></td>
             <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
-            <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
             <td><%- chosenSubmission.submitterAuthor; -%></td>
             <td><%- chosenSubmission.distributable; -%></td>
             <td><%- chosenSubmission.info; -%></td>
@@ -57,7 +60,7 @@
                 <a href="mailto:<%- chosenSubmission.submitterEmail; -%>"><%- chosenSubmission.submitterEmail; -%></a>
             </td>
         <% } %>
-        <% if(includeDownload){ %>
+        <% if(isPReviousResults){ %>
             <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
                 <td>
                     <a type="button" class="btn btn-outline-primary" target="_blank"

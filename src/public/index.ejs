@@ -62,7 +62,7 @@
                             <div class="card-body" style="max-height: 900px; overflow-y: auto;">
                                 <%- include('snippets/SubmissionsTable.ejs', {
                                 submissions: model.currentActiveRound.submissions,
-                                includeDownload: false,
+                                isPReviousResults: false,
                                 isAdmin: false,
                                 isResults: false
                                 }); %>

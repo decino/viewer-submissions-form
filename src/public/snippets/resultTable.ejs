@@ -21,7 +21,7 @@
                  role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0"
                  data-entryid="<%- round.id; -%>">
                 <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round); -%></p>
-                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, includeDownload: true, isAdmin: isAdmin, isResults: true}); %>
+                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: true}); %>
             </div>
             <% } %>
         </div>

@@ -73,7 +73,7 @@ function mode(arr) {
                         <div class="card-body">
                             <%- include('../snippets/SubmissionsTable.ejs', {
                             submissions: indexModel.currentActiveRound.submissions,
-                            includeDownload: true,
+                            isPReviousResults: true,
                             isAdmin: true,
                             isResults: false
                             }); %>

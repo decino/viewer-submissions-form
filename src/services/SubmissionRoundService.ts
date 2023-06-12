@@ -1,19 +1,39 @@
-import {Inject, Service} from "@tsed/di";
+import {Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {BadRequest} from "@tsed/exceptions";
 import {SubmissionModel} from "../model/db/Submission.model";
+import {DecinoRoundHistoryImporterEngine} from "../engine/DecinoRoundHistoryImporterEngine";
+import DOOM_ENGINE from "../model/constants/DoomEngine";
+import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
+import STATUS from "../model/constants/STATUS";
+import {Logger} from "@tsed/logger";
 
 @Service()
-export class SubmissionRoundService {
+export class SubmissionRoundService implements OnInit {
 
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
     @Inject()
     private customWadEngine: CustomWadEngine;
+
+    @Inject()
+    private decinoRoundHistoryImporterEngine: DecinoRoundHistoryImporterEngine;
+
+    @Inject()
+    private logger: Logger;
+
+    public async $onInit(): Promise<void> {
+        const allRounds = await this.getAllSubmissionRounds(true);
+        if (allRounds.length === 0) {
+            this.logger.info("First start detected, loading all previous submission rounds from decino.nl...");
+            const result = await this.syncRound();
+            this.logger.info(`Added ${result.length} submission rounds to the database`);
+        }
+    }
 
     public newSubmissionRound(name: string): Promise<SubmissionRoundModel> {
         return this.ds.transaction(async entityManager => {
@@ -33,6 +53,49 @@ export class SubmissionRoundService {
             });
             return repo.save(newModel);
         });
+    }
+
+    public async syncRound(): Promise<SubmissionRoundModel[]> {
+        const submissionRoundModelRepository = this.ds.getRepository(SubmissionRoundModel);
+        const submissionRepo = this.ds.getRepository(SubmissionModel);
+        const entries = await this.decinoRoundHistoryImporterEngine.getSubmissionRounds();
+        const submissionRounds: SubmissionRoundModel[] = [];
+        let n = 1;
+        for (const entry of entries) {
+            const {submissions, roundId} = entry;
+            const submissionsModels: SubmissionModel[] = submissions.map((submission, index) => {
+
+                const obj: Partial<SubmissionModel> = {
+                    submissionRoundId: roundId,
+                    youtubeLink: submission.youTubeLink,
+                    wadLevel: submission.level,
+                    isChosen: submission.chosen,
+                    wadName: submission.wad,
+                    wadURL: submission.wadDownload,
+                    wadEngine: DOOM_ENGINE.GZDoom,
+                    submitterEmail: `foo@example${index}.com`,
+                    submitterName: submission.submitter,
+                    submissionValid: true
+                };
+                if (submission.chosen) {
+                    const status = new SubmissionStatusModel();
+                    status.status = STATUS.COMPLETED;
+                    obj.status = status;
+                    n++;
+                }
+                return submissionRepo.create(obj);
+            });
+            const submissionRound = submissionRoundModelRepository.create({
+                id: roundId,
+                active: false,
+                submissions: submissionsModels,
+                name: `Submission${roundId}`
+            });
+            submissionRounds.push(submissionRound);
+        }
+        const ret = await submissionRoundModelRepository.save(submissionRounds);
+        await this.ds.manager.query("UPDATE SQLITE_SEQUENCE SET seq = " + n + " WHERE name = 'submission_status_model'");
+        return ret;
     }
 
     public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {
@@ -111,4 +174,5 @@ export class SubmissionRoundService {
         currentActiveRound.paused = pause;
         await repo.save(currentActiveRound);
     }
+
 }

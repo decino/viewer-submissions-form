@@ -31,7 +31,9 @@ export class SubmissionRoundModel extends AbstractModel {
 
     @Name("submissions")
     @Description("List of submissions that belong to this round")
-    @OneToMany(() => SubmissionModel, submissions => submissions.submissionRound)
+    @OneToMany(() => SubmissionModel, submissions => submissions.submissionRound, {
+        cascade: true
+    })
     public submissions: SubmissionModel[];
 
     @BeforeInsert()

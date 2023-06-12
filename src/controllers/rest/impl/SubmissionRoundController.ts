@@ -15,6 +15,7 @@ export class SubmissionRoundController extends BaseRestController {
     @Inject()
     private submissionRoundService: SubmissionRoundService;
 
+
     @Post("/newRound")
     @Authorize("login")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)

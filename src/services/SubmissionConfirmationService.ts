@@ -2,7 +2,7 @@ import {Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
-import {BadRequest, NotFound} from "@tsed/exceptions";
+import {NotFound} from "@tsed/exceptions";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {Logger} from "@tsed/common";
 import {EmailService} from "./EmailService";
@@ -40,9 +40,6 @@ export class SubmissionConfirmationService implements OnInit {
             });
             if (!confirmationEntry) {
                 throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
-            }
-            if (!confirmationEntry.submission.submissionRound?.active || confirmationEntry.submission.submissionRound.paused) {
-                throw new BadRequest("Submission is currently not active or is paused");
             }
             const submission = confirmationEntry.submission;
             submission.submissionValid = true;

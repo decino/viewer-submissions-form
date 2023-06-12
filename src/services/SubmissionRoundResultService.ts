@@ -70,9 +70,7 @@ export class SubmissionRoundResultService {
             }
             entry.isChosen = true;
             if (!entry.status) {
-                entry.status = this.ds.manager.create(SubmissionStatusModel, {
-                    submissionId: entry.submissionRoundId
-                });
+                entry.status = this.ds.manager.create(SubmissionStatusModel);
             }
             entries.push(entry);
         }

@@ -63,11 +63,13 @@ export class SubmissionRoundResultService {
             return;
         }
         const entries: SubmissionModel[] = [];
-        for (const entryId of entryIds) {
+        for (let i = 0; i < entryIds.length; i++) {
+            const entryId = entryIds[i];
             const entry = activeRound.submissions.find(submission => submission.id === entryId);
             if (!entry) {
                 throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
+            entry.playOrder = i + 1;
             entry.isChosen = true;
             if (!entry.status) {
                 entry.status = this.ds.manager.create(SubmissionStatusModel);

@@ -122,6 +122,14 @@ export class SubmissionModel extends AbstractModel {
     })
     public submissionRoundId: number;
 
+    @Name("playOrder")
+    @Description("The order in what this submission was played")
+    @Column({
+        nullable: true,
+        default: null
+    })
+    public playOrder: number;
+
     @Column({
         nullable: true,
         type: "text"

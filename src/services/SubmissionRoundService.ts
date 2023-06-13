@@ -80,6 +80,7 @@ export class SubmissionRoundService implements OnInit {
                 if (submission.chosen) {
                     const status = new SubmissionStatusModel();
                     status.status = STATUS.COMPLETED;
+                    obj.playOrder = submission.no;
                     obj.status = status;
                     n++;
                 }

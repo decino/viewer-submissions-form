@@ -30,7 +30,7 @@
     </thead>
     <tbody>
     <%
-    submissions = submissions.sort((a, b) => a.id - b.id);
+    submissions = submissions.sort((a, b) => a.playOrder - b.playOrder);
     for(let i = 0 ; i < submissions.length; i++){
         const chosenSubmission = submissions[i];
     %>

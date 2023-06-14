@@ -428,6 +428,7 @@ function mode(arr) {
         const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
         <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
+        const dtMap = new Map();
         <% } %>
         loadEventListeners();
         initDt();
@@ -463,6 +464,32 @@ function mode(arr) {
                 document.getElementById("changePassword").value = null;
                 document.getElementById("changePasswordRepeat").value = null;
             });
+
+            ((() => {
+
+                function resize(entryId) {
+                    const tables = dtMap.get(entryId);
+                    for (const table of tables) {
+                        table.columns.adjust().draw();
+                    }
+                }
+
+                site.initPRevSubmissionToggle((el) => {
+                    const activeButton = el.closest(".card").querySelector('button[data-bs-toggle="tab"].active');
+                    const entryId = activeButton.dataset.entryid;
+                    resize(entryId);
+                });
+
+                const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+                for (let i = 0; i < tabEls.length; i++) {
+                    const tab = tabEls[i];
+                    tab.addEventListener('shown.bs.tab', event => {
+                        const newTab = event.target;
+                        const entryId = newTab.dataset.entryid;
+                        resize(entryId);
+                    });
+                }
+            })());
 
             ((() => {
                 document.getElementById("youtubeLinkOk").addEventListener("click", async e => {
@@ -930,6 +957,7 @@ function mode(arr) {
         function initDt() {
             $('.submissionsTable').each(function () {
                 const el = $(this);
+                const ds = el[0].dataset.isresults === "true";
                 const isPreviousRoundCard = el.closest(".preRoundCard").length > 0;
                 const dtOpts = {
                     dom: 'Bfrtip',
@@ -945,7 +973,10 @@ function mode(arr) {
                         style: isPreviousRoundCard ? 'single' : 'multi'
                     }
                 };
-
+                if (!ds) {
+                    dtOpts.dom = "Plfrtip";
+                    delete dtOpts.select;
+                }
 
                 const buttons = [
                     'colvis',
@@ -1103,7 +1134,15 @@ function mode(arr) {
                         });
                 }
                 dtOpts["buttons"] = buttons;
-                el.DataTable(dtOpts);
+                const table = new DataTable(el, dtOpts);
+                if (isPreviousRoundCard) {
+                    const roundId = el[0].closest(".tab-pane").dataset.entryid;
+                    if (dtMap.has(roundId)) {
+                        dtMap.get(roundId).push(table);
+                    } else {
+                        dtMap.set(roundId, [table]);
+                    }
+                }
             });
         }
     });

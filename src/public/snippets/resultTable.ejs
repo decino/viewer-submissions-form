@@ -7,7 +7,8 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>"
                         data-bs-toggle="tab" data-bs-target="#entry<%- round.id; -%>-pane" type="button" role="tab"
-                        aria-controls="entry<%- round.id; -%>-pane" aria-selected="true"><%- round.name; -%></button>
+                        aria-controls="entry<%- round.id; -%>-pane" aria-selected="true"
+                        data-entryid="<%- round.id; -%>"><%- round.name; -%></button>
             </li>
             <% } %>
         </ul>
@@ -20,8 +21,15 @@
             <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane"
                  role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0"
                  data-entryid="<%- round.id; -%>">
+                <div class="form-check form-switch float-end mb-3 allSubmissionSwitchWrapper">
+                    <input class="form-check-input" type="checkbox" role="switch" id="showAllSubmissionSwitch<%- i -%>">
+                    <label class="form-check-label" for="showAllSubmissionSwitch<%- i -%>">All submissions</label>
+                </div>
                 <p class="mb-3 mt-3">Date: <%- model.getRoundDateAsString(round); -%></p>
                 <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: true}); %>
+                <div class="hidden allSubmissionsToggleWrapper">
+                    <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: false}); %>
+                </div>
             </div>
             <% } %>
         </div>

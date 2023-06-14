@@ -131,6 +131,31 @@ const Site = (function () {
             element.closest("div").classList.remove("hidden");
         }
     };
+
+    const initPRevSubmissionToggle = function initPRevSubmissionToggle(overload) {
+        const allTogglesWrappers = document.getElementsByClassName("allSubmissionSwitchWrapper");
+        if (allTogglesWrappers.length > 0) {
+            for (let i = 0; i < allTogglesWrappers.length; i++) {
+                const wrapper = allTogglesWrappers[i];
+                const el = wrapper.querySelector("input");
+                if (el) {
+                    el.addEventListener("change", ev => {
+                        const target = ev.target;
+                        const tableWrapper = target.closest(".tab-pane").querySelector(".allSubmissionsToggleWrapper");
+                        if (tableWrapper.classList.contains("hidden")) {
+                            tableWrapper.classList.remove("hidden");
+                        } else {
+                            tableWrapper.classList.add("hidden");
+                        }
+                        if (overload) {
+                            overload(el);
+                        }
+                    });
+                }
+            }
+        }
+    };
+
     const loadPage = function loadPage(anon) {
         // eslint-disable-next-line require-await
         anon.call(this, Site).then(async () => {
@@ -152,6 +177,7 @@ const Site = (function () {
         showSuccess,
         showError,
         onEntry,
-        onDelete
+        onDelete,
+        initPRevSubmissionToggle
     };
 }());

@@ -1,96 +1,105 @@
-<table class="table submissionsTable">
-    <thead>
-    <tr>
-        <% if(isAdmin){ %>
-            <th scope="col">ID.</th>
-        <% } %>
-        <th scope="col">No.</th>
-        <th scope="col">WAD</th>
-        <th scope="col">Level</th>
-        <% if(isAdmin || isPReviousResults){ %>
-            <th scope="col">Submitter name</th>
-        <% } %>
-        <% if(isAdmin){ %>
-            <th scope="col">Wad engine</th>
-            <th scope="col">GzDoom actions</th>
-            <th scope="col">Submitter is author</th>
-            <th scope="col">Distributable</th>
-            <th scope="col">Info</th>
-            <th scope="col">Submitter email</th>
-        <% } %>
+<%
+submissions = submissions.filter(submission => {
+    if (isResults) {
+        return submission.isChosen;
+    }
+    return !submission.isChosen;
+}).sort((a, b) => a.playOrder - b.playOrder);
+if (submissions.length > 0 || !isPReviousResults) {
+%>
 
-        <% if(isPReviousResults){ %>
-            <th scope="col">Download</th>
-        <% } %>
-        <% if(isResults){ %>
-            <th scope="col">Status</th>
-            <th scope="col">Comments</th>
-        <% } %>
-    </tr>
-    </thead>
-    <tbody>
-    <%
-    submissions = submissions.sort((a, b) => a.playOrder - b.playOrder);
-    for(let i = 0 ; i < submissions.length; i++){
-        const chosenSubmission = submissions[i];
-    %>
-    <tr data-id="<%- chosenSubmission.id; -%>">
-        <% if(isAdmin){ %>
-            <td><%- chosenSubmission.id; -%></td>
-        <% } %>
-        <td><%- i + 1; -%></td>
-        <td>
-            <% const toShow = chosenSubmission.youtubeLink ?
-                    `<a target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}" href="${chosenSubmission.youtubeLink}">${chosenSubmission.wadName}</a>`
-                    :
-                    `<u><span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">${chosenSubmission.wadName}</span></u>`; %>
-            <%- toShow; -%>
-        </td>
-        <td><%- chosenSubmission.wadLevel; -%></td>
-        <% if(isAdmin || isPReviousResults){ %>
-            <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
-        <% } %>
-        <% if(isAdmin){ %>
-            <td><%- chosenSubmission.getEngineAsString(); -%></td>
-            <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
-            <td><%- chosenSubmission.submitterAuthor; -%></td>
-            <td><%- chosenSubmission.distributable; -%></td>
-            <td><%- chosenSubmission.info; -%></td>
-            <td>
-                <a href="mailto:<%- chosenSubmission.submitterEmail; -%>"><%- chosenSubmission.submitterEmail; -%></a>
-            </td>
-        <% } %>
-        <% if(isPReviousResults){ %>
-            <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
-                <td>
-                    <a type="button" class="btn btn-outline-primary" target="_blank"
-                       href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
-                </td>
-            <% } else { %>
-                <td>N/A</td>
+    <table class="table submissionsTable" data-isresults="<%- isResults -%>">
+        <thead>
+        <tr>
+            <% if(isAdmin){ %>
+                <th scope="col">ID.</th>
             <% } %>
-        <% } %>
-        <% if(isResults){ %>
-            <% let clazz = ""; %>
-            <% switch (chosenSubmission.status.status) {
-                case "Rejected":
-                    clazz = "text-danger";
-                    break;
-                case "In Progress":
-                    clazz = "text-info";
-                    break;
-                case "Completed":
-                    clazz = "text-success";
-                    break;
-                case "Queued":
-                    clazz = "text-warning";
-                    break;
-            } %>
-            <td class="<%- clazz; -%>"><%- chosenSubmission.status.status; -%></td>
-            <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
-        <% } %>
-    </tr>
-    <% } %>
-    </tbody>
-</table>
+            <th scope="col">No.</th>
+            <th scope="col">WAD</th>
+            <th scope="col">Level</th>
+            <% if(isAdmin || isPReviousResults){ %>
+                <th scope="col">Submitter name</th>
+            <% } %>
+            <% if(isAdmin){ %>
+                <th scope="col">Wad engine</th>
+                <th scope="col">GzDoom actions</th>
+                <th scope="col">Submitter is author</th>
+                <th scope="col">Distributable</th>
+                <th scope="col">Info</th>
+                <th scope="col">Submitter email</th>
+            <% } %>
 
+            <% if(isPReviousResults){ %>
+                <th scope="col">Download</th>
+            <% } %>
+            <% if(isResults){ %>
+                <th scope="col">Status</th>
+                <th scope="col">Comments</th>
+            <% } %>
+        </tr>
+        </thead>
+        <tbody>
+        <%
+        for(let i = 0 ; i < submissions.length; i++){
+            const chosenSubmission = submissions[i];
+        %>
+        <tr data-id="<%- chosenSubmission.id; -%>">
+            <% if(isAdmin){ %>
+                <td><%- chosenSubmission.id; -%></td>
+            <% } %>
+            <td><%- i + 1; -%></td>
+            <td>
+                <% const toShow = chosenSubmission.youtubeLink ?
+                        `<a target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}" href="${chosenSubmission.youtubeLink}">${chosenSubmission.wadName}</a>`
+                        :
+                        `<u><span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">${chosenSubmission.wadName}</span></u>`; %>
+                <%- toShow; -%>
+            </td>
+            <td><%- chosenSubmission.wadLevel; -%></td>
+            <% if(isAdmin || isPReviousResults){ %>
+                <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
+            <% } %>
+            <% if(isAdmin){ %>
+                <td><%- chosenSubmission.getEngineAsString(); -%></td>
+                <td><%- chosenSubmission.getGzActionAsString()?.join("<br/>"); -%></td>
+                <td><%- chosenSubmission.submitterAuthor; -%></td>
+                <td><%- chosenSubmission.distributable; -%></td>
+                <td><%- chosenSubmission.info; -%></td>
+                <td>
+                    <a href="mailto:<%- chosenSubmission.submitterEmail; -%>"><%- chosenSubmission.submitterEmail; -%></a>
+                </td>
+            <% } %>
+            <% if(isPReviousResults){ %>
+                <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
+                    <td>
+                        <a type="button" class="btn btn-outline-primary" target="_blank"
+                           href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
+                    </td>
+                <% } else { %>
+                    <td>N/A</td>
+                <% } %>
+            <% } %>
+            <% if(isResults){ %>
+                <% let clazz = ""; %>
+                <% switch (chosenSubmission.status.status) {
+                    case "Rejected":
+                        clazz = "text-danger";
+                        break;
+                    case "In Progress":
+                        clazz = "text-info";
+                        break;
+                    case "Completed":
+                        clazz = "text-success";
+                        break;
+                    case "Queued":
+                        clazz = "text-warning";
+                        break;
+                } %>
+                <td class="<%- clazz; -%>"><%- chosenSubmission.status.status; -%></td>
+                <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
+            <% } %>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
+<% } %>

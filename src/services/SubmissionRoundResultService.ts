@@ -83,12 +83,7 @@ export class SubmissionRoundResultService {
 
     public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {
         const allNonActiveRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
-        // this should be done as an inner select on the table join, but this ORM does not support this yet
-        const filteredResult = allNonActiveRounds.map(value => {
-            value.submissions = value.submissions.filter(submission => submission.isChosen);
-            return value;
-        });
-        return filteredResult ?? [];
+        return allNonActiveRounds ?? [];
     }
 
     public async addRandomEntry(roundId: number): Promise<SubmissionModel> {

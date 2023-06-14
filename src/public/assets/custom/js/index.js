@@ -18,6 +18,8 @@ Site.loadPage(async function (site) {
 
     function loadEventListeners() {
 
+        site.initPRevSubmissionToggle();
+
         function getUrl(string) {
             let url;
             try {

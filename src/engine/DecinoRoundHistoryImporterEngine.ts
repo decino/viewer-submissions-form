@@ -25,7 +25,7 @@ export class DecinoRoundHistoryImporterEngine {
     private readonly baseUrl = "https://www.decino.nl/";
 
     public async getSubmissionRounds(): Promise<SubmissionRound[]> {
-        const doc = await this.getDom(`${this.baseUrl}/viewer-submissions`);
+        const doc = await this.getDom(`${this.baseUrl}viewer-submissions`);
         const tables = doc.getElementsByTagName("table");
         const tableArr = Array.from(tables);
         const pArr = tableArr.map(table => this.getSubmissions(table, table.id, doc));

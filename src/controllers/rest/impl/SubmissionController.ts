@@ -44,7 +44,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.OK)
     public async changeStatus(@Res() res: PlatformResponse, @BodyParams() status: SubmissionStatusModel): Promise<unknown> {
         await this.submissionService.modifyStatus(status);
-        return super.doSuccess(res, `Submission status has been changed`);
+        return super.doSuccess(res, `Submission status has been changed.`);
     }
 
     @Post("/:id/setYoutubeLink")
@@ -54,7 +54,7 @@ export class SubmissionController extends BaseRestController {
                                 @PathParams("id") submissionId: number,
                                 @QueryParams("link") youtubeLink?: string): Promise<unknown> {
         await this.submissionService.addYoutubeToSubmission(submissionId, youtubeLink ?? null);
-        return super.doSuccess(res, `Submission youtube link has been assigned`);
+        return super.doSuccess(res, `Submission Youtube link has been assigned.`);
     }
 
     @Get("/downloadWadSecure/:roundId/:id")
@@ -117,7 +117,7 @@ export class SubmissionController extends BaseRestController {
             throw new InternalServerError("An error has occurred when trying to find this WAD's associated entry.");
         }
         if (!entry.downloadable(secure)) {
-            throw new BadRequest("Unable to download file");
+            throw new BadRequest("Unable to download file.");
         }
         return [entry, wad];
     }

@@ -45,7 +45,7 @@ export class SubmissionRoundResultService {
 
     public generateEntries(count: number): SubmissionModel[] {
         if (this.entryCache.size === 0) {
-            throw new Error("Unable to generate entries as the cache has not been built");
+            throw new Error("Unable to generate entries as the cache has not been built.");
         }
         const keysToGet = this.getMultipleRandom([...this.entryCache.keys()], count);
         const chosenEntries = keysToGet.flatMap(key => this.entryCache.get(key)) as SubmissionModel[];
@@ -94,7 +94,7 @@ export class SubmissionRoundResultService {
     public async addRandomEntry(roundId: number): Promise<SubmissionModel> {
         const round = await this.submissionRoundService.getSubmissionRound(roundId);
         if (!round) {
-            throw new BadRequest(`Round ${roundId} does not exist`);
+            throw new BadRequest(`Round ${roundId} does not exist.`);
         }
         await this.buildResultSet(round.submissions);
         const entry = this.generateEntries(1)[0];

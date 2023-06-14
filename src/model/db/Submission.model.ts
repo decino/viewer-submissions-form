@@ -145,7 +145,7 @@ export class SubmissionModel extends AbstractModel {
         type: "text"
     })
     @Name("youtubeLink")
-    @Description("The link to the youtube play of this entry")
+    @Description("The link to the Youtube play of this entry")
     @Nullable(String)
     public youtubeLink: string | null;
 

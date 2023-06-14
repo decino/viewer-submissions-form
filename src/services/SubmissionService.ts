@@ -81,7 +81,7 @@ export class SubmissionService implements OnInit {
             id: submissionId
         });
         if (!submission) {
-            throw new BadRequest(`Unable to find submission of id ${submissionId}`);
+            throw new BadRequest(`Unable to find submission of id ${submissionId}.`);
         }
         submission.youtubeLink = youtubeLink;
         await repo.save(submission);
@@ -95,7 +95,7 @@ export class SubmissionService implements OnInit {
             }
         });
         if (!submission) {
-            throw new BadRequest(`Unable to find submission with id ${status.submissionId}`);
+            throw new BadRequest(`Unable to find submission with id ${status.submissionId}.`);
         }
         submission.status = status.status;
         submission.additionalInfo = status.additionalInfo ?? null;

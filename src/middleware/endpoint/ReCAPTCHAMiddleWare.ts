@@ -12,11 +12,11 @@ export class ReCAPTCHAMiddleWare implements MiddlewareMethods {
 
     public async use(@BodyParams('g-recaptcha-response') reCAPTCHA: string): Promise<void> {
         if (!reCAPTCHA) {
-            throw new BadRequest("reCAPTCHA missing");
+            throw new BadRequest("reCAPTCHA missing.");
         }
         const reCAPTCHAResp = await this.reCAPTCHAService.validateResponse(reCAPTCHA);
         if (!reCAPTCHAResp) {
-            throw new BadRequest("reCAPTCHA response invalid");
+            throw new BadRequest("reCAPTCHA response invalid.");
         }
     }
 

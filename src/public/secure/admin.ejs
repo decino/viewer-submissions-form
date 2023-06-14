@@ -130,7 +130,7 @@ function mode(arr) {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Resuming this round will allow submissions again</p>
+                        <p>Resuming this round will allow submissions again.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-primary" id="resumeRoundButton">Resume</button>
@@ -500,13 +500,13 @@ function mode(arr) {
                     const password = document.getElementById("changePassword").value;
                     const repeatPassword = document.getElementById("changePasswordRepeat").value;
                     if (!email) {
-                        return alert("Please specify email");
+                        return alert("Please specify email.");
                     }
                     if (!password) {
-                        return alert("password must not be blank");
+                        return alert("password must not be blank.");
                     }
                     if (password !== repeatPassword) {
-                        return alert("Passwords do not match");
+                        return alert("Passwords do not match.");
                     }
                     formData.append("email", email);
                     formData.append("password", password);
@@ -522,7 +522,7 @@ function mode(arr) {
                     } finally {
                         Site.loading(false);
                     }
-                    alert("User details changed successfully");
+                    alert("User details changed successfully.");
                     changeDetailsModal.hide();
                 });
             })());
@@ -671,7 +671,7 @@ function mode(arr) {
                                 const duplicateRows = getDuplicateRows();
                                 const valid = duplicateRows.length === 0;
                                 if (!valid) {
-                                    alert("Please remove duplicate entries to proceed");
+                                    alert("Please remove duplicate entries to proceed.");
                                 }
                                 return valid;
                             }
@@ -907,7 +907,7 @@ function mode(arr) {
             document.getElementById("makeNewRoundButton")?.addEventListener("click", async ev => {
                 const roundName = prompt("Submission round name");
                 if (!roundName?.trim()) {
-                    alert("Please supply a round name");
+                    alert("Please supply a round name.");
                     return;
                 }
                 site.loading(true);

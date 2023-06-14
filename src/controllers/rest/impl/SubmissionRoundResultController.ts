@@ -27,7 +27,7 @@ export class SubmissionRoundResultController extends BaseRestController {
     @Returns(StatusCodes.OK, SuccessModel)
     public async buildResultSet(@Res() res: PlatformResponse): Promise<unknown> {
         await this.submissionRoundResultService.buildResultSet();
-        return super.doSuccess(res, "Entry cache generated");
+        return super.doSuccess(res, "Entry cache generated.");
     }
 
     @Post("/submitEntries")
@@ -43,6 +43,6 @@ export class SubmissionRoundResultController extends BaseRestController {
     @Returns(StatusCodes.OK)
     public async addRandomEntry(@Res() res: PlatformResponse, @QueryParams("roundId") roundId: number): Promise<unknown> {
         const entryAdded = await this.submissionRoundResultService.addRandomEntry(roundId);
-        return super.doSuccess(res, `${entryAdded.wadName} map ${entryAdded.wadLevel} has been chosen`);
+        return super.doSuccess(res, `${entryAdded.wadName} map ${entryAdded.wadLevel} has been chosen.`);
     }
 }

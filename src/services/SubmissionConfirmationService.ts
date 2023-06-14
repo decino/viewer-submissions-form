@@ -66,7 +66,7 @@ export class SubmissionConfirmationService implements OnInit {
             }
         });
         if (!entry) {
-            throw Error("Unable to query DB");
+            throw Error("Unable to query DB.");
         }
         await this.sendConfirmationEmail(entry);
         return saveEntry;

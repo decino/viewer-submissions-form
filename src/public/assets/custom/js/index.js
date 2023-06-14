@@ -28,6 +28,27 @@ Site.loadPage(async function (site) {
             return url.protocol === "http:" || url.protocol === "https:" ? url : null;
         }
 
+        site.onDelete(ids => {
+            const table = document.getElementsByClassName("submissionsTable")[0];
+            for (const id of ids) {
+                table.querySelector(`tbody tr[data-id="${id}"]`).remove();
+            }
+        });
+
+        site.onEntry(data => {
+            const table = document.getElementsByClassName("submissionsTable")[0];
+            const no = document.getElementsByClassName("submissionsTable tbody tr").length + 1;
+            const tbody = table.querySelector("tbody");
+            const newRow = `
+                <tr data-id="${data.id}">
+                    <td>${no}</td>
+                    <td><u><span>${data.wadName}</span></u></td>
+                    <td>${data.wadLevel}</td>
+                </tr>
+            `;
+            tbody.innerHTML += newRow;
+        });
+
         const wadRadios = document.querySelectorAll("#link,#Upload");
         for (const wadRadio of wadRadios) {
             wadRadio.addEventListener("change", evt => {
@@ -50,7 +71,7 @@ Site.loadPage(async function (site) {
                 }
             });
         }
-        document.getElementById("wadUrl").addEventListener("change", async ev => {
+        document.getElementById("wadUrl")?.addEventListener("change", async ev => {
             const value = ev.target.value;
             const wadNameInput = document.getElementById("wadName");
             if (!value) {
@@ -65,6 +86,8 @@ Site.loadPage(async function (site) {
                 return;
             }
             site.loading(true);
+            wadNameInput.setAttribute("placeholder", "Attempting to obtain name from url...");
+            wadNameInput.setAttribute("disabled", "true");
             const proxyURl = new URL(`https://api.codetabs.com/v1/proxy?quest=${url}`);
             let result;
             try {
@@ -72,6 +95,9 @@ Site.loadPage(async function (site) {
             } catch {
                 site.loading(false);
                 return;
+            } finally {
+                wadNameInput.removeAttribute("placeholder");
+                wadNameInput.removeAttribute("disabled");
             }
             if (result.status !== 200) {
                 return;
@@ -90,7 +116,7 @@ Site.loadPage(async function (site) {
             wadNameInput.value = wadName;
             site.loading(false);
         });
-        document.getElementById("gameEngine").addEventListener("change", evt => {
+        document.getElementById("gameEngine")?.addEventListener("change", evt => {
             const selectedOption = evt.target.options[evt.target.selectedIndex];
             const selectedValue = selectedOption.dataset.value;
             const gzActionsContainer = document.getElementById("gzActionsContainer");
@@ -102,16 +128,18 @@ Site.loadPage(async function (site) {
         });
 
         const distributableRadios = document.querySelectorAll("#authorYes,#authorNo");
-        for (const distributableRadio of distributableRadios) {
-            distributableRadio.addEventListener("change", evt => {
-                const value = evt.target.value;
-                const distributableSection = document.getElementById("distributableSection");
-                if (value === "true") {
-                    site.display(false, distributableSection);
-                } else {
-                    site.display(true, distributableSection);
-                }
-            });
+        if (distributableRadios) {
+            for (const distributableRadio of distributableRadios) {
+                distributableRadio.addEventListener("change", evt => {
+                    const value = evt.target.value;
+                    const distributableSection = document.getElementById("distributableSection");
+                    if (value === "true") {
+                        site.display(false, distributableSection);
+                    } else {
+                        site.display(true, distributableSection);
+                    }
+                });
+            }
         }
 
         document.getElementById("submit")?.addEventListener("click", async ev => {

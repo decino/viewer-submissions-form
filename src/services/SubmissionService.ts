@@ -11,6 +11,8 @@ import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
+import {SubmissionSocket} from "./socket/SubmissionSocket";
+import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -30,39 +32,75 @@ export class SubmissionService implements OnInit {
     private submissionConfirmationService: SubmissionConfirmationService;
 
     @Inject()
+    private submissionSocket: SubmissionSocket;
+
+    @Inject()
     private logger: Logger;
 
-    public addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {
-        return this.ds.manager.transaction(async entityManager => {
-            const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
-            if (!currentActiveRound) {
-                throw new NotFound("Cannot add a submission when there are no currently active rounds.");
-            }
-            if (currentActiveRound.paused) {
-                throw new BadRequest("Unable to add entry as the current round is paused.");
-            }
-            try {
-                this.validateSubmission(entry, currentActiveRound);
-            } catch (e) {
-                throw new BadRequest(e.message);
-            }
+    public async addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {
+        const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
+        if (!currentActiveRound) {
+            throw new NotFound("Cannot add a submission when there are no currently active rounds.");
+        }
+        if (currentActiveRound.paused) {
+            throw new BadRequest("Unable to add entry as the current round is paused.");
+        }
+        try {
+            this.validateSubmission(entry, currentActiveRound, customWad);
+        } catch (e) {
             if (customWad) {
-                const allowed = await this.customWadEngine.validateFile(customWad);
-                if (!allowed) {
+                try {
                     await this.customWadEngine.deleteCustomWad(customWad);
-                    throw new BadRequest("Invalid file: header mismatch.");
+                } catch {
+                    this.logger.error(`Unable to delete file ${customWad.path}`);
                 }
-                entry.customWadFileName = customWad.originalname;
             }
-            entry.submissionRoundId = currentActiveRound.id;
-            const repo = entityManager.getRepository(SubmissionModel);
-            const saveEntry = await repo.save(entry);
-            if (customWad) {
-                await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
+            throw new BadRequest(e.message);
+        }
+        if (customWad) {
+            const allowed = await this.customWadEngine.validateFile(customWad);
+            if (!allowed) {
+                await this.customWadEngine.deleteCustomWad(customWad);
+                throw new BadRequest("Invalid file: header mismatch.");
             }
-            saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.submissionRoundId);
-            return saveEntry;
+            entry.customWadFileName = customWad.originalname;
+        }
+        entry.submissionRoundId = currentActiveRound.id;
+        const repo = this.ds.getRepository(SubmissionModel);
+        const saveEntry = await repo.save(entry);
+        if (customWad) {
+            await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
+        }
+        saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.id);
+        return saveEntry;
+    }
+
+    public async addYoutubeToSubmission(submissionId: number, youtubeLink: string | null): Promise<void> {
+        const repo = this.ds.getRepository(SubmissionModel);
+        const submission = await repo.findOneBy({
+            id: submissionId
         });
+        if (!submission) {
+            throw new BadRequest(`Unable to find submission of id ${submissionId}`);
+        }
+        submission.youtubeLink = youtubeLink;
+        await repo.save(submission);
+    }
+
+    public async modifyStatus(status: SubmissionStatusModel): Promise<void> {
+        const repo = this.ds.getRepository(SubmissionStatusModel);
+        const submission = await repo.findOne({
+            where: {
+                submissionId: status.submissionId
+            }
+        });
+        if (!submission) {
+            throw new BadRequest(`Unable to find submission with id ${status.submissionId}`);
+        }
+        submission.status = status.status;
+        submission.additionalInfo = status.additionalInfo ?? null;
+
+        await repo.save(submission);
     }
 
     public async modifyEntry(entry: Record<string, unknown>): Promise<void> {
@@ -80,6 +118,13 @@ export class SubmissionService implements OnInit {
         if (entry.engine) {
             mappedObj["wadEngine"] = entry.engine as DOOM_ENGINE;
         }
+        if (entry.author) {
+            mappedObj["submitterAuthor"] = entry.author === "true";
+        }
+        if (mappedObj["submitterAuthor"] && entry.distributable) {
+            mappedObj["distributable"] = entry.distributable === "true";
+        }
+
         mappedObj["submitterName"] = entry.authorName as string ?? null;
 
         const model = repo.create(mappedObj);
@@ -88,17 +133,14 @@ export class SubmissionService implements OnInit {
         }, model);
     }
 
-    public async getEntry(id: number): Promise<SubmissionModel | null> {
+    public getEntry(id: number): Promise<SubmissionModel | null> {
         const repo = this.ds.getRepository(SubmissionModel);
-        const entry = await repo.findOne({
+        return repo.findOne({
+            relations: ["submissionRound", "status"],
             where: {
                 id
             }
         });
-        if (!entry) {
-            return null;
-        }
-        return entry;
     }
 
     public async getAllEntries(roundId = -1): Promise<SubmissionModel[]> {
@@ -107,7 +149,7 @@ export class SubmissionService implements OnInit {
             if (!currentActiveRound) {
                 throw new Error("No round exists.");
             }
-            roundId = currentActiveRound?.id;
+            roundId = currentActiveRound.id;
         }
         const repo = this.ds.getRepository(SubmissionModel);
         const entries = await repo.find({
@@ -117,6 +159,7 @@ export class SubmissionService implements OnInit {
         });
         return entries ?? [];
     }
+
 
     public async deleteEntries(ids: number[]): Promise<SubmissionModel[] | null> {
         const repo = this.ds.getRepository(SubmissionModel);
@@ -129,10 +172,16 @@ export class SubmissionService implements OnInit {
         if (!entries || entries.length === 0) {
             return null;
         }
+        const pArr: Promise<void>[] = [];
         for (const entry of entries) {
-            await this.customWadEngine.deleteCustomWad(entry.id, entry.submissionRoundId);
+            if (entry.customWadFileName) {
+                pArr.push(this.customWadEngine.deleteCustomWad(entry.id, entry.submissionRoundId));
+            }
         }
-        return repo.remove(entries);
+        await Promise.all(pArr);
+        const remove = await repo.remove(entries);
+        this.submissionSocket.emitSubmissionDelete(ids);
+        return remove;
     }
 
     public $onInit(): void {
@@ -144,8 +193,10 @@ export class SubmissionService implements OnInit {
         this.scheduler.addSimpleIntervalJob(job);
     }
 
-    private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel): void {
-        entry.validate();
+    private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel, customWad?: PlatformMulterFile): void {
+        if (!customWad && !entry.wadURL) {
+            throw new Error("Either WAD URL or a file must be uploaded.");
+        }
         const wadUrl = entry.wadURL;
         const submitterName = entry.submitterName;
         const level = entry.wadLevel;
@@ -155,7 +206,7 @@ export class SubmissionService implements OnInit {
             if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${process.env.HELP_EMAIL ?? "decino"} to change your submission.`);
             }
-            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && entry.wadLevel === level) {
+            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && submission.wadLevel === level) {
                 throw new Error("This level for this WAD has already been submitted. Please submit a different map.");
             }
         }

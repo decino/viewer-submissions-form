@@ -11,4 +11,14 @@ export class ObjectUtils {
         }
         return retObj;
     }
+
+    public static removeObjectFromArray<T>(arr: T[], predicate: (itm: T) => boolean): void {
+        let arrLen = arr.length;
+        while (arrLen--) {
+            const currentItem = arr[arrLen];
+            if (predicate(currentItem)) {
+                arr.splice(arrLen, 1);
+            }
+        }
+    }
 }

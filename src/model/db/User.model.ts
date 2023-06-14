@@ -1,5 +1,5 @@
 import {Column, Entity} from "typeorm";
-import {Description, Example, Format, Required} from "@tsed/schema";
+import {Description, Example, Format, Name, Required} from "@tsed/schema";
 import {AbstractModel} from "./AbstractModel";
 
 @Entity()
@@ -8,6 +8,7 @@ export class UserModel extends AbstractModel {
     @Column()
     @Description("User password")
     @Example("/5gftuD/")
+    @Name("password")
     @Required()
     public password: string;
 
@@ -15,6 +16,7 @@ export class UserModel extends AbstractModel {
     @Description("User email")
     @Example("user@domain.com")
     @Format("email")
+    @Name("email")
     @Required()
     public email: string;
 

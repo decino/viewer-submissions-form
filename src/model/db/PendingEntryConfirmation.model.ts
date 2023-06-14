@@ -1,13 +1,10 @@
 import {AbstractModel} from "./AbstractModel";
-import {BeforeInsert, Column, Entity, Index, JoinColumn, OneToOne} from "typeorm";
+import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import * as crypto from "crypto";
 import type {SubmissionModel} from "./Submission.model";
-import {Description, Example, Format, Name, Required} from "@tsed/schema";
+import {Description, Example, Name} from "@tsed/schema";
 
 @Entity()
-@Index(["submissionRoundId", "submitterEmail"], {
-    unique: true
-})
 export class PendingEntryConfirmationModel extends AbstractModel {
 
     @Name("confirmationUid")
@@ -17,36 +14,20 @@ export class PendingEntryConfirmationModel extends AbstractModel {
     })
     public confirmationUid: string;
 
-    @Column({
-        nullable: false
-    })
-    @Name("email")
-    @Description("Email of the submitter")
-    @Example("foo@example.com")
-    @Required()
-    @Format("email")
-    public submitterEmail: string;
-
-    @Name("submissionRoundId")
-    @Description("The submission round this entry belongs to")
+    @Name("submissionId")
+    @Description("The submission this entry belongs to")
     @Example("1")
     @Example("2")
     @Column({
         nullable: false
     })
-    public submissionRoundId: number;
+    public submissionId: number;
 
     @OneToOne("SubmissionModel", "confirmation", AbstractModel.cascadeOps)
-    @JoinColumn([
-        {
-            name: "submitterEmail",
-            referencedColumnName: "submitterEmail"
-        },
-        {
-            name: "submissionRoundId",
-            referencedColumnName: "submissionRoundId"
-        }
-    ])
+    @JoinColumn({
+        name: "submissionId",
+        referencedColumnName: "id"
+    })
     public submission: SubmissionModel;
 
     @BeforeInsert()

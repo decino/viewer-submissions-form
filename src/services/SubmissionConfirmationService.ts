@@ -8,6 +8,7 @@ import {Logger} from "@tsed/common";
 import {EmailService} from "./EmailService";
 import process from "process";
 import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
+import {SubmissionSocket} from "./socket/SubmissionSocket";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -24,6 +25,9 @@ export class SubmissionConfirmationService implements OnInit {
     @Inject()
     private discordBotDispatcherService: DiscordBotDispatcherService;
 
+    @Inject()
+    private submissionSocket: SubmissionSocket;
+
     public processConfirmation(confirmationUid: string): Promise<void> {
         return this.ds.manager.transaction(async entityManager => {
             const confirmationModelRepository = entityManager.getRepository(PendingEntryConfirmationModel);
@@ -32,7 +36,7 @@ export class SubmissionConfirmationService implements OnInit {
                 where: {
                     confirmationUid
                 },
-                relations: ["submission"]
+                relations: ["submission", "submission.submissionRound"]
             });
             if (!confirmationEntry) {
                 throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
@@ -43,18 +47,28 @@ export class SubmissionConfirmationService implements OnInit {
             await confirmationModelRepository.remove(confirmationEntry);
             return submission;
         }).then(submission => {
+            this.submissionSocket.emitSubmission(submission);
             this.discordBotDispatcherService.dispatch(submission);
         });
     }
 
+
     public async generateConfirmationEntry(email: string, round: number): Promise<PendingEntryConfirmationModel> {
         const confirmationModelRepository = this.ds.getRepository(PendingEntryConfirmationModel);
         const newEntry = this.ds.manager.create(PendingEntryConfirmationModel, {
-            submitterEmail: email,
-            submissionRoundId: round
+            submissionId: round
         });
         const saveEntry = await confirmationModelRepository.save(newEntry);
-        await this.sendConfirmationEmail(saveEntry);
+        const entry = await confirmationModelRepository.findOne({
+            relations: ["submission"],
+            where: {
+                id: saveEntry.id
+            }
+        });
+        if (!entry) {
+            throw Error("Unable to query DB");
+        }
+        await this.sendConfirmationEmail(entry);
         return saveEntry;
     }
 
@@ -68,7 +82,7 @@ export class SubmissionConfirmationService implements OnInit {
         const baseUrl = process.env.BASE_URL;
         const confirmationUrl = `${baseUrl}/processSubmission?uid=${pendingEntry.confirmationUid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;
-        return this.emailService.sendMail(body, pendingEntry.submitterEmail);
+        return this.emailService.sendMail(body, pendingEntry.submission.submitterEmail);
     }
 
 }

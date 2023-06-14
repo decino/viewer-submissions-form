@@ -1,14 +1,8 @@
 <!doctype html>
-<html lang="en">
-<%- include('snippets/head.ejs'); %>
-<style>
-    .submissionsTable tbody tr > td {
-        max-width: 1px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-</style>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <%- include('snippets/head.ejs'); %>
+</head>
 <body>
 <div class="container mt-5">
     <main>
@@ -25,7 +19,7 @@
                 <div class="col-md-12">
                     <div class="card-group">
                         <div class="card border-primary mb-3">
-                            <div class="card-header">Submission round <%- model.currentActiveRound.id; -%></div>
+                            <div class="card-header"><%- model.currentActiveRound.name; -%></div>
                             <div class="card-body">
                                 <% if(isPaused){ %>
                                     <div id="overlay">
@@ -44,10 +38,13 @@
                                         </div>
                                     </div>
                                     <div class="hidden" id="success">
-                                        <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
+                                        <div class="alert alert-success d-flex align-items-center" role="alert"
+                                             id="success">
                                             <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
                                             <div id="successContent">
-                                                An email has been sent to the address provided. Please click the link in your email to confirm your entry.
+                                                An email has been sent to the address provided. Please click the
+                                                link in
+                                                your email to confirm your entry.
                                                 <strong>NOTE:</strong> this link will expire in 20 minutes.
                                             </div>
                                         </div>
@@ -56,12 +53,18 @@
                             </div>
                         </div>
                         <div class="card border-primary mb-3 ml-3">
-                            <div class="card-header">Current submissions</div>
-                            <div class="card-body" style="max-height: 900px; overflow-y: scroll;">
+                            <div class="card-header">Current submissions
+                                <span class="badge text-bg-success float-end hidden"
+                                      id="WSConnectedLabel">Live results</span>
+                                <span class="badge text-bg-danger float-end"
+                                      id="WSNotConnectedLabel">Not live results</span>
+                            </div>
+                            <div class="card-body" style="max-height: 900px; overflow-y: auto;">
                                 <%- include('snippets/SubmissionsTable.ejs', {
                                 submissions: model.currentActiveRound.submissions,
-                                includeDownload: false,
-                                isAdmin: false
+                                isPReviousResults: false,
+                                isAdmin: false,
+                                isResults: false
                                 }); %>
                             </div>
                         </div>

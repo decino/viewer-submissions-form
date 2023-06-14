@@ -7,6 +7,7 @@ import {SubmissionRoundService} from "../../../services/SubmissionRoundService";
 import {BaseRestController} from "../BaseRestController";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {BadRequest, NotFound} from "@tsed/exceptions";
+import {Authorize} from "@tsed/passport";
 
 @Controller("/submissionRound")
 export class SubmissionRoundController extends BaseRestController {
@@ -14,14 +15,17 @@ export class SubmissionRoundController extends BaseRestController {
     @Inject()
     private submissionRoundService: SubmissionRoundService;
 
+
     @Post("/newRound")
+    @Authorize("login")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)
-    public createRound(): unknown {
-        return this.submissionRoundService.newSubmissionRound();
+    public createRound(@QueryParams("name") name: string): unknown {
+        return this.submissionRoundService.newSubmissionRound(name);
     }
 
 
     @Post("/pauseRound")
+    @Authorize("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async pauseRound(@Res() res: PlatformResponse, @QueryParams("pause") pause: boolean): Promise<unknown> {
@@ -30,6 +34,7 @@ export class SubmissionRoundController extends BaseRestController {
     }
 
     @Get("/currentActiveRound")
+    @Authorize("login")
     @Returns(StatusCodes.OK, SubmissionRoundModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async getActiveRound(): Promise<unknown> {
@@ -41,6 +46,7 @@ export class SubmissionRoundController extends BaseRestController {
     }
 
     @Get("/getAllRounds")
+    @Authorize("login")
     @Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel)
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
         return this.submissionRoundService.getAllSubmissionRounds(includeActive);

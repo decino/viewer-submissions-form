@@ -1,18 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "./dist",
-    "moduleResolution": "node",
-    "declaration": true,
-    "noResolve": false,
-    "preserveConstEnums": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "sourceMap": true,
-    "target": "esnext",
-    "noEmit": false,
-    "emitDeclarationOnly": false,
-    "inlineSources": true
+    "noEmit": true,
+    "emitDeclarationOnly": false
   }
 }

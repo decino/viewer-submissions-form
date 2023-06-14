@@ -1,6 +1,7 @@
 const Site = (function () {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let isInit = false;
+    const socket = io(`${mainRul}/submission`, {path: '/socket.io/submission/'});
 
     const loading = function loading(show) {
         const loader = document.getElementById("loader");
@@ -20,9 +21,15 @@ const Site = (function () {
         const form = document.getElementById("entryForm");
         const formValue = form.reportValidity();
         if (!formValue) {
-            return;
+            return false;
+        }
+        const reCAPTCHAResponse = grecaptcha.getResponse();
+        if (reCAPTCHAResponse === '') {
+            showError("Please activate reCAPTCHA.");
+            return false;
         }
         const formData = serialiseForm(urlEncoded);
+        formData.append("g-recaptcha-response", reCAPTCHAResponse);
         Site.loading(true);
         let response;
         try {
@@ -35,6 +42,7 @@ const Site = (function () {
             return false;
         } finally {
             Site.loading(false);
+            grecaptcha.reset();
         }
 
         const responseStatus = response.status;
@@ -56,6 +64,26 @@ const Site = (function () {
         document.getElementById("errorContent").textContent = message.trim();
         display(false, error);
     };
+
+    const onEntry = function onEntry(callBack) {
+        socket.on("newSubmission", callBack);
+    };
+
+    const onDelete = function onDelete(callBack) {
+        socket.on("deleteSubmission", callBack);
+    };
+
+    function initWs() {
+        socket.on("connect", () => {
+            document.getElementById("WSNotConnectedLabel")?.classList.add("hidden");
+            document.getElementById("WSConnectedLabel")?.classList.remove("hidden");
+        });
+
+        socket.on("disconnect", () => {
+            document.getElementById("WSNotConnectedLabel")?.classList.remove("hidden");
+            document.getElementById("WSConnectedLabel")?.classList.add("hidden");
+        });
+    }
 
     const showSuccess = function showSuccess() {
         const error = document.getElementById("error");
@@ -104,11 +132,13 @@ const Site = (function () {
         }
     };
     const loadPage = function loadPage(anon) {
+        // eslint-disable-next-line require-await
         anon.call(this, Site).then(async () => {
             function initTooltips() {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
             }
 
+            initWs();
             initTooltips();
             isInit = true;
         });
@@ -120,6 +150,8 @@ const Site = (function () {
         serialiseForm,
         submitEntryForm,
         showSuccess,
-        showError
+        showError,
+        onEntry,
+        onDelete
     };
 }());

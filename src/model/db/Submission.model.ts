@@ -1,12 +1,13 @@
 import {AbstractModel} from "./AbstractModel";
 import {BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
-import {CollectionOf, Description, Enum, Example, Format, Ignore, Name, Nullable, Required} from "@tsed/schema";
+import {Any, Description, Enum, Example, Format, Ignore, Name, Nullable, Required} from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions";
 import type {SubmissionRoundModel} from "./SubmissionRound.model";
 import DOOM_ENGINE from "../constants/DoomEngine";
 import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
 import process from "process";
 import xss from "xss";
+import {SubmissionStatusModel} from "./SubmissionStatus.model";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -69,9 +70,7 @@ export class SubmissionModel extends AbstractModel {
     @Example("jump")
     @Example("mouselook")
     @Example("")
-    @Enum(GZDOOM_ACTIONS)
-    @Nullable(GZDOOM_ACTIONS)
-    @CollectionOf(Number).MaxItems(3).MinItems(0)
+    @Any()
     public gzDoomActions: GZDOOM_ACTIONS[] | null;
 
     @Column({
@@ -123,6 +122,14 @@ export class SubmissionModel extends AbstractModel {
     })
     public submissionRoundId: number;
 
+    @Name("playOrder")
+    @Description("The order in what this submission was played")
+    @Column({
+        nullable: true,
+        default: null
+    })
+    public playOrder: number;
+
     @Column({
         nullable: true,
         type: "text"
@@ -132,6 +139,15 @@ export class SubmissionModel extends AbstractModel {
     @Nullable(String)
     @Ignore()
     public customWadFileName: string | null;
+
+    @Column({
+        nullable: true,
+        type: "text"
+    })
+    @Name("youtubeLink")
+    @Description("The link to the youtube play of this entry")
+    @Nullable(String)
+    public youtubeLink: string | null;
 
     @Column({
         nullable: false
@@ -154,43 +170,52 @@ export class SubmissionModel extends AbstractModel {
 
     @Name("submissionRound")
     @Description("The submission round this entry belongs to")
-    @ManyToOne("SubmissionRoundModel", "submissions", AbstractModel.cascadeOps)
+    @ManyToOne("SubmissionRoundModel", "submissions")
     @JoinColumn({
         name: "submissionRoundId",
         referencedColumnName: "id"
     })
-    public submissionRound: SubmissionRoundModel;
+    public submissionRound?: SubmissionRoundModel;
 
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
     @OneToOne("PendingEntryConfirmationModel", "submission")
     public confirmation: PendingEntryConfirmationModel;
 
-    @Column({
-        nullable: true
+    @Name("status")
+    @Description("The current status of this submission")
+    @OneToOne("SubmissionStatusModel", "submission", {
+        cascade: true
     })
-    @Name("chosenRound")
-    @Description("The round ID that this entry was chosen for")
-    public chosenRoundId: number;
+    public status: SubmissionStatusModel;
 
-    public downloadable(force = false): boolean {
-        return force ? true : !(this.submitterAuthor && !this.distributable);
+    @Column({
+        nullable: false,
+        type: "boolean",
+        default: false
+    })
+    @Name("chosen")
+    @Description("If this submission was picked for this round")
+    public isChosen: boolean;
+
+    public downloadable(admin = false): boolean {
+        if (admin) {
+            return true;
+        }
+        if (this.submissionRound?.active || !this.isChosen) {
+            return false;
+        }
+        return !(this.submitterAuthor && !this.distributable);
     }
 
-    public getDownloadUrl(force = false): string | null {
-        if (force) {
-            return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
-        }
-        if (!this.downloadable()) {
+    public getDownloadUrl(admin = false): string | null {
+        if (!this.downloadable(admin)) {
             return null;
         }
-        return this.customWadFileName ? `${process.env.BASE_URL}/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
-    }
-
-    public validate(): void {
-        if (!this.wadURL && !this.customWadFileName) {
-            throw new Error("Either WAD URL or a file must be uploaded.");
+        if (admin) {
+            return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
         }
+        return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
     }
 
     public getEngineAsString(): string {

@@ -6,9 +6,12 @@ import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
 import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, Res} from "@tsed/common";
+import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res, UseBefore} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
+import {Authorize} from "@tsed/passport";
+import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/ReCAPTCHAMiddleWare";
+import {SubmissionStatusModel} from "../../../model/db/SubmissionStatus.model";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -20,20 +23,42 @@ export class SubmissionController extends BaseRestController {
     private customWadEngine: CustomWadEngine;
 
     @Post("/addEntry")
+    @UseBefore(ReCAPTCHAMiddleWare)
     @Returns(StatusCodes.CREATED, SubmissionModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public addEntry(@BodyParams() submission: SubmissionModel, @MultipartFile("file") customWad: PlatformMulterFile): unknown {
-        return this.submissionService.addEntry(submission, customWad ?? null);
+    public addEntry(@BodyParams() submission: SubmissionModel, @MultipartFile("file") customWad?: PlatformMulterFile): Promise<unknown> {
+        return this.submissionService.addEntry(submission, customWad);
     }
 
     @Post("/modifyEntry")
+    @UseBefore(ReCAPTCHAMiddleWare)
+    @Authorize("login")
     @Returns(StatusCodes.OK, SubmissionModel)
     public modifyEntry(@BodyParams() submission: any): unknown {
         return this.submissionService.modifyEntry(submission);
     }
 
+    @Post("/changeStatus")
+    @Authorize("login")
+    @Returns(StatusCodes.OK)
+    public async changeStatus(@Res() res: PlatformResponse, @BodyParams() status: SubmissionStatusModel): Promise<unknown> {
+        await this.submissionService.modifyStatus(status);
+        return super.doSuccess(res, `Submission status has been changed`);
+    }
+
+    @Post("/:id/setYoutubeLink")
+    @Authorize("login")
+    @Returns(StatusCodes.OK)
+    public async setYoutubeLink(@Res() res: PlatformResponse,
+                                @PathParams("id") submissionId: number,
+                                @QueryParams("link") youtubeLink?: string): Promise<unknown> {
+        await this.submissionService.addYoutubeToSubmission(submissionId, youtubeLink ?? null);
+        return super.doSuccess(res, `Submission youtube link has been assigned`);
+    }
+
     @Get("/downloadWadSecure/:roundId/:id")
+    @Authorize("login")
     @Returns(StatusCodes.CREATED, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
@@ -46,6 +71,7 @@ export class SubmissionController extends BaseRestController {
 
 
     @Get("/getSubmission/:id")
+    @Authorize("login")
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.OK, SubmissionModel)
@@ -65,6 +91,7 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Delete("/deleteEntries")
+    @Authorize("login")
     @Returns(StatusCodes.CREATED, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
@@ -90,7 +117,7 @@ export class SubmissionController extends BaseRestController {
             throw new InternalServerError("An error has occurred when trying to find this WAD's associated entry.");
         }
         if (!entry.downloadable(secure)) {
-            throw new BadRequest("This WAD is not shareable by author's request.");
+            throw new BadRequest("Unable to download file");
         }
         return [entry, wad];
     }

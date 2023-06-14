@@ -2,7 +2,7 @@ import {Get, View} from "@tsed/schema";
 import {Controller, Inject} from "@tsed/di";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
 import {SubmissionConfirmationService} from "../../services/SubmissionConfirmationService";
-import {PlatformResponse, QueryParams, Res} from "@tsed/common";
+import {PlatformResponse, QueryParams, Req, Res} from "@tsed/common";
 import {NotFound} from "@tsed/exceptions";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
 import {IndexDto} from "../../DTO/IndexDto";
@@ -29,6 +29,16 @@ export class HomeView {
         return {
             model: new IndexDto(currentActiveRound, previousRounds)
         };
+    }
+
+
+    @Get("/login")
+    @View("login.ejs")
+    public showLogin(@Req() req: Req, @Res() res: Res): unknown {
+        if (req.user) {
+            res.redirect("/secure");
+        }
+        return null;
     }
 
     @Get("/processSubmission")

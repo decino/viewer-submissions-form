@@ -1,26 +1,27 @@
 <!doctype html>
-<html lang="en">
-<%- include('snippets/head.ejs'); %>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <%- include('snippets/head.ejs'); %>
+</head>
 <body>
 
 <div class="container mt-5">
     <main class="col-md-12">
         <% if (success){ %>
-        <div class="mt-4 p-5 bg-success text-white rounded">
-            <h1>Submission</h1>
-            <p><%- message; -%></p>
-        </div>
+            <div class="mt-4 p-5 bg-success text-white rounded">
+                <h1>Submission</h1>
+                <p><%- message; -%></p>
+            </div>
         <% } else { %>
-        <div class="mt-4 p-5 bg-danger text-white rounded">
-            <h1>Error</h1>
-            <p><%- message; -%></p>
-        </div>
+            <div class="mt-4 p-5 bg-danger text-white rounded">
+                <h1>Error</h1>
+                <p><%- message; -%></p>
+            </div>
         <% } %>
     </main>
 </div>
 
 
 <%- include('snippets/scripts.ejs'); %>
-<script src="assets/custom/js/index.js"></script>
 </body>
 </html>

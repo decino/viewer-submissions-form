@@ -1,11 +1,13 @@
 import "reflect-metadata";
-import {$log, Logger, registerProvider} from "@tsed/common";
+import {$log, Logger as TsEdLogger, registerProvider} from "@tsed/common";
 import {PlatformExpress} from "@tsed/platform-express";
 import {Server} from "./Server";
-import {DataSource} from "typeorm";
+import {DataSource, Logger as TypeOrmLogger} from "typeorm";
 import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
 
+
 async function bootstrap(): Promise<void> {
+    // const models = await getDbModules();
     const dataSource = new DataSource({
         type: "better-sqlite3",
         entities: [`${__dirname}/model/db/**/*.model.{ts,js}`],
@@ -16,15 +18,51 @@ async function bootstrap(): Promise<void> {
     registerProvider<DataSource>({
         provide: SQLITE_DATA_SOURCE,
         type: "typeorm:datasource",
-        deps: [Logger],
-        async useAsyncFactory(logger: Logger) {
+        deps: [TsEdLogger],
+        async useAsyncFactory(logger: TsEdLogger) {
             await dataSource.initialize();
-            logger.info("Connected with typeorm to database: main.sqlite");
+            dataSource.setOptions({
+                logger: new class LoggerProxy implements TypeOrmLogger {
+                    public logQuery(query: string, parameters?: any[]): void {
+                        logger.debug(query, parameters);
+                    }
+
+                    public logMigration(message: string): any {
+                        logger.debug(message);
+                    }
+
+                    public log(level: "log" | "info" | "warn", message: any): void {
+                        switch (level) {
+                            case "log":
+                            case "info":
+                                logger.info(message);
+                                break;
+                            case "warn":
+                                logger.warn(message);
+                                break;
+
+                        }
+                    }
+
+                    public logSchemaBuild(message: string): void {
+                        logger.debug(message);
+                    }
+
+                    public logQueryError(error: string | Error, query: string, parameters?: any[]): void {
+                        logger.error(error, query, parameters);
+                    }
+
+                    public logQuerySlow(time: number, query: string, parameters?: any[]): void {
+                        logger.warn(time, query, parameters);
+                    }
+                }
+            });
+            logger.info(`Connected with typeorm to database: ${dataSource.options.database}`);
             return dataSource;
         },
         hooks: {
             $onDestroy(dataSource) {
-                return dataSource.isInitialized && dataSource.close();
+                return dataSource.isInitialized && dataSource.destroy();
             }
         }
     });

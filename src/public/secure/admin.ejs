@@ -1,7 +1,10 @@
 <!doctype html>
-<html lang="en">
-<%- include('../snippets/head.ejs'); %>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css"/>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <%- include('../snippets/head.ejs'); %>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css"/>
+</head>
 <body>
 
 <%
@@ -22,7 +25,7 @@ function mode(arr) {
             <div class="row">
                 <div class="col-md-12">
                     <div class="card border-primary mb-3">
-                        <div class="card-header">Round <%- indexModel.currentActiveRound.id; -%></div>
+                        <div class="card-header"><%- indexModel.currentActiveRound.name; -%></div>
                         <div class="card-body text-center">
                             <% if(indexModel.currentActiveRound.paused){ %>
                                 <h5 class="card-title mb-4 text-danger">Round is currently paused</h5>
@@ -36,7 +39,7 @@ function mode(arr) {
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Most requested WAD</h5>
-                                    <h5 class="card-text"><%- mode(indexModel.currentActiveRound.submissions); -%></h5>
+                                    <h5 class="card-text"><%- mode(indexModel.currentActiveRound.submissions) ?? "N/A"; -%></h5>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Number of map authors</h5>
@@ -47,11 +50,17 @@ function mode(arr) {
                         <div class="card-footer text-center">
                             <div class="btn-group" role="group" aria-label="Basic outlined example">
                                 <% if(indexModel.currentActiveRound.paused){ %>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resumeRoundModal">Resume round</button>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#resumeRoundModal">Resume round
+                                    </button>
                                 <% } else { %>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pauseRoundModal">Pause round</button>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#pauseRoundModal">Pause round
+                                    </button>
                                 <% } %>
-                                <button type="button" class="btn btn-outline-success" id="endRoundButton" data-bs-toggle="modal" data-bs-target="#endRoundModal">End round</button>
+                                <button type="button" class="btn btn-outline-success" id="endRoundButton"
+                                        data-bs-toggle="modal" data-bs-target="#endRoundModal">End round
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -64,8 +73,9 @@ function mode(arr) {
                         <div class="card-body">
                             <%- include('../snippets/SubmissionsTable.ejs', {
                             submissions: indexModel.currentActiveRound.submissions,
-                            includeDownload: true,
-                            isAdmin: true
+                            isPReviousResults: true,
+                            isAdmin: true,
+                            isResults: false
                             }); %>
                         </div>
                     </div>
@@ -77,8 +87,9 @@ function mode(arr) {
                     Create a new submission round
                 </div>
                 <div class="card-body">
-                    <p class="card-text">Clicking this button will create a new submission round and enable people to submit entries.</p>
-                    <button class="btn btn-primary" id="makeNewRoundButton">Make new round</button>
+                    <p class="card-text">Clicking this button will create a new submission round and enable people
+                        to submit entries.</p>
+                    <button class="btn btn-outline-primary" id="makeNewRoundButton">Make new round</button>
                 </div>
             </div>
         <% } %>
@@ -93,41 +104,58 @@ function mode(arr) {
                 </div>
             </div>
         <% } %>
+        <div class="row mt-5">
+            <div class="col-md-12 text-center">
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <form method="get" action="/rest/auth/logout" class="d-inline">
+                        <button class="btn btn-outline-primary" type="submit">Logout</button>
+                    </form>
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                            data-bs-target="#changeDetailsModel">Change Details
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 </div>
 <% if(indexModel.currentActiveRound){ %>
     <% if(indexModel.currentActiveRound.paused){ %>
-        <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel" aria-hidden="true">
+        <div class="modal fade" id="resumeRoundModal" tabindex="-1" aria-labelledby="resumeRoundModalLabel"
+             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume round <%- indexModel.currentActiveRound.id; -%></h1>
+                        <h1 class="modal-title fs-5" id="resumeRoundModalLabel">Resume
+                            round <%- indexModel.currentActiveRound.id; -%></h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p>Resuming this round will allow submissions again</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="resumeRoundButton">Resume</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-primary" id="resumeRoundButton">Resume</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
     <% } else { %>
-        <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel" aria-hidden="true">
+        <div class="modal fade" id="pauseRoundModal" tabindex="-1" aria-labelledby="pauseRoundModalLabel"
+             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause round <%- indexModel.currentActiveRound.id; -%></h1>
+                        <h1 class="modal-title fs-5" id="pauseRoundModalLabel">Pause
+                            round <%- indexModel.currentActiveRound.id; -%></h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Are you sure you wish to pause this round? This will lock the round and prevent anyone from submitting any more entries.</p>
+                        <p>Are you sure you wish to pause this round? This will lock the round and prevent anyone from
+                            submitting any more entries.</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="pauseRoundButton">Pause</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-primary" id="pauseRoundButton">Pause</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -146,7 +174,8 @@ function mode(arr) {
                     <form id="endRoundWizard">
                         <nav>
                             <div class="nav nav-pills nav-fill" id="nav-tab" role="tablist">
-                                <a class="nav-link active" id="step1-tab" data-toggle="tab" href="#step1">Pause round</a>
+                                <a class="nav-link active" id="step1-tab" data-toggle="tab" href="#step1">Pause
+                                    round</a>
                                 <a class="nav-link" id="step2-tab" data-toggle="tab" href="#step2">Select winners</a>
                                 <a class="nav-link" id="step3-tab" data-toggle="tab" href="#step3">Review</a>
                             </div>
@@ -155,7 +184,8 @@ function mode(arr) {
                             <div class="tab-pane fade show active" id="step1">
                                 <div class="alert alert-primary" role="alert">
                                     <i class="bi bi-exclamation-triangle"></i>
-                                    In order to finish this round and pick winners, you must first pause the current active round.
+                                    In order to finish this round and pick winners, you must first pause the current
+                                    active round.
                                 </div>
                                 <% if(indexModel.currentActiveRound.paused){ %>
                                     <div class="alert alert-success" role="alert">
@@ -165,7 +195,9 @@ function mode(arr) {
                                     <div class="alert alert-warning" role="alert">
                                         <i class="bi bi-exclamation-triangle"></i>
                                         Please pause the round to continue.
-                                        <button type="button" class="btn btn-outline-success" id="endRoundPauseRoundButton">Pause round</button>
+                                        <button type="button" class="btn btn-outline-success"
+                                                id="endRoundPauseRoundButton">Pause round
+                                        </button>
                                     </div>
                                 <% } %>
                             </div>
@@ -176,6 +208,8 @@ function mode(arr) {
                                         <th scope="col">ID</th>
                                         <th scope="col">WAD</th>
                                         <th scope="col">Level</th>
+                                        <th scope="col">Submitter</th>
+                                        <th scope="col">Author</th>
                                     </tr>
                                     </thead>
                                     <tbody id="endRoundResultsTableBody"></tbody>
@@ -183,15 +217,17 @@ function mode(arr) {
                             </div>
                             <div class="tab-pane fade" id="step3">
                                 <div class="alert alert-primary" role="alert">
-                                    Review the selected entries here. Once you finish, this will end the current round and confirm the entries.
+                                    Review the selected entries here. Once you finish, this will end the current round
+                                    and confirm the entries.
                                 </div>
                                 <table class="table" id="endRoundReviewTable">
                                     <thead>
                                     <tr>
                                         <th scope="col">No.</th>
-                                        <th scope="col">ID</th>
                                         <th scope="col">WAD</th>
                                         <th scope="col">Level</th>
+                                        <th scope="col">Submitter</th>
+                                        <th scope="col">Author</th>
                                     </tr>
                                     </thead>
                                     <tbody id="endRoundReviewTableBody"></tbody>
@@ -200,11 +236,15 @@ function mode(arr) {
                         </div>
                         <div class="row justify-content-between">
                             <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary" data-enchanter="previous">Previous</button>
+                                <button type="button" class="btn btn-outline-primary" data-enchanter="previous">
+                                    Previous
+                                </button>
                             </div>
                             <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary" data-enchanter="next">Next</button>
-                                <button type="button" class="btn btn-outline-success" data-enchanter="finish">Finish</button>
+                                <button type="button" class="btn btn-outline-primary" data-enchanter="next">Next
+                                </button>
+                                <button type="button" class="btn btn-outline-success" data-enchanter="finish">Finish
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -213,7 +253,8 @@ function mode(arr) {
         </div>
     </div>
 
-    <div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -243,15 +284,17 @@ function mode(arr) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="submissionModifySaveButton">Save changes</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-primary" id="submissionModifySaveButton">Save changes
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
 <% } %>
-<div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel" aria-hidden="true">
+<div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -262,14 +305,117 @@ function mode(arr) {
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Ok</button>
             </div>
         </div>
     </div>
 </div>
 
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
+<div class="modal fade" id="setYoutubeLinkModal" tabindex="-1" aria-labelledby="setYoutubeLinkModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="setYoutubeLinkModalLabel">Set YouTube link</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="submissionInfoContent">
+                <div class="alert alert-success" role="alert">
+                    Use this to set a YouTube link after you have published the video
+                </div>
+                <input type="hidden" id="setYoutubeLinkSubmissionId">
+                <div class="mb-3 mt-3">
+                    <label for="youtubeLinkUrl" class="form-label">Enter YouTube extension</label>
+                    <div class="input-group">
+                        <span class="input-group-text">https://www.youtube.com/</span>
+                        <input id="youtubeLinkUrl" type="text" class="form-control" placeholder="watch?v=t7BW5ZiTmrE">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="youtubeLinkOk">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="submissionStatusModal" tabindex="-1" aria-labelledby="submissionStatusModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="submissionStatusModalLabel">Modify submission status</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="submissionStatusModalInfoContent">
+                <form id="statusForm">
+                    <input type="hidden" name="id" id="statusSubmissionId"/>
+                    <div class="mb-3">
+                        <label for="statusSelect" class="form-label">Status</label>
+                        <select class="form-select" aria-label="Status Select" id="statusSelect" name="status">
+                            <option selected value="Queued">Queued</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusComments" class="form-label">Comments</label>
+                        <textarea class="form-control" id="statusComments" rows="3" name="additionalInfo"></textarea>
+                    </div>
+                    <div class="mb-3 hidden" id="generateRandomWrapper">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="generateRandomEntryCheck">
+                            <label class="form-check-label" for="generateRandomEntryCheck">
+                                generate another random entry for this round
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="submissionStatusModalOk">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="changeDetailsModel" tabindex="-1" aria-labelledby="changeDetailsModelLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="changeDetailsModelLabel">Change account details</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="changeDetailsModelInfoContent">
+                <div class="mb-3">
+                    <label for="changeEmail" class="form-label">Email address</label>
+                    <input type="email" class="form-control" name="email" id="changeEmail"
+                           value="<%- user.email; -%>">
+                </div>
+                <div class="mb-3">
+                    <label for="changePassword" class="form-label">New Password</label>
+                    <input type="password" class="form-control" name="password" id="changePassword">
+                </div>
+                <div class="mb-3">
+                    <label for="changePasswordRepeat" class="form-label">Repeat Password</label>
+                    <input type="password" class="form-control" id="changePasswordRepeat">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="changeDetailsModelOk">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript"
+        src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
 </body>
@@ -277,8 +423,10 @@ function mode(arr) {
 
 <script>
     Site.loadPage(async site => {
-        <% if(indexModel.currentActiveRound){ %>
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
+        const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
+        const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
+        <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
         <% } %>
         loadEventListeners();
@@ -296,11 +444,11 @@ function mode(arr) {
                 <p>Wad Name: ${wadName}</p>
                 <p>Wad Level: ${wadLevel}</p>
                 <p>Wad Engine: ${wadEngine}</p>
-                ${gzDoomAction ? `<p>${gzDoomAction}</p>` : ""}
-                ${submitterName ? `<p>${submitterName}</p>` : ""}
+                ${gzDoomAction ? `<p>GZDoom actions: ${gzDoomAction}</p>` : ""}
+                ${submitterName ? `<p>Submitter name: ${submitterName}</p>` : ""}
                 <p>Submitter created this map: ${author}</p>
                 <p>distributable: ${distributable}</p>
-                ${info ? `<pre>${info}</pre>` : ""}
+                ${info ? `Info: <pre>${info}</pre>` : ""}
                 <p>email: ${email}</p>
                 <p>download: ${downloadUrl}</p>
             `;
@@ -310,6 +458,145 @@ function mode(arr) {
         }
 
         function loadEventListeners() {
+            const changeDetailsModal = new bootstrap.Modal('#changeDetailsModel');
+            document.getElementById("changeDetailsModel").addEventListener("show.bs.modal", () => {
+                document.getElementById("changePassword").value = null;
+                document.getElementById("changePasswordRepeat").value = null;
+            });
+
+            ((() => {
+                document.getElementById("youtubeLinkOk").addEventListener("click", async e => {
+                    const submissionId = document.getElementById("setYoutubeLinkSubmissionId").value;
+                    const linkExt = document.getElementById("youtubeLinkUrl").value;
+
+                    let endpoint;
+                    if (!linkExt) {
+                        endpoint = `${baseUrl}/submission/${submissionId}/setYoutubeLink?link`;
+                    } else {
+                        const link = `https://www.youtube.com/${linkExt}`;
+                        const encodedLink = encodeURIComponent(link);
+                        endpoint = `${baseUrl}/submission/${submissionId}/setYoutubeLink?link=${encodedLink}`;
+                    }
+
+                    site.loading(true);
+                    try {
+                        await fetch(endpoint, {
+                            method: 'POST'
+                        });
+                    } catch (e) {
+                        alert(e.message);
+                        return;
+                    } finally {
+                        Site.loading(false);
+                    }
+                    alert(`YouTube link ${linkExt ? "set" : "cleared"}`);
+                    window.location.reload();
+                });
+            })());
+            ((() => {
+                document.getElementById("changeDetailsModelOk").addEventListener("click", async e => {
+                    const formData = new URLSearchParams();
+                    const email = document.getElementById("changeEmail").value;
+                    const password = document.getElementById("changePassword").value;
+                    const repeatPassword = document.getElementById("changePasswordRepeat").value;
+                    if (!email) {
+                        return alert("Please specify email");
+                    }
+                    if (!password) {
+                        return alert("password must not be blank");
+                    }
+                    if (password !== repeatPassword) {
+                        return alert("Passwords do not match");
+                    }
+                    formData.append("email", email);
+                    formData.append("password", password);
+                    site.loading(true);
+                    try {
+                        await fetch(`${baseUrl}/auth/changeDetails`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    } catch (e) {
+                        alert(e.message);
+                        return;
+                    } finally {
+                        Site.loading(false);
+                    }
+                    alert("User details changed successfully");
+                    changeDetailsModal.hide();
+                });
+            })());
+
+            ((() => {
+                document.getElementById("statusSelect").addEventListener("change", ev => {
+                    const value = ev.target.value;
+                    const checkBoxWrapper = document.getElementById("generateRandomWrapper");
+                    const generateRandomEntryCheck = document.getElementById("generateRandomEntryCheck");
+                    generateRandomEntryCheck.checked = false;
+                    if (value === "Rejected") {
+                        Site.display(false, checkBoxWrapper);
+                    } else {
+                        Site.display(true, checkBoxWrapper);
+                    }
+                });
+                document.getElementById("submissionStatusModalOk").addEventListener("click", async ev => {
+                    const generateRandomEntryCheck = document.getElementById("generateRandomEntryCheck");
+                    const submissionId = document.getElementById("statusSubmissionId").value;
+                    const status = document.getElementById("statusSelect").value;
+                    const additionalInfo = document.getElementById("statusComments").value || null;
+                    const formData = new URLSearchParams();
+                    formData.append("submissionId", submissionId);
+                    formData.append("status", status);
+                    if (additionalInfo) {
+                        formData.append("additionalInfo", additionalInfo);
+                    }
+                    site.loading(true);
+                    try {
+                        await fetch(`${baseUrl}/submission/changeStatus`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    } catch (e) {
+                        alert(e.message);
+                        return;
+                    } finally {
+                        Site.loading(false);
+                    }
+                    if (generateRandomEntryCheck.checked) {
+                        const submissionEntryId = ev.target.dataset.entryid;
+                        site.loading(true);
+                        try {
+                            await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${submissionEntryId}`, {
+                                method: 'POST'
+                            });
+                        } catch (e) {
+                            alert(e.message);
+                            return;
+                        } finally {
+                            Site.loading(false);
+                        }
+                    }
+                    window.location.reload();
+                });
+            })());
+            ((() => {
+                const distributableRadios = document.querySelectorAll("#authorYes,#authorNo");
+                if (distributableRadios) {
+                    for (const distributableRadio of distributableRadios) {
+                        distributableRadio.addEventListener("change", evt => {
+                            const value = evt.target.value;
+                            const distributableSection = document.getElementById("distributableSection");
+                            if (value === "true") {
+                                site.display(false, distributableSection);
+                            } else {
+                                site.display(true, distributableSection);
+                            }
+                        });
+                    }
+                }
+            })());
+
+
             ((() => {
                 const resumeRoundButton = document.getElementById("resumeRoundButton") ?? null;
                 const pauseRoundButton = document.getElementById("pauseRoundButton") ?? null;
@@ -406,20 +693,43 @@ function mode(arr) {
 
                         function buildNextStep() {
 
-                            function buildStep2() {
-                                if (step2Dt) {
-                                    return;
-                                }
+                            async function buildStep2() {
 
                                 function highlightDupes() {
                                     step2Dt.rows().every(function () {
                                         const htmlRow = this.node();
-                                        htmlRow.classList.remove("text-bg-danger");
+                                        htmlRow.classList.remove("table-danger");
                                     });
                                     const dupeRows = getDuplicateRows();
                                     for (let dupeRow of dupeRows) {
-                                        dupeRow.classList.add("text-bg-danger");
+                                        dupeRow.classList.add("table-danger");
                                     }
+                                }
+
+                                async function buildResultCache() {
+                                    site.loading(true);
+                                    let json;
+                                    let result;
+                                    try {
+                                        result = await fetch(`${baseUrl}/submissionRoundResult/buildResultSet`, {
+                                            method: "POST"
+                                        });
+                                        json = await result.json();
+                                    } finally {
+                                        site.loading(false);
+                                    }
+
+                                    if (result.status !== 200) {
+                                        console.error(json);
+                                        alert("Failed to build result cache.");
+                                        return false;
+                                    }
+                                    return true;
+                                }
+
+                                const built = await buildResultCache();
+                                if (step2Dt || !built) {
+                                    return;
                                 }
 
                                 step2Dt = $("#endRoundResultsTable").DataTable({
@@ -432,6 +742,12 @@ function mode(arr) {
                                     select: {
                                         style: 'multi'
                                     },
+                                    columnDefs: [
+                                        {
+                                            "visible": false,
+                                            "targets": 0
+                                        }
+                                    ],
                                     ordering: false,
                                     buttons: [
                                         {
@@ -453,11 +769,16 @@ function mode(arr) {
                                                     alert("Failed to generate entry. See console for more info.");
                                                     return;
                                                 }
+                                                if (json.length === 0) {
+                                                    return;
+                                                }
                                                 const entry = json[0];
                                                 dt.row.add([
-                                                    entry.id.toString(),
+                                                    entry.id,
                                                     entry.WADName,
-                                                    entry.level
+                                                    entry.level,
+                                                    entry.authorName ?? "anonymous",
+                                                    entry.author
                                                 ]).draw();
                                                 highlightDupes();
                                             }
@@ -486,9 +807,11 @@ function mode(arr) {
                                                 selectedRows.every(function (rowIdx, tableLoop, rowLoop) {
                                                     const entry = json[rowLoop];
                                                     this.data([
-                                                        entry.id.toString(),
+                                                        entry.id,
                                                         entry.WADName,
-                                                        entry.level
+                                                        entry.level,
+                                                        entry.authorName ?? "anonymous",
+                                                        entry.author
                                                     ]).draw();
                                                 });
                                                 selectedRows.deselect();
@@ -513,8 +836,8 @@ function mode(arr) {
                                 step2Data.each((rows, index) => {
                                     tableHtml += "<tr>";
                                     tableHtml += `<td>${index + 1}</td>`;
-                                    for (const row of rows) {
-                                        tableHtml += `<td>${row}</td>`;
+                                    for (let i = 1; i < rows.length; i++) {
+                                        tableHtml += `<td>${rows[i]}</td>`;
                                     }
                                     tableHtml += "</tr>";
                                 });
@@ -582,10 +905,15 @@ function mode(arr) {
             });
 
             document.getElementById("makeNewRoundButton")?.addEventListener("click", async ev => {
+                const roundName = prompt("Submission round name");
+                if (!roundName?.trim()) {
+                    alert("Please supply a round name");
+                    return;
+                }
                 site.loading(true);
                 let newRound;
                 try {
-                    newRound = await fetch(`${baseUrl}/submissionRound/newRound`, {
+                    newRound = await fetch(`${baseUrl}/submissionRound/newRound?name=${roundName}`, {
                         method: "POST"
                     });
                 } finally {
@@ -635,7 +963,7 @@ function mode(arr) {
                 }
                 if (isPreviousRoundCard) {
                     dtOpts["columnDefs"] = [
-                        {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10, 11]}
+                        {"visible": false, "targets": [0, 4, 5, 7, 8, 9, 10, 11]}
                     ];
                 }
                 if (!isPreviousRoundCard) {
@@ -693,8 +1021,34 @@ function mode(arr) {
                                 const submissionObj = await submission.json();
                                 const wadName = submissionObj.WADName;
                                 const wadURL = submissionObj.WAD ?? null;
+                                const isAuthor = submissionObj.author;
+                                const distributable = isAuthor && submissionObj.distributable;
+                                const changeEv = new Event('change');
+                                const authorYes = document.getElementById("authorYes");
+                                const authorNo = document.getElementById("authorNo");
+                                const distributableYes = document.getElementById("distributableYes");
+                                const distributableNo = document.getElementById("distributableNo");
+                                if (isAuthor) {
+                                    authorYes.checked = true;
+                                    authorYes.dispatchEvent(changeEv);
+                                } else {
+                                    authorNo.checked = true;
+                                    authorNo.dispatchEvent(changeEv);
+                                }
+                                if (distributable) {
+                                    distributableYes.checked = true;
+                                } else {
+                                    distributableNo.checked = true;
+                                }
+
                                 const wadUrlInput = document.getElementById("wadDownloadUrlSection");
-                                wadURL ? wadUrlInput.classList.remove("hidden") : wadUrlInput.classList.add("hidden");
+                                if (!wadURL) {
+                                    wadUrlInput.classList.add("hidden");
+                                    wadUrlInput.querySelector("input").setAttribute("disabled", "true");
+                                } else {
+                                    wadUrlInput.classList.remove("hidden");
+                                    wadUrlInput.querySelector("input").removeAttribute("disabled");
+                                }
                                 const level = submissionObj.level;
                                 const engine = submissionObj.engine;
                                 const submitterName = submissionObj.authorName;
@@ -707,6 +1061,44 @@ function mode(arr) {
                                 document.getElementById("authorName").value = submitterName;
                                 document.getElementById("submissionId").value = id;
                                 submissionModificationModal.show();
+                            }
+                        });
+                } else {
+                    buttons.push({
+                            extend: 'selectedSingle',
+                            text: 'Change status',
+                            action: async (e, dt) => {
+                                const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                let submission;
+                                try {
+                                    submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const submissionObj = await submission.json();
+                                const statusObj = submissionObj.status;
+                                const dd = document.getElementById('statusSelect');
+                                const input = document.getElementById("statusComments");
+                                document.getElementById("statusSubmissionId").value = submissionObj.id;
+                                input.value = null;
+                                dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
+                                if (statusObj.additionalInfo) {
+                                    input.value = statusObj.additionalInfo;
+                                }
+                                document.getElementById("submissionStatusModalOk").dataset.entryid = submissionEntryId;
+                                submissionStatusModal.show();
+                            }
+                        },
+                        {
+                            extend: 'selectedSingle',
+                            text: 'Set YouTube link',
+                            action: async (e, dt) => {
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                document.getElementById("setYoutubeLinkSubmissionId").value = id;
+                                setYoutubeLinkModal.show();
                             }
                         });
                 }

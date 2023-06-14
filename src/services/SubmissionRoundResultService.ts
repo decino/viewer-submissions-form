@@ -5,7 +5,8 @@ import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
-import {InternalServerError} from "@tsed/exceptions";
+import {BadRequest, InternalServerError} from "@tsed/exceptions";
+import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 
 @Service()
 export class SubmissionRoundResultService {
@@ -19,53 +20,86 @@ export class SubmissionRoundResultService {
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
-    public async generateEntries(count: number | undefined): Promise<SubmissionModel[]> {
-        const allEntries = await this.submissionService.getAllEntries();
-        const mergedEntries: Map<string, SubmissionModel[]> = new Map();
+    private readonly entryCache: Map<string, SubmissionModel[]> = new Map();
 
+    public async buildResultSet(entries?: SubmissionModel[]): Promise<void> {
+        this.entryCache.clear();
+        let allEntries: SubmissionModel[];
+        if (entries) {
+            allEntries = entries;
+        } else {
+            allEntries = await this.submissionService.getAllEntries();
+        }
         for (const entry of allEntries) {
             if (!entry.submissionValid) {
                 continue;
             }
-            const wadIdentifier = entry.wadURL ? entry.wadURL : entry.wadName;
-            if (mergedEntries.has(wadIdentifier)) {
-                mergedEntries.get(wadIdentifier)?.push(entry);
+            const wadIdentifier = entry.wadName;
+            if (this.entryCache.has(wadIdentifier)) {
+                this.entryCache.get(wadIdentifier)?.push(entry);
             } else {
-                mergedEntries.set(wadIdentifier, [entry]);
+                this.entryCache.set(wadIdentifier, [entry]);
             }
         }
-        const keysToGet = this.getMultipleRandom([...mergedEntries.keys()], count);
-        const chosenEntries = keysToGet.flatMap(key => mergedEntries.get(key)) as SubmissionModel[];
+    }
+
+    public generateEntries(count: number): SubmissionModel[] {
+        if (this.entryCache.size === 0) {
+            throw new Error("Unable to generate entries as the cache has not been built");
+        }
+        const keysToGet = this.getMultipleRandom([...this.entryCache.keys()], count);
+        const chosenEntries = keysToGet.flatMap(key => this.entryCache.get(key)) as SubmissionModel[];
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    public async submitEntries(enryIds: number[]): Promise<void> {
-        const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+    public async submitEntries(entryIds: number[], round?: SubmissionRoundModel): Promise<void> {
+        let activeRound: SubmissionRoundModel | null;
+        if (round) {
+            activeRound = round;
+        } else {
+            activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        }
         if (!activeRound) {
             return;
         }
         const entries: SubmissionModel[] = [];
-        for (const entryId of enryIds) {
+        for (let i = 0; i < entryIds.length; i++) {
+            const entryId = entryIds[i];
             const entry = activeRound.submissions.find(submission => submission.id === entryId);
             if (!entry) {
-                throw new InternalServerError(`Entry if ID ${entryId} is not found in current active round.`);
+                throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
-            entry.chosenRoundId = activeRound.id;
+            entry.playOrder = i + 1;
+            entry.isChosen = true;
+            if (!entry.status) {
+                entry.status = this.ds.manager.create(SubmissionStatusModel);
+            }
             entries.push(entry);
         }
-        const repo = this.ds.getRepository(SubmissionModel);
-        await repo.save(entries);
+        await this.ds.manager.save(SubmissionModel, entries);
         await this.submissionRoundService.endActiveSubmissionRound();
+        this.entryCache.clear();
     }
 
     public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {
         const allNonActiveRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
         // this should be done as an inner select on the table join, but this ORM does not support this yet
         const filteredResult = allNonActiveRounds.map(value => {
-            value.submissions = value.submissions.filter(submission => !!submission.chosenRoundId);
+            value.submissions = value.submissions.filter(submission => submission.isChosen);
             return value;
         });
         return filteredResult ?? [];
+    }
+
+    public async addRandomEntry(roundId: number): Promise<SubmissionModel> {
+        const round = await this.submissionRoundService.getSubmissionRound(roundId);
+        if (!round) {
+            throw new BadRequest(`Round ${roundId} does not exist`);
+        }
+        await this.buildResultSet(round.submissions);
+        const entry = this.generateEntries(1)[0];
+        await this.submitEntries([entry.id], round);
+        return entry;
     }
 
     private getMultipleRandom<T>(array: T[], num = -1): T[] {
@@ -76,5 +110,4 @@ export class SubmissionRoundResultService {
         }
         return num === -1 ? shuffled : shuffled.slice(0, num);
     }
-
 }

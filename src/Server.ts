@@ -1,5 +1,5 @@
 import {Configuration, Inject} from "@tsed/di";
-import {PlatformApplication} from "@tsed/common";
+import {BeforeRoutesInit, PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
 import {config} from "./config";
@@ -20,6 +20,10 @@ import {isProduction} from "./config/envs";
 import helmet from "helmet";
 import process from "process";
 import cors from "cors";
+import {TypeormStore} from "connect-typeorm";
+import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
+import {DataSource} from "typeorm";
+import {SessionModel} from "./model/db/Session.model";
 
 const opts: Partial<TsED.Configuration> = {
     ...config,
@@ -74,6 +78,11 @@ const opts: Partial<TsED.Configuration> = {
             }
         ]
     },
+    socketIO: {
+        cors: {
+            origin: process.env.BASE_URL
+        }
+    },
     middlewares: [
         helmet({
             contentSecurityPolicy: false,
@@ -90,17 +99,6 @@ const opts: Partial<TsED.Configuration> = {
         bodyParser.urlencoded({
             extended: true
         }),
-        session({
-            secret: process.env.SESSION_KEY as string,
-            resave: true,
-            saveUninitialized: true,
-            // maxAge: 36000,
-            cookie: {
-                path: "/",
-                httpOnly: process.env.HTTPS === "false",
-                secure: process.env.HTTPS === "true"
-            }
-        })
     ],
     views: {
         root: `${__dirname}/public`,
@@ -128,10 +126,35 @@ if (!isProduction) {
 }
 
 @Configuration(opts)
-export class Server {
+export class Server implements BeforeRoutesInit {
+
     @Inject()
     protected app: PlatformApplication;
 
     @Configuration()
     protected settings: Configuration;
+
+    @Inject(SQLITE_DATA_SOURCE)
+    private ds: DataSource;
+
+    public $beforeRoutesInit(): void | Promise<any> {
+        if (isProduction) {
+            this.app.getApp().set("trust proxy", 1);
+        }
+        this.app.use(session({
+            secret: process.env.SESSION_KEY as string,
+            resave: false,
+            store: new TypeormStore({
+                cleanupLimit: 2,
+            }).connect(this.ds.getRepository(SessionModel)),
+            saveUninitialized: false,
+            cookie: {
+                path: "/",
+                httpOnly: true,
+                maxAge: 86400000,
+                secure: process.env.HTTPS === "true",
+                sameSite: "strict"
+            }
+        }));
+    }
 }

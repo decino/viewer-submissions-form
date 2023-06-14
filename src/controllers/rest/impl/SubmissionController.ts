@@ -54,7 +54,7 @@ export class SubmissionController extends BaseRestController {
                                 @PathParams("id") submissionId: number,
                                 @QueryParams("link") youtubeLink?: string): Promise<unknown> {
         await this.submissionService.addYoutubeToSubmission(submissionId, youtubeLink ?? null);
-        return super.doSuccess(res, `Submission Youtube link has been assigned.`);
+        return super.doSuccess(res, `Submission YouTube link has been assigned.`);
     }
 
     @Get("/downloadWadSecure/:roundId/:id")

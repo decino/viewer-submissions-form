@@ -8,7 +8,7 @@ submissions = submissions.filter(submission => {
 if (submissions.length > 0 || !isPReviousResults) {
 %>
 
-    <table class="table submissionsTable" data-isresults="<%- isResults -%>">
+    <table class="table submissionsTable" data-isresults="<%- isResults; -%>">
         <thead>
         <tr>
             <% if(isAdmin){ %>
@@ -17,7 +17,7 @@ if (submissions.length > 0 || !isPReviousResults) {
             <th scope="col">No.</th>
             <th scope="col">WAD</th>
             <th scope="col">Level</th>
-            <% if(isAdmin || isPReviousResults){ %>
+            <% if(isAdmin || (isPReviousResults && isResults) ){ %>
                 <th scope="col">Submitter name</th>
             <% } %>
             <% if(isAdmin){ %>
@@ -56,7 +56,7 @@ if (submissions.length > 0 || !isPReviousResults) {
                 <%- toShow; -%>
             </td>
             <td><%- chosenSubmission.wadLevel; -%></td>
-            <% if(isAdmin || isPReviousResults){ %>
+            <% if(isAdmin || (isPReviousResults && isResults)){ %>
                 <td><%- chosenSubmission.submitterName ?? "anonymous"; -%></td>
             <% } %>
             <% if(isAdmin){ %>

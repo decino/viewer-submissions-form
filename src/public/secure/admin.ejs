@@ -427,9 +427,9 @@ function mode(arr) {
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
         const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
         const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
+        const dtMap = new Map();
         <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
-        const dtMap = new Map();
         <% } %>
         loadEventListeners();
         initDt();

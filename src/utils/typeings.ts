@@ -8,3 +8,9 @@ export type ReCAPTCHAResponse = {
     "hostname": string,
     "error-codes": string[]
 };
+
+
+export type HttpErrorRenderObj = {
+    status: number,
+    message: string
+}

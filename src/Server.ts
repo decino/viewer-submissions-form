@@ -25,6 +25,8 @@ import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
 import {DataSource} from "typeorm";
 import {SessionModel} from "./model/db/Session.model";
 import compression from "compression";
+import "./filters/HttpExceptionFilter";
+import "./engine/impl/HttpErrorRenderers/index";
 
 const opts: Partial<TsED.Configuration> = {
     ...config,

@@ -10,11 +10,11 @@ import {AbstractEjsHttpRenderEngine} from "./AbstractEjsHttpRenderEngine";
 })
 export class HttpNotFoundRenderEngine extends AbstractEjsHttpRenderEngine {
 
-    public supportsError(exception: Exception): boolean {
+    public override supportsError(exception: Exception): boolean {
         return exception instanceof ResourceNotFound || exception instanceof NotFound;
     }
 
-    public getTitle(): string {
+    public override getTitle(): string {
         return "The page you’re looking for doesn't exist.";
     }
 

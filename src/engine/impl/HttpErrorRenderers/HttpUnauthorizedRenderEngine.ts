@@ -9,11 +9,11 @@ import {AbstractEjsHttpRenderEngine} from "./AbstractEjsHttpRenderEngine";
 })
 export class HttpUnauthorizedRenderEngine extends AbstractEjsHttpRenderEngine {
 
-    public supportsError(exception: Exception): boolean {
+    public override supportsError(exception: Exception): boolean {
         return exception instanceof Unauthorized;
     }
 
-    public getTitle(): string {
+    public override getTitle(): string {
         return "You are not Authorized to view this page.";
     }
 

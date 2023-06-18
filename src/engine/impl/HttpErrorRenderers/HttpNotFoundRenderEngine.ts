@@ -10,7 +10,7 @@ import {PlatformResponse} from "@tsed/common";
     scope: ProviderScope.SINGLETON,
     type: HTTP_INJECTION_ENGINE
 })
-export class HttpNotFoundRenderEngine implements IHttpErrorRenderEngine {
+export class HttpNotFoundRenderEngine implements IHttpErrorRenderEngine<string> {
     public render(obj: HttpErrorRenderObj, response: PlatformResponse): Promise<string> {
         return response.render("404.ejs", obj);
     }

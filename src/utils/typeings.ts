@@ -1,4 +1,5 @@
 import {SubmissionModel} from "../model/db/Submission.model";
+import {Exception} from "@tsed/exceptions";
 
 export type SubmissionModification = Partial<SubmissionModel>;
 
@@ -12,5 +13,6 @@ export type ReCAPTCHAResponse = {
 
 export type HttpErrorRenderObj = {
     status: number,
-    message: string
+    message: string,
+    internalError: Exception
 }

@@ -182,16 +182,17 @@ function mode(arr) {
                         </nav>
                         <div class="tab-content py-4" id="nav-tabContent">
                             <div class="tab-pane fade show active" id="step1">
-                                <div class="alert alert-primary" role="alert">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    In order to finish this round and pick winners, you must first pause the current
-                                    active round.
-                                </div>
                                 <% if(indexModel.currentActiveRound.paused){ %>
                                     <div class="alert alert-success" role="alert">
                                         <i class="bi bi-check-circle"></i> Round is paused
                                     </div>
                                 <% } else { %>
+                                    <div class="alert alert-primary" role="alert">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        In order to finish this round and pick winners, you must first pause the
+                                        current
+                                        active round.
+                                    </div>
                                     <div class="alert alert-warning" role="alert">
                                         <i class="bi bi-exclamation-triangle"></i>
                                         Please pause the round to continue.
@@ -696,11 +697,17 @@ function mode(arr) {
 
                             function validateStep2() {
                                 const duplicateRows = getDuplicateRows();
-                                const valid = duplicateRows.length === 0;
-                                if (!valid) {
+                                const hasDupes = duplicateRows.length > 0;
+                                if (hasDupes) {
                                     alert("Please remove duplicate entries to proceed.");
+                                    return false;
                                 }
-                                return valid;
+                                const tableData = step2Dt.rows().data();
+                                if (tableData.length === 0) {
+                                    alert("No entries in table");
+                                    return false;
+                                }
+                                return true;
                             }
 
                             function validateStep3() {
@@ -748,8 +755,7 @@ function mode(arr) {
 
                                     if (result.status !== 200) {
                                         console.error(json);
-                                        alert("Failed to build result cache.");
-                                        return false;
+                                        alert(`Failed to continue: ${json.message}`);
                                     }
                                     return true;
                                 }

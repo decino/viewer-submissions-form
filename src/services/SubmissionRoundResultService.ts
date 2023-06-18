@@ -30,6 +30,9 @@ export class SubmissionRoundResultService {
         } else {
             allEntries = await this.submissionService.getAllEntries();
         }
+        if (allEntries.length === 0) {
+            throw new BadRequest("There are no entries in this round!");
+        }
         for (const entry of allEntries) {
             if (!entry.submissionValid) {
                 continue;

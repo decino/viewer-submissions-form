@@ -9,12 +9,14 @@ import {DefaultHttpRenderEngine} from "../engine/impl/HttpErrorRenderers/Default
 })
 export class HttpErrorFactory {
 
+    private readonly defaultRenderEngine: IHttpErrorRenderEngine<unknown>;
+
     public constructor(@Inject(HTTP_INJECTION_ENGINE) private readonly engines: IHttpErrorRenderEngine<unknown>[]) {
+        this.defaultRenderEngine = engines.find(engine => engine instanceof DefaultHttpRenderEngine)!;
     }
 
     public getRenderEngine(exception: Exception): IHttpErrorRenderEngine<unknown> {
-        const defaultRenderEngine = this.engines.find(engine => engine instanceof DefaultHttpRenderEngine)!;
-        return this.engines.find(engine => engine.supportsError(exception)) ?? defaultRenderEngine;
+        return this.engines.find(engine => engine.supportsError(exception)) ?? this.defaultRenderEngine;
     }
 
 }

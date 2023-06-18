@@ -13,7 +13,7 @@ type Entry = {
 }
 
 
-export type SubmissionRound = {
+type SubmissionRound = {
     submissions: Entry[],
     roundId: number
 }

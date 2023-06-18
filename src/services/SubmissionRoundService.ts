@@ -57,14 +57,10 @@ export class SubmissionRoundService implements OnInit {
 
     public async syncRound(): Promise<SubmissionRoundModel[]> {
         const submissionRoundModelRepository = this.ds.getRepository(SubmissionRoundModel);
-        const submissionRepo = this.ds.getRepository(SubmissionModel);
         const entries = await this.decinoRoundHistoryImporterEngine.getSubmissionRounds();
-        const submissionRounds: SubmissionRoundModel[] = [];
-        let n = 1;
-        for (const entry of entries) {
+        const submissionRounds = entries.map(entry => {
             const {submissions, roundId} = entry;
             const submissionsModels: SubmissionModel[] = submissions.map((submission, index) => {
-
                 const obj: Partial<SubmissionModel> = {
                     submissionRoundId: roundId,
                     youtubeLink: submission.youTubeLink,
@@ -82,21 +78,17 @@ export class SubmissionRoundService implements OnInit {
                     status.status = STATUS.COMPLETED;
                     obj.playOrder = submission.no;
                     obj.status = status;
-                    n++;
                 }
-                return submissionRepo.create(obj);
+                return this.ds.manager.create(SubmissionModel, obj) as SubmissionModel;
             });
-            const submissionRound = submissionRoundModelRepository.create({
+            return submissionRoundModelRepository.create({
                 id: roundId,
                 active: false,
                 submissions: submissionsModels,
                 name: `Submission${roundId}`
             });
-            submissionRounds.push(submissionRound);
-        }
-        const ret = await submissionRoundModelRepository.save(submissionRounds);
-        await this.ds.manager.query("UPDATE SQLITE_SEQUENCE SET seq = " + n + " WHERE name = 'submission_status_model'");
-        return ret;
+        });
+        return submissionRoundModelRepository.save(submissionRounds);
     }
 
     public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {

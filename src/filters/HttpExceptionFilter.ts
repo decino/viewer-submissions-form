@@ -15,7 +15,8 @@ export class HttpExceptionFilter implements ExceptionFilterMethods {
         const obj: HttpErrorRenderObj = {
             status: exception.status,
             message: exception.message,
-            internalError: exception
+            internalError: exception,
+            title: renderEngine.getTitle()
         };
         const response = ctx.response;
         const template = await renderEngine.render(obj, response);

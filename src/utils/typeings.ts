@@ -13,6 +13,7 @@ export type ReCAPTCHAResponse = {
 
 export type HttpErrorRenderObj = {
     status: number,
+    title: string | null,
     message: string,
     internalError: Exception
 }

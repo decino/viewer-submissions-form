@@ -8,11 +8,13 @@ export interface IHttpErrorRenderEngine<T> {
      * @param obj
      * @param response
      */
-    render(obj: HttpErrorRenderObj, response: PlatformResponse): Promise<T>;
+    render(obj: Omit<HttpErrorRenderObj, "title">, response: PlatformResponse): Promise<T>;
 
     /**
      * Returns true if this render engine supports the exception thrown by the system
      * @param exception
      */
     supportsError(exception: Exception): boolean;
+
+    getTitle(): string | null;
 }

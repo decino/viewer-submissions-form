@@ -1,22 +1,21 @@
 import {Injectable, ProviderScope} from "@tsed/di";
-import {IHttpErrorRenderEngine} from "../../IHttpErrorRenderEngine";
-import {HttpErrorRenderObj} from "../../../utils/typeings";
 import {Exception, NotFound} from "@tsed/exceptions";
 import {HTTP_INJECTION_ENGINE} from "../../../model/di/tokens";
 import {ResourceNotFound} from "@tsed/platform-exceptions";
-import {PlatformResponse} from "@tsed/common";
+import {AbstractEjsHttpRenderEngine} from "./AbstractEjsHttpRenderEngine";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
     type: HTTP_INJECTION_ENGINE
 })
-export class HttpNotFoundRenderEngine implements IHttpErrorRenderEngine<string> {
-    public render(obj: HttpErrorRenderObj, response: PlatformResponse): Promise<string> {
-        return response.render("404.ejs", obj);
-    }
+export class HttpNotFoundRenderEngine extends AbstractEjsHttpRenderEngine {
 
     public supportsError(exception: Exception): boolean {
         return exception instanceof ResourceNotFound || exception instanceof NotFound;
+    }
+
+    public getTitle(): string {
+        return "The page you’re looking for doesn't exist.";
     }
 
 }

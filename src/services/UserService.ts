@@ -4,11 +4,10 @@ import {DataSource} from "typeorm";
 import {UserModel} from "../model/db/User.model";
 import argon2 from "argon2";
 import {CustomUserInfoModel} from "../model/auth/CustomUserInfoModel";
-import {NotAuthorized} from "../exceptions/NotAuthorized";
-import {StatusCodes} from "http-status-codes";
 import {Logger} from "@tsed/logger";
 import {AfterInit} from "@tsed/common";
 import * as crypto from "crypto";
+import {Unauthorized} from "@tsed/exceptions";
 
 @Service()
 export class UsersService implements AfterInit {
@@ -39,7 +38,7 @@ export class UsersService implements AfterInit {
             }
         });
         if (!userObject) {
-            throw new NotAuthorized("You are not logged in", StatusCodes.UNAUTHORIZED);
+            throw new Unauthorized("You are not logged in");
         }
         userObject.email = newModel.email;
         userObject.password = await argon2.hash(newModel.password);

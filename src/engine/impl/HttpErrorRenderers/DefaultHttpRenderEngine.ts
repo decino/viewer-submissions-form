@@ -35,6 +35,9 @@ export class DefaultHttpRenderEngine implements IHttpErrorRenderEngine<DefaultRe
         };
     }
 
+    public getTitle(): string | null {
+        return null;
+    }
 
     private getErrors(error: Exception): Exception {
         return [error, error.origin].filter(Boolean).reduce((errs, {errors}: ResponseErrorObject) => {

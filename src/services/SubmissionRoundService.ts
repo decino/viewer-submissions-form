@@ -74,8 +74,9 @@ export class SubmissionRoundService implements OnInit {
                     submissionValid: true
                 };
                 if (submission.chosen) {
-                    const status = new SubmissionStatusModel();
-                    status.status = STATUS.COMPLETED;
+                    const status = this.ds.manager.create(SubmissionStatusModel, {
+                        status: STATUS.COMPLETED
+                    });
                     obj.playOrder = submission.no;
                     obj.status = status;
                 }

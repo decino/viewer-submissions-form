@@ -1,4 +1,4 @@
-import {Inject, OnInit, Service} from "@tsed/di";
+import {Constant, Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource} from "typeorm";
 import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
@@ -6,7 +6,6 @@ import {NotFound} from "@tsed/exceptions";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {Logger} from "@tsed/common";
 import {EmailService} from "./EmailService";
-import process from "process";
 import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 
@@ -27,6 +26,9 @@ export class SubmissionConfirmationService implements OnInit {
 
     @Inject()
     private submissionSocket: SubmissionSocket;
+
+    @Constant("envs.BASE_URL")
+    private readonly baseUrl: string;
 
     public processConfirmation(confirmationUid: string): Promise<void> {
         return this.ds.manager.transaction(async entityManager => {
@@ -73,13 +75,13 @@ export class SubmissionConfirmationService implements OnInit {
     }
 
     public $onInit(): Promise<any> | void {
-        if (!process.env.BASE_URL) {
+        if (!this.baseUrl) {
             throw new Error("Base URL has not been set.");
         }
     }
 
     private sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<string> {
-        const baseUrl = process.env.BASE_URL;
+        const baseUrl = this.baseUrl;
         const confirmationUrl = `${baseUrl}/processSubmission?uid=${pendingEntry.confirmationUid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;
         return this.emailService.sendMail(body, pendingEntry.submission.submitterEmail);

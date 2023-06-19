@@ -1,4 +1,4 @@
-import {Inject, OnInit, Service} from "@tsed/di";
+import {Constant, Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
 import {DataSource, In} from "typeorm";
 import {SubmissionModel} from "../model/db/Submission.model";
@@ -36,6 +36,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private logger: Logger;
+
+    @Constant("envs.HELP_EMAIL")
+    private readonly helpEmail: string;
 
     public async addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
@@ -204,7 +207,7 @@ export class SubmissionService implements OnInit {
         const wadName = entry.wadName;
         for (const submission of round.submissions) {
             if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
-                throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${process.env.HELP_EMAIL ?? "decino"} to change your submission.`);
+                throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${this.helpEmail ?? "decino"} to change your submission.`);
             }
             if ((submission.wadURL === wadUrl || submission.wadName === wadName) && submission.wadLevel === level) {
                 throw new Error("This level for this WAD has already been submitted. Please submit a different map.");

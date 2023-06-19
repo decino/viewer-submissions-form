@@ -1,4 +1,4 @@
-import {Inject, Service} from "@tsed/di";
+import {Constant, Inject, OnInit, Service} from "@tsed/di";
 import {SubmissionModel} from "../model/db/Submission.model";
 import fetch from 'node-fetch';
 import {Logger} from "@tsed/common";
@@ -10,12 +10,19 @@ type SubmissionPayload = {
 }
 
 @Service()
-export class DiscordBotDispatcherService {
+export class DiscordBotDispatcherService implements OnInit {
 
-    private readonly dispatchAddress = `${process.env.BOT_URI}/bot/postSubmission`;
+    @Constant("envs.BOT_URI")
+    private readonly botUri: string;
+
+    private dispatchAddress: string;
 
     @Inject()
     private logger: Logger;
+
+    public $onInit(): void {
+        this.dispatchAddress = `${this.botUri}/bot/postSubmission`;
+    }
 
     public dispatch(entry: SubmissionModel): Promise<void> {
         const payload: SubmissionPayload = {

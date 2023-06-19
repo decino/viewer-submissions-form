@@ -1,4 +1,4 @@
-import {Configuration, Inject} from "@tsed/di";
+import {Configuration, Constant, Inject} from "@tsed/di";
 import {BeforeRoutesInit, PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
@@ -142,12 +142,18 @@ export class Server implements BeforeRoutesInit {
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
+    @Constant("envs.SESSION_KEY")
+    private readonly sessionKey: string;
+
+    @Constant("envs.HTTPS")
+    private readonly https: string;
+
     public $beforeRoutesInit(): void | Promise<any> {
         if (isProduction) {
             this.app.getApp().set("trust proxy", 1);
         }
         this.app.use(session({
-            secret: process.env.SESSION_KEY as string,
+            secret: this.sessionKey,
             resave: false,
             store: new TypeormStore({
                 cleanupLimit: 2,
@@ -157,7 +163,7 @@ export class Server implements BeforeRoutesInit {
                 path: "/",
                 httpOnly: true,
                 maxAge: 86400000,
-                secure: process.env.HTTPS === "true",
+                secure: this.https === "true",
                 sameSite: "strict"
             }
         }));

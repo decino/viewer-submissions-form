@@ -1,5 +1,4 @@
-import {Inject, Service} from "@tsed/di";
-import process from "process";
+import {Constant, Inject, Service} from "@tsed/di";
 import {ReCAPTCHAResponse} from "../utils/typeings";
 import fetch from "node-fetch";
 import FormData from "form-data";
@@ -13,9 +12,12 @@ export class ReCAPTCHAService {
 
     private readonly baseUrl = "https://www.google.com/recaptcha/api/siteverify";
 
+    @Constant("envs.RECAPTCHA_SECRET_KEY")
+    private readonly reCAPTCHASecretKey: string;
+
     public async validateResponse(clientResponse: string): Promise<boolean> {
         const form = new FormData();
-        form.append('secret', process.env.RECAPTCHA_SECRET_KEY);
+        form.append('secret', this.reCAPTCHASecretKey);
         form.append('response', clientResponse);
         const response = await fetch(this.baseUrl, {
             method: "POST",

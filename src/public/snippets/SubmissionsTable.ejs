@@ -49,11 +49,10 @@ if (submissions.length > 0 || !isPReviousResults) {
             <% } %>
             <td><%- i + 1; -%></td>
             <td>
-                <% const toShow = chosenSubmission.youtubeLink ?
-                        `<a target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}" href="${chosenSubmission.youtubeLink}">${chosenSubmission.wadName}</a>`
-                        :
-                        `<u><span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">${chosenSubmission.wadName}</span></u>`; %>
-                <%- toShow; -%>
+                <%- `<u>
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">
+                        ${chosenSubmission.wadName}</span>
+                </u>`; -%>
             </td>
             <td><%- chosenSubmission.wadLevel; -%></td>
             <% if(isAdmin || (isPReviousResults && isResults)){ %>
@@ -95,7 +94,12 @@ if (submissions.length > 0 || !isPReviousResults) {
                         clazz = "text-warning";
                         break;
                 } %>
-                <td class="<%- clazz; -%>"><%- chosenSubmission.status.status; -%></td>
+                <% const toShow = chosenSubmission.youtubeLink ?
+                        `<a target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Watch playthrough" style="color: inherit" href="${chosenSubmission.youtubeLink}">${chosenSubmission.status.status}</a>`
+                        :
+                        `${chosenSubmission.status.status}`; %>
+
+                <td class="<%- clazz; -%>"><%- toShow; -%></td>
                 <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
             <% } %>
         </tr>

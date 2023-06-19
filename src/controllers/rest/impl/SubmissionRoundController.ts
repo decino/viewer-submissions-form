@@ -1,5 +1,5 @@
 import {Controller, Inject} from "@tsed/di";
-import {Get, Post, Returns} from "@tsed/schema";
+import {Get, Post, Returns, Security} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {SubmissionRoundModel} from "../../../model/db/SubmissionRound.model";
@@ -18,6 +18,7 @@ export class SubmissionRoundController extends BaseRestController {
 
     @Post("/newRound")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)
     public createRound(@QueryParams("name") name: string): unknown {
         return this.submissionRoundService.newSubmissionRound(name);
@@ -26,6 +27,7 @@ export class SubmissionRoundController extends BaseRestController {
 
     @Post("/pauseRound")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public async pauseRound(@Res() res: PlatformResponse, @QueryParams("pause") pause: boolean): Promise<unknown> {
@@ -35,6 +37,7 @@ export class SubmissionRoundController extends BaseRestController {
 
     @Get("/currentActiveRound")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, SubmissionRoundModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async getActiveRound(): Promise<unknown> {
@@ -47,6 +50,7 @@ export class SubmissionRoundController extends BaseRestController {
 
     @Get("/getAllRounds")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel)
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
         return this.submissionRoundService.getAllSubmissionRounds(includeActive);

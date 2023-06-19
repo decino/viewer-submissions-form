@@ -128,7 +128,10 @@ if (!isProduction) {
     opts["swagger"] = [
         {
             path: "/api-docs",
-            specVersion: "3.0.3"
+            specVersion: "3.0.3",
+            options: {
+                withCredentials: true
+            }
         }
     ];
 }

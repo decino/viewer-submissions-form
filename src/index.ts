@@ -7,7 +7,6 @@ import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
 
 
 async function bootstrap(): Promise<void> {
-    // const models = await getDbModules();
     const dataSource = new DataSource({
         type: "better-sqlite3",
         entities: [`${__dirname}/model/db/**/*.model.{ts,js}`],

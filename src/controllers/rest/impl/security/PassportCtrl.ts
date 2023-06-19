@@ -1,6 +1,6 @@
 import {Controller, Inject, ProviderScope, Scope} from "@tsed/di";
 import {Authenticate, Authorize} from "@tsed/passport";
-import {Get, Post, Returns} from "@tsed/schema";
+import {Get, Post, Returns, Security} from "@tsed/schema";
 import {PlatformResponse, Req, Res, UseBefore} from "@tsed/common";
 import {StatusCodes} from "http-status-codes";
 import {ReCAPTCHAMiddleWare} from "../../../../middleware/endpoint/ReCAPTCHAMiddleWare";
@@ -36,6 +36,7 @@ export class PassportCtrl extends BaseRestController {
 
     @Post("/changeDetails")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK)
     public async changeDetails(@Res() res: PlatformResponse, @Req() req: Req, @BodyParams() userDetails: UserModel): Promise<PlatformResponse> {
         const loggedInUser = req.user as CustomUserInfoModel;

@@ -1,6 +1,6 @@
 import {Controller, Inject} from "@tsed/di";
 import {BaseRestController} from "../BaseRestController";
-import {Get, Integer, Post, Returns} from "@tsed/schema";
+import {Get, Integer, Post, Returns, Security} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {SubmissionModel} from "../../../model/db/Submission.model";
@@ -17,6 +17,7 @@ export class SubmissionRoundResultController extends BaseRestController {
 
     @Get("/generateEntries")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, Array).Of(SubmissionModel)
     public generateEntries(@Res() res: PlatformResponse, @QueryParams("count") count?: number): unknown {
         return this.submissionRoundResultService.generateEntries(count ?? -1);
@@ -24,6 +25,7 @@ export class SubmissionRoundResultController extends BaseRestController {
 
     @Post("/buildResultSet")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     public async buildResultSet(@Res() res: PlatformResponse): Promise<unknown> {
         await this.submissionRoundResultService.buildResultSet();
@@ -32,6 +34,7 @@ export class SubmissionRoundResultController extends BaseRestController {
 
     @Post("/submitEntries")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     public async submitEntries(@Res() res: PlatformResponse, @BodyParams() @Integer() entries: number[]): Promise<unknown> {
         await this.submissionRoundResultService.submitEntries(entries);
@@ -40,6 +43,7 @@ export class SubmissionRoundResultController extends BaseRestController {
 
     @Post("/addRandomEntry")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK)
     public async addRandomEntry(@Res() res: PlatformResponse, @QueryParams("roundId") roundId: number): Promise<unknown> {
         const entryAdded = await this.submissionRoundResultService.addRandomEntry(roundId);

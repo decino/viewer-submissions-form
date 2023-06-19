@@ -1,5 +1,5 @@
 import {Controller, Inject} from "@tsed/di";
-import {Get, View} from "@tsed/schema";
+import {Get, Security, View} from "@tsed/schema";
 import {IndexDto} from "../../DTO/IndexDto";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
@@ -20,6 +20,7 @@ export class AdminHome {
 
     @Get()
     @Authorize("login")
+    @Security("login")
     @View("/secure/admin.ejs")
     public async showAdmin(@Req() req: Req): Promise<unknown> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();

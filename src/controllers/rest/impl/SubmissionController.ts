@@ -1,5 +1,5 @@
 import {Controller, Inject} from "@tsed/di";
-import {Delete, Get, Post, Returns} from "@tsed/schema";
+import {Delete, Get, Post, Returns, Security} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {SubmissionModel} from "../../../model/db/Submission.model";
 import {SubmissionService} from "../../../services/SubmissionService";
@@ -34,6 +34,7 @@ export class SubmissionController extends BaseRestController {
     @Post("/modifyEntry")
     @UseBefore(ReCAPTCHAMiddleWare)
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK, SubmissionModel)
     public modifyEntry(@BodyParams() submission: any): unknown {
         return this.submissionService.modifyEntry(submission);
@@ -41,6 +42,7 @@ export class SubmissionController extends BaseRestController {
 
     @Post("/changeStatus")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK)
     public async changeStatus(@Res() res: PlatformResponse, @BodyParams() status: SubmissionStatusModel): Promise<unknown> {
         await this.submissionService.modifyStatus(status);
@@ -49,6 +51,7 @@ export class SubmissionController extends BaseRestController {
 
     @Post("/:id/setYoutubeLink")
     @Authorize("login")
+    @Security("login")
     @Returns(StatusCodes.OK)
     public async setYoutubeLink(@Res() res: PlatformResponse,
                                 @PathParams("id") submissionId: number,
@@ -62,6 +65,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.CREATED, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    @Security("login")
     public async downloadWadSecure(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
         const [entry, wad] = await this.getWad(roundId, id, true);
         res.attachment(entry.customWadFileName as string);
@@ -75,6 +79,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.OK, SubmissionModel)
+    @Security("login")
     public getSubmission(@Res() res: PlatformResponse, @PathParams("id") id: number): Promise<unknown> {
         return this.submissionService.getEntry(id);
     }
@@ -92,7 +97,8 @@ export class SubmissionController extends BaseRestController {
 
     @Delete("/deleteEntries")
     @Authorize("login")
-    @Returns(StatusCodes.CREATED, SuccessModel)
+    @Security("login")
+    @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
         const result = await this.submissionService.deleteEntries(ids);

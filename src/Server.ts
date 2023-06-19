@@ -53,6 +53,9 @@ const opts: Partial<TsED.Configuration> = {
             }
             return cb(null, true);
         },
+        limits: {
+            fileSize: Number.parseInt(process.env.FILE_SIZE_UPLOAD_LIMIT_MB as string) * 1048576
+        },
         preservePath: true
     },
     passport: {

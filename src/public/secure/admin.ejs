@@ -68,7 +68,7 @@ function mode(arr) {
             </div>
             <div class="row mt-5">
                 <div class="col-md-12">
-                    <div class="card border-primary mb-3 ml-3">
+                    <div class="card border-primary mb-3 ml-3" id="currentSubmissionsPanel">
                         <div class="card-header">Current submissions</div>
                         <div class="card-body">
                             <%- include('../snippets/SubmissionsTable.ejs', {
@@ -963,7 +963,10 @@ function mode(arr) {
         function initDt() {
             $('.submissionsTable').each(function () {
                 const el = $(this);
-                const ds = el[0].dataset.isresults === "true";
+                let ds = el[0].dataset.isresults === "true";
+                if (el[0].closest("#currentSubmissionsPanel") !== null) {
+                    ds = true;
+                }
                 const isPreviousRoundCard = el.closest(".preRoundCard").length > 0;
                 const dtOpts = {
                     dom: 'Bfrtip',

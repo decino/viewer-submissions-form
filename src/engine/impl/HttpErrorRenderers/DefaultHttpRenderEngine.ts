@@ -1,6 +1,5 @@
 import {IHttpErrorRenderEngine} from "../../IHttpErrorRenderEngine";
 import {Exception} from "@tsed/exceptions";
-import {ResponseErrorObject} from "@tsed/common";
 import {HttpErrorRenderObj} from "../../../utils/typeings";
 import {Injectable, ProviderScope} from "@tsed/di";
 import {HTTP_INJECTION_ENGINE} from "../../../model/di/tokens";
@@ -8,7 +7,6 @@ import {HTTP_INJECTION_ENGINE} from "../../../model/di/tokens";
 export type DefaultRenderObj = {
     name: string;
     message: string;
-    errors: Exception;
     status: number
 }
 
@@ -28,21 +26,14 @@ export class DefaultHttpRenderEngine implements IHttpErrorRenderEngine<DefaultRe
 
     public mapError(error: Exception): DefaultRenderObj {
         return {
-            name: error.origin?.name || error.name,
+            name: error.origin?.name ?? error.name,
             message: error.message,
-            status: error.status || 500,
-            errors: this.getErrors(error)
+            status: error.status ?? 500
         };
     }
 
     public getTitle(): string | null {
         return null;
-    }
-
-    private getErrors(error: Exception): Exception {
-        return [error, error.origin].filter(Boolean).reduce((errs, {errors}: ResponseErrorObject) => {
-            return [...errs, ...(errors ?? [])];
-        }, []);
     }
 
 }

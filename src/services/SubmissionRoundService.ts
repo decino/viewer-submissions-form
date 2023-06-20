@@ -71,7 +71,7 @@ export class SubmissionRoundService implements OnInit {
                     wadEngine: DOOM_ENGINE.GZDoom,
                     submitterEmail: `foo@example${index}.com`,
                     submitterName: submission.submitter,
-                    submissionValid: true
+                    submissionValid: true,
                 };
                 if (submission.chosen) {
                     const status = this.ds.manager.create(SubmissionStatusModel, {
@@ -82,11 +82,33 @@ export class SubmissionRoundService implements OnInit {
                 }
                 return this.ds.manager.create(SubmissionModel, obj) as SubmissionModel;
             });
+            let date: Date;
+            // UTC time is 0 based so months need -1
+            switch (roundId) {
+                case 1:
+                    date = new Date(Date.UTC(2019, 7 - 1, 1, 18));
+                    break;
+                case 2:
+                    date = new Date(Date.UTC(2020, 9 - 1, 1, 18));
+                    break;
+                case 3:
+                    date = new Date(Date.UTC(2021, 5 - 1, 1));
+                    break;
+                case 4:
+                    date = new Date(Date.UTC(2021, 11 - 1, 1));
+                    break;
+                case 5:
+                    date = new Date(Date.UTC(2022, 12 - 1, 1));
+                    break;
+                default:
+                    date = new Date();
+            }
             return submissionRoundModelRepository.create({
                 id: roundId,
                 active: false,
                 submissions: submissionsModels,
-                name: `Submission${roundId}`
+                name: `Submission${roundId}`,
+                createdAt: date
             });
         });
         return submissionRoundModelRepository.save(submissionRounds);

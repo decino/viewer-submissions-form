@@ -18,9 +18,10 @@ export class IndexDto {
 
     public getRoundDateAsString(round: SubmissionRoundModel): string {
         const createdAt = round.createdAt;
-        const date = createdAt.getDate();
-        const month = createdAt.getMonth();
-        const year = createdAt.getFullYear();
+        const date = createdAt.getUTCDate();
+        const month = createdAt.getUTCMonth();
+        const year = createdAt.getUTCFullYear();
+        const time = `${(createdAt.getUTCHours() < 10 ? '0' : '') + createdAt.getUTCHours()}:${(createdAt.getUTCMinutes() < 10 ? '0' : '') + createdAt.getUTCMinutes()}`;
         const monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const nth = function (d: number): string {
             if (d > 3 && d < 21) {
@@ -37,7 +38,7 @@ export class IndexDto {
                     return "th";
             }
         };
-        return `${date}<sup>${nth(date)}</sup> of ${monthName[month]} ${year}`;
+        return `${date}<sup>${nth(date)}</sup> of ${monthName[month]} ${year} at ${time} UTC`;
     }
 
 }

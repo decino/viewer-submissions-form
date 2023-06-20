@@ -1,11 +1,11 @@
 import {Injectable, ProviderScope} from "@tsed/di";
-import {HTTP_INJECTION_ENGINE} from "../../../model/di/tokens";
+import {HTTP_RENDER_ENGINE} from "../../../model/di/tokens";
 import {Exception, Unauthorized} from "@tsed/exceptions";
 import {AbstractEjsHttpRenderEngine} from "./AbstractEjsHttpRenderEngine";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
-    type: HTTP_INJECTION_ENGINE
+    type: HTTP_RENDER_ENGINE
 })
 export class HttpUnauthorizedRenderEngine extends AbstractEjsHttpRenderEngine {
 

@@ -1,12 +1,12 @@
 import {Injectable, ProviderScope} from "@tsed/di";
 import {Exception, NotFound} from "@tsed/exceptions";
-import {HTTP_INJECTION_ENGINE} from "../../../model/di/tokens";
+import {HTTP_RENDER_ENGINE} from "../../../model/di/tokens";
 import {ResourceNotFound} from "@tsed/platform-exceptions";
 import {AbstractEjsHttpRenderEngine} from "./AbstractEjsHttpRenderEngine";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
-    type: HTTP_INJECTION_ENGINE
+    type: HTTP_RENDER_ENGINE
 })
 export class HttpNotFoundRenderEngine extends AbstractEjsHttpRenderEngine {
 

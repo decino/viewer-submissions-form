@@ -128,3 +128,4 @@ dist
 /*.sqlite-shm
 /*.sqlite-wal
 *.sqlite
+customWads/**

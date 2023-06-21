@@ -50,13 +50,25 @@ Site.loadPage(async function (site) {
             `;
             tbody.innerHTML += newRow;
         });
-
+        document.getElementById("wadFile")?.addEventListener("change", ev => {
+            const file = ev.currentTarget.files[0];
+            const fileSizeAlert = document.getElementById("fileSizeError");
+            const submitButton = document.getElementById("submit");
+            if (file && file.size > fileSizeLimit) {
+                Site.display(false, fileSizeAlert);
+                submitButton.disabled = true;
+            } else {
+                Site.display(true, fileSizeAlert);
+                submitButton.disabled = false;
+            }
+        });
         const wadRadios = document.querySelectorAll("#link,#Upload");
+        const fileSizeAlert = document.getElementById("fileSizeError");
+        const uploadForm = document.getElementById("wadFile");
+        const urlForm = document.getElementById("wadUrl");
         for (const wadRadio of wadRadios) {
             wadRadio.addEventListener("change", evt => {
                 const value = evt.target.value;
-                const uploadForm = document.getElementById("wadFile");
-                const urlForm = document.getElementById("wadUrl");
                 if (value === "upload") {
                     site.display(false, uploadForm);
                     site.display(true, urlForm);
@@ -67,6 +79,7 @@ Site.loadPage(async function (site) {
                 } else {
                     site.display(true, uploadForm);
                     site.display(false, urlForm);
+                    Site.display(true, fileSizeAlert);
                     uploadForm.value = "";
                     urlForm.setAttribute("required", "");
                     uploadForm.removeAttribute("required");

@@ -26,6 +26,12 @@
                     <span title="required" class="text-danger">*</span></label>
                 <input name="file" class="form-control" type="file" id="wadFile"
                        accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                <div class="alert alert-danger mt-3 hidden" role="alert" id="fileSizeError">
+                    File is too big
+                </div>
+                <div class="alert alert-warning mt-3" role="alert">
+                    A max file size of <%- process.env.FILE_SIZE_UPLOAD_LIMIT_MB; -%>MB is set for uploaded file
+                </div>
             </div>
         <% } %>
     </div>
@@ -101,7 +107,8 @@
     </div>
     <% if(!isAdmin){ %>
         <div class="mb-3">
-            <label for="extraInfo" class="form-label">Tell me something about the level: its backstory, your inspiration,
+            <label for="extraInfo" class="form-label">Tell me something about the level: its backstory, your
+                inspiration,
                 or about yourself -- whatever you want. Keep it somewhat short as I need to memorise it.</label>
             <textarea name="info" class="form-control" id="extraInfo" rows="3"></textarea>
         </div>

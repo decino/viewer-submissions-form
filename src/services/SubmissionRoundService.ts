@@ -107,7 +107,7 @@ export class SubmissionRoundService implements OnInit {
                 id: roundId,
                 active: false,
                 submissions: submissionsModels,
-                name: `Submission${roundId}`,
+                name: `Round #0${roundId}`,
                 createdAt: date
             });
         });

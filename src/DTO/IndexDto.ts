@@ -23,22 +23,23 @@ export class IndexDto {
         const year = createdAt.getUTCFullYear();
         const time = `${(createdAt.getUTCHours() < 10 ? '0' : '') + createdAt.getUTCHours()}:${(createdAt.getUTCMinutes() < 10 ? '0' : '') + createdAt.getUTCMinutes()}`;
         const monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const nth = function (d: number): string {
-            if (d > 3 && d < 21) {
-                return 'th';
-            }
-            switch (d % 10) {
-                case 1:
-                    return "st";
-                case 2:
-                    return "nd";
-                case 3:
-                    return "rd";
-                default:
-                    return "th";
-            }
-        };
-        return `${date}<sup>${nth(date)}</sup> of ${monthName[month]} ${year} at ${time} UTC`;
+        return `${date}<sup>${this.nth(date)}</sup> of ${monthName[month]} ${year} at ${time} UTC`;
+    }
+
+    private nth(d: number): string {
+        if (d > 3 && d < 21) {
+            return 'th';
+        }
+        switch (d % 10) {
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
+        }
     }
 
 }

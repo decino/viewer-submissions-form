@@ -1,5 +1,5 @@
 import {Injectable, ProviderScope} from "@tsed/di";
-import * as JSDOM from "jsdom";
+import {JSDOM} from "jsdom";
 
 type Entry = {
     no: number
@@ -28,12 +28,12 @@ export class DecinoRoundHistoryImporterEngine {
         const doc = await this.getDom(`${this.baseUrl}viewer-submissions`);
         const tables = doc.getElementsByTagName("table");
         const tableArr = Array.from(tables);
-        const pArr = tableArr.map(table => this.getSubmissions(table, table.id, doc));
+        const pArr = tableArr.map(table => this.getSubmissions(table, doc));
         return Promise.all(pArr).then(results => results.flat());
     }
 
     private async getDom(url: string): Promise<Document> {
-        const jsDom = await JSDOM.JSDOM.fromURL(url, {
+        const jsDom = await JSDOM.fromURL(url, {
             runScripts: 'dangerously',
             resources: 'usable'
         });
@@ -44,7 +44,8 @@ export class DecinoRoundHistoryImporterEngine {
         });
     }
 
-    private async getSubmissions(table: HTMLTableElement, roundId: string, doc: Document): Promise<SubmissionRound> {
+    private async getSubmissions(table: HTMLTableElement, doc: Document): Promise<SubmissionRound> {
+        const roundId = table.id;
         const allSubmissionsLinks: NodeListOf<HTMLAnchorElement> = doc.querySelectorAll("#siteContainer > a");
         const nodeArr = Array.from(allSubmissionsLinks);
         const mappedAllEntriesLink = nodeArr.find(link =>
@@ -65,16 +66,16 @@ export class DecinoRoundHistoryImporterEngine {
         const rows = Array.from(table.querySelectorAll("tr:not(#tableHeader)"));
         return rows.map(row => {
             const cells = Array.from(row.querySelectorAll("td"));
-            const number = cells[0].textContent;
-            const wad = cells[1].textContent;
-            const level = cells[2].textContent;
+            const number = cells[0].textContent!;
+            const wad = cells[1].textContent!;
+            const level = cells[2].textContent!;
             return {
                 wad,
                 level,
                 no: Number.parseInt(number!),
                 chosen: false
             };
-        }) as Entry[];
+        });
     }
 
     private mapEntries(chosenEntries: Entry[], submittedEntries: Entry[], table: HTMLTableElement, roundId: string): SubmissionRound {

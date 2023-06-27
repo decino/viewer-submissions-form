@@ -40,7 +40,7 @@ export class DecinoRoundHistoryImporterEngine {
         return new Promise(resolve => {
             setTimeout(() => {
                 resolve(jsDom.window.document);
-            }, 1000);
+            }, 2000);
         });
     }
 

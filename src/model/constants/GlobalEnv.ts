@@ -1,4 +1,4 @@
-export const prefix = "envs.";
+const prefix = "envs.";
 
 /**
  * Env to be used in `@Constant` decorators

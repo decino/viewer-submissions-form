@@ -71,7 +71,7 @@ if (submissions.length > 0 || !isPReviousResults) {
             <% if(isPReviousResults){ %>
                 <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
                     <td>
-                        <a type="button" class="btn btn-outline-primary" target="_blank"
+                        <a type="button" class="btn btn-sm btn-outline-primary" target="_blank"
                            href="<%- chosenSubmission.getDownloadUrl(isAdmin ?? false); -%>">Download</a>
                     </td>
                 <% } else { %>

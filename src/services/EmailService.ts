@@ -1,10 +1,10 @@
 import {Constant, Inject, Service} from "@tsed/di";
 import {BeforeInit, Logger} from "@tsed/common";
-import * as nodemailer from "nodemailer";
-import {Transporter} from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {Envelope} from "nodemailer/lib/mailer";
 import GlobalEnv from "../model/constants/GlobalEnv";
+import {createTransport, Transporter} from "nodemailer";
+import {isProduction} from "../config/envs";
 
 @Service()
 export class EmailService implements BeforeInit {
@@ -36,7 +36,7 @@ export class EmailService implements BeforeInit {
     private readonly smtpReplyTo: string;
 
     public async $beforeInit(): Promise<void> {
-        const transporter = nodemailer.createTransport({
+        const transporter = createTransport({
             host: this.smtpHost,
             port: Number.parseInt(this.smtpPort),
             secure: this.smtpSecure === "true",
@@ -44,6 +44,7 @@ export class EmailService implements BeforeInit {
                 user: this.smtpUser,
                 pass: this.smtpPass
             },
+            debug: !isProduction,
             tls: {
                 rejectUnauthorized: false
             }

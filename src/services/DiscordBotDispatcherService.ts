@@ -2,6 +2,7 @@ import {Constant, Inject, OnInit, Service} from "@tsed/di";
 import {SubmissionModel} from "../model/db/Submission.model";
 import fetch from 'node-fetch';
 import {Logger} from "@tsed/common";
+import GlobalEnv from "../model/constants/GlobalEnv";
 
 type SubmissionPayload = {
     wadName: string,
@@ -12,7 +13,7 @@ type SubmissionPayload = {
 @Service()
 export class DiscordBotDispatcherService implements OnInit {
 
-    @Constant("envs.BOT_URI")
+    @Constant(GlobalEnv.BOT_URI)
     private readonly botUri: string;
 
     private dispatchAddress: string;

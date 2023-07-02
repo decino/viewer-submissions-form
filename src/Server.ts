@@ -27,6 +27,7 @@ import {SessionModel} from "./model/db/Session.model";
 import compression from "compression";
 import "./filters/HttpExceptionFilter";
 import "./engine/impl/HttpErrorRenderers/index";
+import GlobalEnv from "./model/constants/GlobalEnv";
 
 const opts: Partial<TsED.Configuration> = {
     ...config,
@@ -148,10 +149,10 @@ export class Server implements BeforeRoutesInit {
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
-    @Constant("envs.SESSION_KEY")
+    @Constant(GlobalEnv.SESSION_KEY)
     private readonly sessionKey: string;
 
-    @Constant("envs.HTTPS")
+    @Constant(GlobalEnv.HTTPS)
     private readonly https: string;
 
     public $beforeRoutesInit(): void | Promise<any> {

@@ -13,6 +13,7 @@ import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
+import GlobalEnv from "../model/constants/GlobalEnv";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -37,7 +38,7 @@ export class SubmissionService implements OnInit {
     @Inject()
     private logger: Logger;
 
-    @Constant("envs.HELP_EMAIL")
+    @Constant(GlobalEnv.HELP_EMAIL)
     private readonly helpEmail: string;
 
     public async addEntry(entry: SubmissionModel, customWad?: PlatformMulterFile): Promise<SubmissionModel> {

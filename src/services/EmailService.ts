@@ -4,6 +4,7 @@ import * as nodemailer from "nodemailer";
 import {Transporter} from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {Envelope} from "nodemailer/lib/mailer";
+import GlobalEnv from "../model/constants/GlobalEnv";
 
 @Service()
 export class EmailService implements BeforeInit {
@@ -13,25 +14,25 @@ export class EmailService implements BeforeInit {
 
     private emailTransport: Transporter<SMTPTransport.SentMessageInfo>;
 
-    @Constant("envs.SMTP_USER")
+    @Constant(GlobalEnv.SMTP_USER)
     private readonly smtpUser: string;
 
-    @Constant("envs.SMTP_PASS")
+    @Constant(GlobalEnv.SMTP_PASS)
     private readonly smtpPass: string;
 
-    @Constant("envs.SMTP_PORT")
+    @Constant(GlobalEnv.SMTP_PORT)
     private readonly smtpPort: string;
 
-    @Constant("envs.SMTP_HOST")
+    @Constant(GlobalEnv.SMTP_HOST)
     private readonly smtpHost: string;
 
-    @Constant("envs.SMTP_SECURE")
+    @Constant(GlobalEnv.SMTP_SECURE)
     private readonly smtpSecure: string;
 
-    @Constant("envs.SMTP_FROM")
+    @Constant(GlobalEnv.SMTP_FROM)
     private readonly smtpFrom: string;
 
-    @Constant("envs.REPLY_TO")
+    @Constant(GlobalEnv.REPLY_TO)
     private readonly smtpReplyTo: string;
 
     public async $beforeInit(): Promise<void> {

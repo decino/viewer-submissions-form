@@ -1,6 +1,7 @@
 import {Constant, Injectable, ProviderScope} from "@tsed/di";
 import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
+import GlobalEnv from "../model/constants/GlobalEnv";
 
 export type CustomWadEntry = {
     content: Buffer,
@@ -13,7 +14,7 @@ export type CustomWadEntry = {
 export class CustomWadEngine {
     private readonly basePath = `${__dirname}/../../customWads`;
 
-    @Constant("envs.ALLOWED_HEADERS")
+    @Constant(GlobalEnv.ALLOWED_HEADERS)
     private readonly allowedHeaders: string;
 
     public async getWad(round: number, entryId: number): Promise<CustomWadEntry | null> {

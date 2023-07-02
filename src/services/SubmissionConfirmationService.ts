@@ -8,6 +8,7 @@ import {Logger} from "@tsed/common";
 import {EmailService} from "./EmailService";
 import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
+import GlobalEnv from "../model/constants/GlobalEnv";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -27,7 +28,7 @@ export class SubmissionConfirmationService implements OnInit {
     @Inject()
     private submissionSocket: SubmissionSocket;
 
-    @Constant("envs.BASE_URL")
+    @Constant(GlobalEnv.BASE_URL)
     private readonly baseUrl: string;
 
     public processConfirmation(confirmationUid: string): Promise<void> {

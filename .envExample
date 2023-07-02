@@ -9,6 +9,7 @@ BASE_URL=http://localhost:8000
 ENTRIES_TO_GENERATE=5
 HELP_EMAIL=submissions@decino.nl
 BOT_URI=
+FILE_SIZE_UPLOAD_LIMIT_MB=30
 
 ##### SMTP ####
 SMTP_HOST=

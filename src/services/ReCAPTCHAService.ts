@@ -3,6 +3,7 @@ import {ReCAPTCHAResponse} from "../utils/typeings";
 import fetch from "node-fetch";
 import FormData from "form-data";
 import {Logger} from "@tsed/common";
+import GlobalEnv from "../model/constants/GlobalEnv";
 
 @Service()
 export class ReCAPTCHAService {
@@ -12,7 +13,7 @@ export class ReCAPTCHAService {
 
     private readonly baseUrl = "https://www.google.com/recaptcha/api/siteverify";
 
-    @Constant("envs.RECAPTCHA_SECRET_KEY")
+    @Constant(GlobalEnv.RECAPTCHA_SECRET_KEY)
     private readonly reCAPTCHASecretKey: string;
 
     public async validateResponse(clientResponse: string): Promise<boolean> {

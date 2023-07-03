@@ -33,7 +33,7 @@ export class LoginLocalProtocol implements OnVerify {
 }
 
 @Catch(PassportException)
-export class PassportExceptionFilter implements ExceptionFilterMethods {
+export class PassportExceptionFilter implements ExceptionFilterMethods<PassportException> {
 
     @Inject()
     private httpExceptionFilter: HttpExceptionFilter;

@@ -80,7 +80,7 @@ export class SubmissionRoundService implements OnInit {
                     obj.playOrder = submission.no;
                     obj.status = status;
                 }
-                return this.ds.manager.create(SubmissionModel, obj) as SubmissionModel;
+                return this.ds.manager.create(SubmissionModel, obj as SubmissionModel);
             });
             let date: Date;
             // UTC time is 0 based so months need -1

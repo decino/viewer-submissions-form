@@ -5,7 +5,7 @@ import {HttpErrorFactory} from "../factory/HttpErrorFactory";
 import {HttpErrorRenderObj} from "../utils/typeings";
 
 @Catch(Exception)
-export class HttpExceptionFilter implements ExceptionFilterMethods {
+export class HttpExceptionFilter implements ExceptionFilterMethods<Exception> {
 
     @Inject()
     private httpErrorFactory: HttpErrorFactory;

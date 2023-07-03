@@ -5,7 +5,7 @@ import {PlatformResponse} from "@tsed/common";
 
 export abstract class AbstractEjsHttpRenderEngine implements IHttpErrorRenderEngine<string> {
 
-    public render(obj: Omit<HttpErrorRenderObj, "title">, response: PlatformResponse): Promise<string> {
+    public render(obj: HttpErrorRenderObj, response: PlatformResponse): Promise<string> {
         return response.render("errorPage.ejs", obj);
     }
 

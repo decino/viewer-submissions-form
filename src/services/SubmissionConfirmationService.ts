@@ -9,6 +9,7 @@ import {EmailService} from "./EmailService";
 import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import GlobalEnv from "../model/constants/GlobalEnv";
+import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -81,7 +82,7 @@ export class SubmissionConfirmationService implements OnInit {
         }
     }
 
-    private sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<string> {
+    private sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<SentMessageInfo> {
         const baseUrl = this.baseUrl;
         const confirmationUrl = `${baseUrl}/processSubmission?uid=${pendingEntry.confirmationUid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;

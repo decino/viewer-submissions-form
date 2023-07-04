@@ -1,10 +1,11 @@
 import {Constant, Inject, Service} from "@tsed/di";
 import {BeforeInit, Logger} from "@tsed/common";
-import SMTPTransport from "nodemailer/lib/smtp-transport";
+import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
 import {Envelope} from "nodemailer/lib/mailer";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {createTransport, Transporter} from "nodemailer";
 import {isProduction} from "../config/envs";
+import {BadRequest} from "@tsed/exceptions";
 
 @Service()
 export class EmailService implements BeforeInit {
@@ -12,7 +13,7 @@ export class EmailService implements BeforeInit {
     @Inject()
     private logger: Logger;
 
-    private emailTransport: Transporter<SMTPTransport.SentMessageInfo>;
+    private emailTransport: Transporter<SentMessageInfo>;
 
     @Constant(GlobalEnv.SMTP_USER)
     private readonly smtpUser: string;
@@ -62,7 +63,7 @@ export class EmailService implements BeforeInit {
         this.emailTransport = transporter;
     }
 
-    public async sendMail(body: string, to: string): Promise<string> {
+    public async sendMail(body: string, to: string): Promise<SentMessageInfo> {
         const env: Envelope = {
             from: this.smtpFrom,
             to
@@ -75,6 +76,25 @@ export class EmailService implements BeforeInit {
             subject: "Viewer-Submitted Levels Confirmation"
         });
         this.logger.info(`send mail to: ${to}. mail transport id: ${sentMail.messageId}`);
-        return sentMail.messageId;
+        if (!this.wasAccepted(sentMail, to)) {
+            throw new BadRequest(`Unable to send an email to ${to}`);
+        }
+        return sentMail;
+    }
+
+    private wasAccepted(sentMail: SentMessageInfo, emailSentTo: string): boolean {
+        const acceptedArr = sentMail.accepted;
+        for (const accepted of acceptedArr) {
+            if (typeof accepted === "string") {
+                if (accepted === emailSentTo) {
+                    return true;
+                }
+            } else {
+                if (accepted.address === emailSentTo) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -42,5 +42,15 @@ export class IndexDto {
         }
     }
 
+    private getMostSubmittedWads(): string | null {
+        if (!this.currentActiveRound) {
+            return null;
+        }
+        const mappedArr = this.currentActiveRound.submissions.map(submission => submission.wadName);
+        return mappedArr.sort((a, b) =>
+            mappedArr.filter(v => v === a).length
+            - mappedArr.filter(v => v === b).length
+        ).pop() ?? null;
+    }
 }
 

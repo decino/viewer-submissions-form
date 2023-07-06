@@ -7,15 +7,6 @@
 </head>
 <body>
 
-<%
-function mode(arr) {
-    const mappedArr = arr.map(submission => submission.wadName);
-    return mappedArr.sort((a, b) =>
-            mappedArr.filter(v => v === a).length
-            - mappedArr.filter(v => v === b).length
-    ).pop();
-}
-%>
 <div id="overlay" class="hidden">
     <div id="loader" class="hidden"></div>
 </div>
@@ -39,7 +30,7 @@ function mode(arr) {
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Most requested WAD</h5>
-                                    <h5 class="card-text"><%- mode(indexModel.currentActiveRound.submissions) ?? "N/A"; -%></h5>
+                                    <h5 class="card-text"><%- indexModel.getMostSubmittedWads() ?? "N/A"; -%></h5>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Number of map authors</h5>

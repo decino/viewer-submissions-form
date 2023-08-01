@@ -39,7 +39,7 @@ Site.loadPage(async function (site) {
 
         site.onEntry(data => {
             const table = document.getElementsByClassName("submissionsTable")[0];
-            const no = document.querySelectorAll(".submissionsTable tbody tr").length + 1;
+            const no = table.querySelectorAll("tbody tr").length + 1;
             const tbody = table.querySelector("tbody");
             const newRow = `
                 <tr data-id="${data.id}">

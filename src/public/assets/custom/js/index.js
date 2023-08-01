@@ -33,13 +33,13 @@ Site.loadPage(async function (site) {
         site.onDelete(ids => {
             const table = document.getElementsByClassName("submissionsTable")[0];
             for (const id of ids) {
-                table.querySelector(`tbody tr[data-id="${id}"]`).remove();
+                table?.querySelector(`tbody tr[data-id="${id}"]`)?.remove();
             }
         });
 
         site.onEntry(data => {
             const table = document.getElementsByClassName("submissionsTable")[0];
-            const no = document.getElementsByClassName("submissionsTable tbody tr").length + 1;
+            const no = document.querySelectorAll(".submissionsTable tbody tr").length + 1;
             const tbody = table.querySelector("tbody");
             const newRow = `
                 <tr data-id="${data.id}">

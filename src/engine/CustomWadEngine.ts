@@ -3,6 +3,7 @@ import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {BadRequest} from "@tsed/exceptions";
+import AdmZip, {IZipEntry} from "adm-zip";
 
 export type CustomWadEntry = {
     content: Buffer,
@@ -41,17 +42,12 @@ export class CustomWadEngine {
 
     public async validateFile(customWad: PlatformMulterFile): Promise<void> {
         this.checkFileExt(customWad);
-        const allowedHeaders = this.allowedHeaders;
-        if (!allowedHeaders) {
-            return;
+        const fileExt = customWad.originalname.split(".").pop() ?? "";
+        if (fileExt === "zip") {
+            await this.analyseZip(customWad);
         }
         const buffer = await fs.promises.readFile(customWad.path);
-        const header = buffer.toString("ascii", 0, 4);
-        const allowedHeadersArr = allowedHeaders.split(",");
-        if (!allowedHeadersArr.includes(header)) {
-            throw new BadRequest("Invalid file: header mismatch.");
-        }
-        return;
+        this.checkHeaders(buffer);
     }
 
     public deleteCustomWad(entry: number, round: number): Promise<void>;
@@ -63,12 +59,53 @@ export class CustomWadEngine {
         return fs.promises.rm(toDelete, {recursive: true, force: true});
     }
 
-    private checkFileExt(customWad: PlatformMulterFile): void {
-        const fileExt = customWad.originalname.split(".").pop() ?? "";
+    private checkHeaders(buffer: Buffer, isZip = false): void {
+        const allowedHeaders = this.allowedHeaders;
+        if (!allowedHeaders) {
+            return;
+        }
+        const header = buffer.toString("ascii", 0, 4);
+        const allowedHeadersArr = allowedHeaders.split(",");
+        if (!allowedHeadersArr.includes(header)) {
+            if (isZip) {
+                throw new BadRequest("Invalid file inside of ZIP: header mismatch.");
+            }
+            throw new BadRequest("Invalid file: header mismatch.");
+        }
+    }
+
+    private checkFileExt(customWad: PlatformMulterFile | string, isZip = false): void {
+        const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
+        const fileExt = fileName.split(".").pop() ?? "";
         const allowedFilesArr = this.allowedFiles.split(",");
         if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
+            if (isZip) {
+                throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+            }
             throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
         }
+    }
+
+    private async analyseZip(customWad: PlatformMulterFile): Promise<void> {
+        const buffer = await fs.promises.readFile(customWad.path);
+        const zip = new AdmZip(buffer);
+        const entries = zip.getEntries();
+        for (const entry of entries) {
+            this.checkFileExt(entry.entryName, true);
+            const buff = await this.getZipData(entry);
+            this.checkHeaders(buff, true);
+        }
+    }
+
+    private getZipData(entry: IZipEntry): Promise<Buffer> {
+        return new Promise((resolve, reject) => {
+            entry.getDataAsync((data, err) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(data);
+            });
+        });
     }
 
 }

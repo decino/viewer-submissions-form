@@ -204,17 +204,26 @@ export class SubmissionService implements OnInit {
         }
         const wadUrl = entry.wadURL;
         const submitterName = entry.submitterName;
-        const level = entry.wadLevel;
+        const level = this.getNumberPart(entry.wadLevel);
         const email = entry.submitterEmail;
         const wadName = entry.wadName;
         for (const submission of round.submissions) {
             if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${this.helpEmail ?? "decino"} to change your submission.`);
             }
-            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && submission.wadLevel === level) {
+            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && this.getNumberPart(submission.wadLevel) === level) {
                 throw new Error("This level for this WAD has already been submitted. Please submit a different map.");
             }
         }
+    }
+
+    private getNumberPart(num: string): string {
+        const sanitisedN = num.replace(/\D/g, '');
+        const parsedInt = Number.parseInt(sanitisedN);
+        if (Number.isNaN(parsedInt)) {
+            return num;
+        }
+        return parsedInt.toString();
     }
 
     private scanDb(): Promise<unknown> {

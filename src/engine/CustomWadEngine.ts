@@ -2,6 +2,7 @@ import {Constant, Injectable, ProviderScope} from "@tsed/di";
 import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
 import GlobalEnv from "../model/constants/GlobalEnv";
+import {BadRequest} from "@tsed/exceptions";
 
 export type CustomWadEntry = {
     content: Buffer,
@@ -16,6 +17,9 @@ export class CustomWadEngine {
 
     @Constant(GlobalEnv.ALLOWED_HEADERS)
     private readonly allowedHeaders: string;
+
+    @Constant(GlobalEnv.ALLOWED_FILES)
+    private readonly allowedFiles: string;
 
     public async getWad(round: number, entryId: number): Promise<CustomWadEntry | null> {
         const files = await fs.promises.readdir(`${this.basePath}/${round}/${entryId}`);
@@ -35,22 +39,36 @@ export class CustomWadEngine {
         return fs.promises.rename(customWad.path, `${newFolder}/${customWad.originalname}`);
     }
 
-    public async validateFile(customWad: PlatformMulterFile): Promise<boolean> {
+    public async validateFile(customWad: PlatformMulterFile): Promise<void> {
+        this.checkFileExt(customWad);
         const allowedHeaders = this.allowedHeaders;
         if (!allowedHeaders) {
-            return true;
+            return;
         }
         const buffer = await fs.promises.readFile(customWad.path);
         const header = buffer.toString("ascii", 0, 4);
         const allowedHeadersArr = allowedHeaders.split(",");
-        return allowedHeadersArr.includes(header);
+        if (!allowedHeadersArr.includes(header)) {
+            throw new BadRequest("Invalid file: header mismatch.");
+        }
+        return;
     }
 
     public deleteCustomWad(entry: number, round: number): Promise<void>;
+
     public deleteCustomWad(entry: PlatformMulterFile): Promise<void>;
+
     public deleteCustomWad(entry: number | PlatformMulterFile, round?: number): Promise<void> {
         const toDelete = typeof entry === "number" ? `${this.basePath}/${round}/${entry}` : entry.path;
         return fs.promises.rm(toDelete, {recursive: true, force: true});
+    }
+
+    private checkFileExt(customWad: PlatformMulterFile): void {
+        const fileExt = customWad.originalname.split(".").pop() ?? "";
+        const allowedFilesArr = this.allowedFiles.split(",");
+        if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
+            throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+        }
     }
 
 }

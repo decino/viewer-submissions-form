@@ -12,9 +12,6 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import methodOverride from "method-override";
-import {Request} from "express";
-import {FileFilterCallback} from "multer";
-import {BadRequest} from "@tsed/exceptions";
 import "@tsed/swagger";
 import {isProduction} from "./config/envs";
 import helmet from "helmet";
@@ -42,18 +39,6 @@ const opts: Partial<TsED.Configuration> = {
     componentsScan: [`./services/**/**.js`],
     multer: {
         dest: `${__dirname}/../customWads`,
-        fileFilter: function (req: Request, file: Express.Multer.File, cb: FileFilterCallback) {
-            const allowedFiles = process.env.ALLOWED_FILES;
-            if (!allowedFiles) {
-                return cb(null, true);
-            }
-            const fileExt = file.originalname.split(".").pop() ?? "";
-            const allowedFilesArr = allowedFiles.split(",");
-            if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
-                return cb(new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`));
-            }
-            return cb(null, true);
-        },
         limits: {
             fileSize: Number.parseInt(process.env.FILE_SIZE_UPLOAD_LIMIT_MB as string) * 1048576
         },

@@ -80,9 +80,10 @@ export class CustomWadEngine {
         const allowedFilesArr = this.allowedFiles.split(",");
         if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
             if (isZip) {
-                if (fileExt.toLowerCase() !== "txt") {
-                    throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+                if (this.isTxt(customWad)) {
+                    return;
                 }
+                throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
             }
             throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
         }
@@ -94,6 +95,9 @@ export class CustomWadEngine {
         const entries = zip.getEntries();
         for (const entry of entries) {
             this.checkFileExt(entry.entryName, true);
+            if (this.isTxt(entry.entryName)) {
+                continue;
+            }
             const buff = await this.getZipData(entry);
             this.checkHeaders(buff, true);
         }
@@ -108,6 +112,12 @@ export class CustomWadEngine {
                 return resolve(data);
             });
         });
+    }
+
+    private isTxt(customWad: PlatformMulterFile | string): boolean {
+        const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
+        const fileExt = fileName.split(".").pop() ?? "";
+        return fileExt.toLowerCase() === "txt";
     }
 
 }

@@ -80,7 +80,9 @@ export class CustomWadEngine {
         const allowedFilesArr = this.allowedFiles.split(",");
         if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
             if (isZip) {
-                throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+                if (fileExt.toLowerCase() !== "txt") {
+                    throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+                }
             }
             throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
         }

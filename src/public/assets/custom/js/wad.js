@@ -1,10 +1,10 @@
 const WadAnalyser = (function () {
     const lumpSize = 16;
     const MapNameFormat = {
-        LUMP: 0,
-        MAPINFO: 1,
-        UMAPINFO: 2,
-        DEHACKED: 3,
+        MAPINFO: 0,
+        UMAPINFO: 1,
+        DEHACKED: 2,
+        LUMP: 3,
     };
 
     const MapProcessor = (function () {
@@ -21,8 +21,7 @@ const WadAnalyser = (function () {
         }
 
         function searchMapNameFormat(wadData, numLumps, offset) {
-            let mapNameFormatType = MapNameFormat.LUMP;
-
+            const found = [];
             for (let lump = 0; lump < numLumps; lump++) {
                 let name = "";
 
@@ -32,26 +31,39 @@ const WadAnalyser = (function () {
 
                 for (let index = 0; index < 8; index++) {
                     name += String.fromCharCode(wadData.getUint8(lumpOffset + 8 + index));
-
-                    // Don't know what the 8th character is so break early.
-                    if (name === "MAPINFO") {
-                        break;
-                    }
                 }
-                if (name === "MAPINFO") {
-                    mapNameFormatType = MapNameFormat.MAPINFO;
+                if (name === "MAPINFO\0") {
+                    found.push({
+                        format: MapNameFormat.MAPINFO,
+                        position,
+                        size
+                    });
                 } else if (name === "UMAPINFO") {
-                    mapNameFormatType = MapNameFormat.UMAPINFO;
+                    found.push({
+                        format: MapNameFormat.UMAPINFO,
+                        position,
+                        size
+                    });
                 } else if (name === "DEHACKED") {
-                    mapNameFormatType = MapNameFormat.DEHACKED;
-                }
-                if (mapNameFormatType !== MapNameFormat.LUMP) {
-                    mapFormatPos = position;
-                    mapFormatSize = size;
-                    return mapNameFormatType;
+                    found.push({
+                        format: MapNameFormat.DEHACKED,
+                        position,
+                        size
+                    });
                 }
             }
+            if (found.length > 0) {
+                let arr = Array.from(found);
+                const itm = arr.sort((a, b) =>
+                    a.format - b.format
+                ).shift();
+                mapFormatPos = itm.position;
+                mapFormatSize = itm.size;
+
+                return itm.format;
+            }
             return MapNameFormat.LUMP;
+
         }
 
         function getMapFromMapInfo(wadData) {

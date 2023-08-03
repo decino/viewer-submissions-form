@@ -51,6 +51,7 @@ export class SubmissionService implements OnInit {
         }
         try {
             this.validateSubmission(entry, currentActiveRound, customWad);
+            await this.hasBeenPreviouslyPlayed(entry);
         } catch (e) {
             if (customWad) {
                 try {
@@ -196,6 +197,18 @@ export class SubmissionService implements OnInit {
         );
         const job = new SimpleIntervalJob({minutes: 1,}, task);
         this.scheduler.addSimpleIntervalJob(job);
+    }
+
+    private async hasBeenPreviouslyPlayed(entry: SubmissionModel): Promise<void> {
+        const previousRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
+        for (const previousRound of previousRounds) {
+            const chosenEntries = previousRound.submissions.filter(submission => submission.isChosen);
+            for (const chosenEntry of chosenEntries) {
+                if ((chosenEntry.wadURL === entry.wadURL || chosenEntry.wadName === entry.wadName) && this.getNumberPart(chosenEntry.wadLevel) === this.getNumberPart(entry.wadLevel)) {
+                    throw new Error("This map has been previously played and can not be submitted");
+                }
+            }
+        }
     }
 
     private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel, customWad?: PlatformMulterFile): void {

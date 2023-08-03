@@ -18,6 +18,7 @@ const Site = (function () {
     const submitEntryForm = async function submitEntryForm(ev, endpoint, urlEncoded = false) {
         ev.preventDefault();
         ev.stopPropagation();
+        showError(null);
         const form = document.getElementById("entryForm");
         const formValue = form.reportValidity();
         if (!formValue) {
@@ -28,6 +29,12 @@ const Site = (function () {
             showError("Please activate reCAPTCHA.");
             return false;
         }
+        if (document?.getElementById("link")?.checked && !document?.getElementById("levelToPlay")?.value) {
+            showError("Please fill in the level to play");
+            document.getElementById("levelToPlay").focus();
+            return;
+        }
+
         const formData = serialiseForm(urlEncoded);
         formData.append("g-recaptcha-response", reCAPTCHAResponse);
         Site.loading(true);
@@ -56,11 +63,16 @@ const Site = (function () {
     };
 
     const showError = function showError(message) {
+        const error = document.getElementById("error");
+        if (message === null) {
+            document.getElementById("errorContent").textContent = null;
+            display(true, error);
+            return;
+        }
         const success = document.getElementById("success");
         if (!success.classList.contains("hidden")) {
             display(true, success);
         }
-        const error = document.getElementById("error");
         document.getElementById("errorContent").textContent = message.trim();
         display(false, error);
     };

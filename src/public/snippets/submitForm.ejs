@@ -41,11 +41,11 @@
         <input name="WADName" type="text" class="form-control" id="wadName" required>
     </div>
     <div class="mb-3">
-        <label for="levelToPlay" class="form-label">Which level should I play? Don't tell me to choose one myself,
-            or
-            I'll have to reject it.
+        <label for="levelToPlay" class="form-label">Which level should I play?
             <span title="required" class="text-danger">*</span></label>
-        <input name="level" type="text" class="form-control" id="levelToPlay" required>
+        <select class="form-select hidden" name="level" id="levelToPlaySelect">
+        </select>
+        <input name="level" type="text" class="form-control" id="levelToPlay">
     </div>
     <div class="mb-3">
         <label for="gameEngine" class="form-label">Which engine is this level designed for?

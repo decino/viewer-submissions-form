@@ -50,7 +50,7 @@ Site.loadPage(async function (site) {
             `;
             tbody.innerHTML += newRow;
         });
-        document.getElementById("wadFile")?.addEventListener("change", ev => {
+        document.getElementById("wadFile")?.addEventListener("change", async ev => {
             const file = ev.currentTarget.files[0];
             const fileSizeAlert = document.getElementById("fileSizeError");
             const submitButton = document.getElementById("submit");
@@ -63,11 +63,32 @@ Site.loadPage(async function (site) {
                 Site.display(true, fileSizeAlert);
                 submitButton.disabled = false;
             }
+            const ext = file.name?.split(".")?.pop()?.toLowerCase();
+            const select = document.getElementById("levelToPlaySelect");
+            select.innerHTML = null;
+            const input = document.getElementById("levelToPlay");
+            if (ext === "wad") {
+                const maps = await WadAnalyser.readFile(file);
+                if (!maps || maps.lenght === 0) {
+                    select.classList.add("hidden");
+                    input.classList.remove("hidden");
+                    return;
+                }
+                input.classList.add("hidden");
+                select.classList.remove("hidden");
+                const list = maps.map(mapName => `<option>${mapName}</option>`);
+                select.innerHTML = list.join();
+            } else {
+                select.classList.add("hidden");
+                input.classList.remove("hidden");
+            }
         });
         const wadRadios = document.querySelectorAll("#link,#Upload");
         const fileSizeAlert = document.getElementById("fileSizeError");
         const uploadForm = document.getElementById("wadFile");
         const urlForm = document.getElementById("wadUrl");
+        const select = document.getElementById("levelToPlaySelect");
+        const input = document.getElementById("levelToPlay");
         for (const wadRadio of wadRadios) {
             wadRadio.addEventListener("change", evt => {
                 const value = evt.target.value;
@@ -78,6 +99,8 @@ Site.loadPage(async function (site) {
                     uploadForm.setAttribute("required", "");
                     urlForm.removeAttribute("required");
                     document.getElementById("wadName").removeAttribute("disabled");
+                    select.classList.remove("hidden");
+                    input.classList.add("hidden");
                 } else {
                     site.display(true, uploadForm);
                     site.display(false, urlForm);
@@ -85,6 +108,8 @@ Site.loadPage(async function (site) {
                     uploadForm.value = "";
                     urlForm.setAttribute("required", "");
                     uploadForm.removeAttribute("required");
+                    input.classList.remove("hidden");
+                    select.classList.add("hidden");
                 }
             });
         }

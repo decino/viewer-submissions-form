@@ -45,7 +45,7 @@ export class SubmissionStatusModel extends AbstractModel {
     @Nullable(String)
     public additionalInfo?: string | null;
 
-    @OneToOne("SubmissionModel", "status")
+    @OneToOne("SubmissionModel", "status", AbstractModel.cascadeOps)
     @JoinColumn({
         name: "submissionId",
         referencedColumnName: "id"

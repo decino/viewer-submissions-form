@@ -1,5 +1,5 @@
 import {Controller, Inject} from "@tsed/di";
-import {Get, Post, Returns, Security} from "@tsed/schema";
+import {Delete, Get, Post, Returns, Security} from "@tsed/schema";
 import {StatusCodes} from "http-status-codes";
 import {PlatformResponse, QueryParams, Res} from "@tsed/common";
 import {SubmissionRoundModel} from "../../../model/db/SubmissionRound.model";
@@ -8,6 +8,7 @@ import {BaseRestController} from "../BaseRestController";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {BadRequest, NotFound} from "@tsed/exceptions";
 import {Authorize} from "@tsed/passport";
+import {PathParams} from "@tsed/platform-params";
 
 @Controller("/submissionRound")
 export class SubmissionRoundController extends BaseRestController {
@@ -54,5 +55,22 @@ export class SubmissionRoundController extends BaseRestController {
     @Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel)
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
         return this.submissionRoundService.getAllSubmissionRounds(includeActive);
+    }
+
+    @Delete("/:roundId/deleteRound")
+    @Authorize("login")
+    @Security("login")
+    @Returns(StatusCodes.OK, SuccessModel)
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    public async deleteRound(@Res() res: PlatformResponse, @PathParams("roundId") roundId: number): Promise<unknown> {
+        try {
+            const result = await this.submissionRoundService.deleteRound(roundId);
+            if (result) {
+                return super.doSuccess(res, `Round ${roundId} has been deleted`);
+            }
+        } catch (e) {
+            throw new BadRequest(e.message);
+        }
+        throw new BadRequest("Unable to delete round");
     }
 }

@@ -52,6 +52,7 @@
                                 <button type="button" class="btn btn-outline-success" id="endRoundButton"
                                         data-bs-toggle="modal" data-bs-target="#endRoundModal">End round
                                 </button>
+                                <button type="button" class="btn btn-outline-danger" id="deleteRoundButton" data-roundid="<%- indexModel.currentActiveRound.id; -%>">Delete round</button>
                             </div>
                         </div>
                     </div>
@@ -425,6 +426,25 @@
         loadEventListeners();
         initDt();
 
+        async function deleteRound(roundId) {
+            const accepted = confirm("Are you sure you wish to delete this round? all accosted data will be removed");
+            if (!accepted) {
+                return false;
+            }
+            site.loading(true);
+            try {
+                await fetch(`${baseUrl}/submissionRound/${roundId}/deleteRound`, {
+                    method: 'DELETE'
+                });
+                return true;
+            } catch (e) {
+                alert(e.message);
+                return false;
+            } finally {
+                Site.loading(false);
+            }
+            return false;
+        }
 
         function showSubmissionInfoModel(no, id, wadName, wadLevel, wadEngine, gzDoomAction, submitterName, author, distributable, info, email, downloadUrl) {
 
@@ -479,11 +499,26 @@
                         const newTab = event.target;
                         const entryId = newTab.dataset.entryid;
                         resize(entryId);
+                        if (document.getElementById("prevRoundDeleteButton")) {
+                            document.getElementById("prevRoundDeleteButton").dataset.roundid = entryId;
+                        }
                     });
                 }
             })());
 
             ((() => {
+                document.getElementById("deleteRoundButton")?.addEventListener("click", async ev => {
+                    const result = await deleteRound(ev.target.dataset.roundid);
+                    if (result) {
+                        window.location.reload();
+                    }
+                });
+                document.getElementById("prevRoundDeleteButton")?.addEventListener("click", async ev => {
+                    const result = await deleteRound(ev.target.dataset.roundid);
+                    if (result) {
+                        window.location.reload();
+                    }
+                });
                 document.getElementById("youtubeLinkOk").addEventListener("click", async e => {
                     const submissionId = document.getElementById("setYoutubeLinkSubmissionId").value;
                     const linkExt = document.getElementById("youtubeLinkUrl").value;

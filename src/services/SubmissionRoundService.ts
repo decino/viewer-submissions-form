@@ -139,6 +139,30 @@ export class SubmissionRoundService implements OnInit {
         });
     }
 
+    public async deleteRound(roundId: number): Promise<boolean> {
+        await this.ds.transaction(async entityManager => {
+            const repo = entityManager.getRepository(SubmissionRoundModel);
+            const round = await repo.findOne({
+                where: {
+                    id: roundId,
+                },
+                relations: ["submissions"]
+            });
+            if (!round) {
+                throw new BadRequest(`Unable to find round ${roundId}`);
+            }
+            const pArr: Promise<void>[] = [];
+            for (const submission of round.submissions) {
+                if (submission.customWadFileName) {
+                    pArr.push(this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId));
+                }
+            }
+            await Promise.all(pArr);
+            await repo.remove(round);
+        });
+        return true;
+    }
+
     public async getAllSubmissionRounds(includeActive = true): Promise<SubmissionRoundModel[]> {
         const repo = this.ds.getRepository(SubmissionRoundModel);
         if (includeActive) {

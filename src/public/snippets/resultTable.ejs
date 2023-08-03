@@ -35,4 +35,9 @@
             <% } %>
         </div>
     </div>
+    <% if(isAdmin){ %>
+        <div class="card-footer text-body-secondary">
+            <button class="btn btn-outline-danger" id="prevRoundDeleteButton" data-roundid="<%- model.previousRounds[0].id; -%>">Delete round</button>
+        </div>
+    <% } %>
 </div>

@@ -161,23 +161,23 @@ const WadAnalyser = (function () {
             const retArr = [];
 
             let lump = 0;
-			while (lump < numLumps) {
+            while (lump < numLumps) {
                 const candidateMapName  = getLumpName(wadData, offset, lump++);
-				let   numMandatoryFound = 0;
-				while (lump < numLumps) {
-					const lumpName    = sanitiseString(getLumpName(wadData, offset, lump++));
+                let   numMandatoryFound = 0;
+                while (lump < numLumps) {
+                    const lumpName    = sanitiseString(getLumpName(wadData, offset, lump++));
                     const isMandatory = MapLumps[lumpName];
-					if (isMandatory === undefined) {
-						lump--; // Backtrack
-						break;
-					} else if (isMandatory) {
-						numMandatoryFound++;
-						if (numMandatoryFound == 5) {
-							retArr.push(sanitiseString(candidateMapName));
-						}
-					}
-				}
-			}
+                    if (isMandatory === undefined) {
+                        lump--; // Backtrack
+                        break;
+                    } else if (isMandatory) {
+                        numMandatoryFound++;
+                        if (numMandatoryFound == 5) {
+                            retArr.push(sanitiseString(candidateMapName));
+                        }
+                    }
+                }
+            }
 
             return retArr;
         }

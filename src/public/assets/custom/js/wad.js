@@ -172,7 +172,7 @@ const WadAnalyser = (function () {
                         break;
                     } else if (isMandatory) {
                         numMandatoryFound++;
-                        if (numMandatoryFound == 5) {
+                        if (numMandatoryFound === 5) {
                             retArr.push(sanitiseString(candidateMapName));
                         }
                     }

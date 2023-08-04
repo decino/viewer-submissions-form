@@ -167,7 +167,7 @@ const WadAnalyser = (function () {
                 while (lump < numLumps) {
                     const lumpName = sanitiseString(getLumpName(wadData, offset, lump++));
                     const isMandatory = MapLumps[lumpName] ?? null;
-                    if (isMandatory == null) {
+                    if (isMandatory === null) {
                         lump--; // Backtrack
                         break;
                     } else if (isMandatory) {

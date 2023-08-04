@@ -20,6 +20,7 @@ export class SubmissionRoundResultService {
     @Inject(SQLITE_DATA_SOURCE)
     private ds: DataSource;
 
+    // Map of wad names to an array of submissions
     private readonly entryCache: Map<string, SubmissionModel[]> = new Map();
 
     public async buildResultSet(entries?: SubmissionModel[]): Promise<void> {
@@ -28,6 +29,7 @@ export class SubmissionRoundResultService {
         if (entries) {
             allEntries = entries;
         } else {
+            // get all tbe entries for this round
             allEntries = await this.submissionService.getAllEntries();
         }
         if (allEntries.length === 0) {
@@ -35,9 +37,14 @@ export class SubmissionRoundResultService {
         }
         for (const entry of allEntries) {
             if (!entry.submissionValid) {
+                // invalid entry? skip it
                 continue;
             }
+
+            // get the WAD name from the entry
             const wadIdentifier = entry.wadName;
+
+            // group all the wads by wad name. so multiple entries of the same wad are grouped in to an array
             if (this.entryCache.has(wadIdentifier)) {
                 this.entryCache.get(wadIdentifier)?.push(entry);
             } else {
@@ -50,8 +57,14 @@ export class SubmissionRoundResultService {
         if (this.entryCache.size === 0) {
             throw new Error("Unable to generate entries as the cache has not been built.");
         }
-        const keysToGet = this.getMultipleRandom([...this.entryCache.keys()], count);
-        const chosenEntries = keysToGet.flatMap(key => this.entryCache.get(key)) as SubmissionModel[];
+
+        // get a random unique array of wad names
+        const wadNames = this.getMultipleRandom([...this.entryCache.keys()], count);
+
+        // transform the wad names above into actual submissions (maps)
+        const chosenEntries = wadNames.flatMap(wadName => this.entryCache.get(wadName) ?? []);
+
+        // get a unique random array of the maps from above
         return this.getMultipleRandom(chosenEntries, count);
     }
 

@@ -7,15 +7,15 @@ const WadAnalyser = (function () {
         LUMP: 3,
     };
     const MapLumps = {
-        THINGS  : true,
+        THINGS: true,
         LINEDEFS: true,
         SIDEDEFS: true,
         VERTEXES: true,
-        SECTORS : true,
-        SEGS    : false,
+        SECTORS: true,
+        SEGS: false,
         SSECTORS: false,
-        NODES   : false,
-        REJECT  : false,
+        NODES: false,
+        REJECT: false,
         BLOCKMAP: false,
     };
 
@@ -162,12 +162,12 @@ const WadAnalyser = (function () {
 
             let lump = 0;
             while (lump < numLumps) {
-                const candidateMapName  = getLumpName(wadData, offset, lump++);
-                let   numMandatoryFound = 0;
+                const candidateMapName = getLumpName(wadData, offset, lump++);
+                let numMandatoryFound = 0;
                 while (lump < numLumps) {
-                    const lumpName    = sanitiseString(getLumpName(wadData, offset, lump++));
-                    const isMandatory = MapLumps[lumpName];
-                    if (!isMandatory ) {
+                    const lumpName = sanitiseString(getLumpName(wadData, offset, lump++));
+                    const isMandatory = MapLumps[lumpName] ?? null;
+                    if (isMandatory == null) {
                         lump--; // Backtrack
                         break;
                     } else if (isMandatory) {

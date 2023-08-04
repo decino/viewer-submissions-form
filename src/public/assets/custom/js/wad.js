@@ -53,13 +53,11 @@ const WadAnalyser = (function () {
                 }
             }
             if (found.length > 0) {
-                let arr = Array.from(found);
-                const itm = arr.sort((a, b) =>
+                const itm = found.sort((a, b) =>
                     a.format - b.format
                 ).shift();
                 mapFormatPos = itm.position;
                 mapFormatSize = itm.size;
-
                 return itm.format;
             }
             return MapNameFormat.LUMP;

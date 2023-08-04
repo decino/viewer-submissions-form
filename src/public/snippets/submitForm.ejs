@@ -1,4 +1,34 @@
-<% const isPaused = model.currentActiveRound.paused; %>
+<% const isPaused = model.currentActiveRound.paused;
+function mapEngine(value) {
+    switch (value) {
+        case "GZDoom":
+            return "GZDoom";
+        case "Doom":
+            return "Doom";
+        case "DoomII":
+            return "Doom II";
+        case "FINAL_DOOM":
+            return "Final Doom";
+        case "BOOM":
+            return "Boom";
+        case "MBF":
+            return "MBF";
+        case "MBF21":
+            return "MBF 21";
+    }
+}
+
+function mapGzActions(value) {
+    switch (value) {
+        case "JUMP":
+            return "Jump";
+        case "CROUCH":
+            return "Crouch";
+        case "MOUSE_LOOK":
+            return "Mouse look";
+    }
+}
+%>
 <form id="entryForm">
     <% if(isAdmin){ %>
         <input type="hidden" name="id" id="submissionId"/>
@@ -54,8 +84,9 @@
                 aria-label="Which engine is this level designed for?">
             <% for(const key in model.doomEngines) {
                 const value = model.doomEngines[key];
+                const display = mapEngine(value);
             %>
-            <option data-value=<%- value; -%> value="<%- key; -%>"><%- value; -%></option>
+            <option data-value=<%- value; -%> value="<%- key; -%>"><%- display; -%></option>
             <% } %>
         </select>
     </div>
@@ -64,11 +95,12 @@
             <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
             <% for(const key in model.gzActions) {
                 const value = model.gzActions[key];
+                const display = mapGzActions(value);
             %>
             <div class="form-check form-check-inline">
                 <input name="gzDoomAction" class="form-check-input" type="checkbox" id="gzActionCheck_<%- key; -%>"
                        value="<%- key; -%>">
-                <label class="form-check-label" for="gzActionCheck_<%- key; -%>"><%- value; -%></label>
+                <label class="form-check-label" for="gzActionCheck_<%- key; -%>"><%- display; -%></label>
             </div>
             <% } %>
         </div>

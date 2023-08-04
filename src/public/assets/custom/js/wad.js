@@ -6,6 +6,18 @@ const WadAnalyser = (function () {
         DEHACKED: 2,
         LUMP: 3,
     };
+    const MapLumps = {
+        THINGS  : true,
+        LINEDEFS: true,
+        SIDEDEFS: true,
+        VERTEXES: true,
+        SECTORS : true,
+        SEGS    : false,
+        SSECTORS: false,
+        NODES   : false,
+        REJECT  : false,
+        BLOCKMAP: false,
+    };
 
     const MapProcessor = (function () {
 
@@ -134,18 +146,39 @@ const WadAnalyser = (function () {
                 });
         }
 
+        function getLumpName(wadData, offset, lumpIndex) {
+            let lumpName = "";
+
+            const lumpOffset = offset + (lumpIndex * lumpSize) + 8;
+            for (let index = 0; index < 8; index++) {
+                lumpName += String.fromCharCode(wadData.getUint8(lumpOffset + index));
+            }
+
+            return lumpName;
+        }
+
         function getMapFromLumps(wadData, numLumps, offset) {
             const retArr = [];
-            for (let lump = 0; lump < numLumps; lump++) {
-                let name = "";
-                const lumpOffset = offset + (lump * lumpSize);
-                for (let index = 0; index < 8; index++) {
-                    name += String.fromCharCode(wadData.getUint8(lumpOffset + 8 + index));
-                }
-                if ((name.substring(0, 3) === "MAP") || (name[0] === "E" && name[2] === "M")) {
-                    retArr.push(sanitiseString(name));
+
+            let lump = 0;
+            while (lump < numLumps) {
+                const candidateMapName  = getLumpName(wadData, offset, lump++);
+                let   numMandatoryFound = 0;
+                while (lump < numLumps) {
+                    const lumpName    = sanitiseString(getLumpName(wadData, offset, lump++));
+                    const isMandatory = MapLumps[lumpName];
+                    if (!isMandatory ) {
+                        lump--; // Backtrack
+                        break;
+                    } else if (isMandatory) {
+                        numMandatoryFound++;
+                        if (numMandatoryFound === 5) {
+                            retArr.push(sanitiseString(candidateMapName));
+                        }
+                    }
                 }
             }
+
             return retArr;
         }
 

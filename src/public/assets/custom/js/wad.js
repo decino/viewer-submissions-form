@@ -207,6 +207,31 @@ const WadAnalyser = (function () {
             });
     }
 
+    function removeQuotesIfNecessary(maps) {
+        Object.keys(maps)
+            .map(mapSlot => {
+                const mapName = maps[mapSlot];
+                if(mapName[0] === '"' && mapName[mapName.length - 1] === '"') {
+                    maps[mapSlot] = mapName.slice(1, mapName.length - 1);
+                }
+            });
+
+        return maps;
+    }
+
+    // Add map slot to title, unless it it already happens to be part of the title
+    function addMapSlotsToNameIfNecessary(maps) {
+        Object.keys(maps)
+            .map(mapSlot => {
+                const mapName = maps[mapSlot];
+                if (!mapName.toUpperCase().includes(mapSlot.toUpperCase())) {
+                    maps[mapSlot] = mapSlot + ": " + mapName;
+                }
+            });
+
+        return maps;
+    }
+
     function getMapNames(wadData, lumpTable, mapNameFormats) {
         const maps = getMapFromLumps(lumpTable);
 
@@ -221,6 +246,9 @@ const WadAnalyser = (function () {
         // if(mapNameFormats["UMAPINFO"]) {
         //     console.log("getMapFromUmapInfo");
         // }
+
+        removeQuotesIfNecessary(maps);
+        addMapSlotsToNameIfNecessary(maps);
 
         // Discard map slots, keep names.
         // Maps for which no name was found have the slot as the name.

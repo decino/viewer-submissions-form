@@ -175,8 +175,28 @@ const Site = (function () {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
             }
 
+            function initTabs() {
+                const triggerTabList = document.querySelectorAll('#resultTabs button');
+                triggerTabList.forEach(triggerEl => {
+                    const tabTrigger = new bootstrap.Tab(triggerEl);
+                    triggerEl.addEventListener('click', event => {
+                        event.preventDefault();
+                        tabTrigger.show();
+                    });
+                });
+            }
+
+            function selectLastTab() {
+                const lastTab = document.querySelector('#resultTabs li:last-child button');
+                if (lastTab) {
+                    bootstrap.Tab.getInstance(lastTab).show();
+                }
+            }
+
             initWs();
             initTooltips();
+            initTabs();
+            selectLastTab();
             isInit = true;
         });
     };

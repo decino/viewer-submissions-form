@@ -24,48 +24,12 @@ const WadAnalyser = (function () {
         let mapFormatPos = 0;
         let mapFormatSize = 0;
 
-        function getLumpName(wadData, offset, lumpIndex) {
-            let lumpName = "";
-
-            const lumpOffset = offset + (lumpIndex * lumpSize) + 8;
-            for (let index = 0; index < 8; index++) {
-                lumpName += String.fromCharCode(wadData.getUint8(lumpOffset + index));
-            }
-
-            return lumpName;
-        }
-
         function lineFilter(line) {
             return line.split(" ")[0].toUpperCase() === "MAP";
         }
 
         function sanitiseString(map) {
             return map.trim().replace(/\0/g, '').replace(/(\r\n|\n|\r)/gm, "").replace(/['"]+/g, '');
-        }
-
-        function getMapFromLumps(wadData, numLumps, offset) {
-            const retArr = [];
-
-            let lump = 0;
-            while (lump < numLumps) {
-                const candidateMapName = getLumpName(wadData, offset, lump++);
-                let numMandatoryFound = 0;
-                while (lump < numLumps) {
-                    const lumpName = sanitiseString(getLumpName(wadData, offset, lump++));
-                    const isMandatory = MapLumps[lumpName] ?? null;
-                    if (isMandatory === null) {
-                        lump--; // Backtrack
-                        break;
-                    } else if (isMandatory) {
-                        numMandatoryFound++;
-                        if (numMandatoryFound === 5) {
-                            retArr.push(sanitiseString(candidateMapName));
-                        }
-                    }
-                }
-            }
-
-            return retArr;
         }
 
         function getMapFromMapInfo(wadData) {
@@ -139,7 +103,6 @@ const WadAnalyser = (function () {
         }
 
         return {
-            getMapFromLumps,
             getMapFromMapInfo,
             getMapFromUmapInfo,
             getMapFromDehacked
@@ -215,16 +178,52 @@ const WadAnalyser = (function () {
         return mapNameFormats;
     }
 
-    function getMapNames(lumpTable, mapNameFormats) {
-        console.log("getMapFromLumps");
+    function getMapFromLumps(lumpTable) {
+        const maps = {};
 
-        if(mapNameFormats["MAPINFO"]) {
-            console.log("getMapFromMapInfo");
-        } else if(mapNameFormats["MAPINFO"]) {
-            console.log("getMapFromUmapInfo");
-        } else if(mapNameFormats["MAPINFO"]) {
-            console.log("getMapFromDehacked");
+        let lump = 0;
+        while (lump < lumpTable.length) {
+            const candidateMapSlot = lumpTable[lump++].name;
+
+            let numMandatoryFound = 0;
+            while (lump < lumpTable.length) {
+                const lumpName = lumpTable[lump++].name;
+
+                const mapLumpIsMandatory = MapLumps[lumpName] ?? null;
+                if (mapLumpIsMandatory === null) {
+                    lump--; // Not a map lump. Backtrack and use it as a new candidate map slot.
+                    break;
+                } else if (mapLumpIsMandatory) {
+                    numMandatoryFound++;
+                    if (numMandatoryFound === 5) {
+                        maps[candidateMapSlot] = candidateMapSlot;
+                    }
+                }
+            }
         }
+
+        return maps;
+    }
+
+    function getMapNames(lumpTable, mapNameFormats) {
+        const maps = getMapFromLumps(lumpTable);
+
+        // if(mapNameFormats["DEHACKED"]) {
+        //     console.log("getMapFromDehacked");
+        // }
+
+        // if(mapNameFormats["MAPINFO"]) {
+        //     console.log("getMapFromMapInfo");
+        // }
+
+        // if(mapNameFormats["UMAPINFO"]) {
+        //     console.log("getMapFromUmapInfo");
+        // }
+
+        // Discard map slots, keep names.
+        // Maps for which no name was found have the slot as the name.
+        // return Object.values(maps);
+        return maps; // TODO remove debug lines
     }
 
     function processWad(wadData) {

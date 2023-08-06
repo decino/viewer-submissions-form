@@ -40,7 +40,6 @@ const WadAnalyser = (function () {
         // 0x08 infoTableoffset (4 bytes)
 
         const identification = readString(wadData, 0, 4);
-        console.log(`file size: ${wadData.byteLength}l, identification: ${identification}`); // TODO remove debug lines
 
         if (identification !== "IWAD" && identification !== "PWAD") {
             throw new Error("Error: not a IWAD or PWAD");
@@ -48,7 +47,6 @@ const WadAnalyser = (function () {
 
         const numLumps        = wadData.getInt32(4, true);
         const infoTableoffset = wadData.getInt32(8, true);
-        console.log(`numLumps: ${numLumps}, infoTableoffset: ${infoTableoffset}`); // TODO remove debug lines
 
         if (wadData.byteLength < infoTableoffset + numLumps * 16) {
             throw new Error("Error: Header corrupt or file truncated");
@@ -84,7 +82,6 @@ const WadAnalyser = (function () {
             }
         }
 
-        console.table(mapNameFormats); // TODO remove debug lines
         return mapNameFormats;
     }
 
@@ -119,7 +116,6 @@ const WadAnalyser = (function () {
         const dehString = readString(wadData, dehLump.offset, dehLump.length);
 
         const lines = dehString.split('\n');
-        console.table(lines); // TODO remove debug lines
 
         lines.filter(line => line.includes("HUSTR_"))
             .forEach(line => {
@@ -135,7 +131,6 @@ const WadAnalyser = (function () {
                 if (!maps[mapSlot]) {
                     return;
                 }
-                console.log(`mapSlot: ${mapSlot}, mapName: ${mapName}`); // TODO remove debug lines
 
                 maps[mapSlot] = mapName;
             });
@@ -145,7 +140,6 @@ const WadAnalyser = (function () {
         const mapiString = readString(wadData, mapiLump.offset, mapiLump.length);
 
         const lines = mapiString.split('\n');
-        console.table(lines); // TODO remove debug lines
 
         // This only parses the ZDOOM formats.
         // TODO: Implement MAPINFO Hexen format
@@ -186,7 +180,6 @@ const WadAnalyser = (function () {
                         mapName = mapName.slice(0, brace).trim();
                     }
                 }
-                console.log(`mapSlot: ${mapSlot}, mapName: ${mapName}`); // TODO remove debug lines
 
                 maps[mapSlot] = mapName;
             });
@@ -241,7 +234,6 @@ const WadAnalyser = (function () {
         let error = false;
 
         for (const token of tokens) {
-// try{ // TODO remove debug lines
             if (insideDeclarationState > 0) {
                 if (token[0] === "symbol") {
                     if (token[1] === "{") {
@@ -337,9 +329,6 @@ const WadAnalyser = (function () {
                     insideBlockState = 1;
                 }
             }
-// }finally{
-// console.log(`token: ${token}, insideDeclarationState: ${insideDeclarationState}, insideBlockState: ${insideBlockState}, mapSlot: ${mapSlot}, key: ${key}, value: ${value}`);
-// }
         }
     }
 
@@ -347,13 +336,11 @@ const WadAnalyser = (function () {
         const umapString = readString(wadData, umapLump.offset, umapLump.length);
 
         const lines = umapString.split('\n');
-        console.table(lines); // TODO remove debug lines
 
         const tokens = tokenizer(lines);
         const mapSlotsAndNames = mapNameExtractorForUMAPINFO(tokens);
 
         for (const mapSlotAndName of mapSlotsAndNames) {
-            console.log(mapSlotAndName);
             if (maps[mapSlotAndName[0]]) {
                 maps[mapSlotAndName[0]] = mapSlotAndName[1];
             }
@@ -387,7 +374,6 @@ const WadAnalyser = (function () {
 
     function getMapNames(wadData, lumpTable, mapNameFormats) {
         const maps = getMapFromLumps(lumpTable);
-        console.log(maps); // TODO remove debug lines
 
         if(mapNameFormats["DEHACKED"]) {
             getMapFromDEHACKED(wadData, mapNameFormats["DEHACKED"], maps);
@@ -406,8 +392,7 @@ const WadAnalyser = (function () {
 
         // Discard map slots, keep names.
         // Maps for which no name was found have the slot as the name.
-        // return Object.values(maps);
-        return maps; // TODO remove debug lines
+        return Object.values(maps);
     }
 
     function processWad(wadData) {

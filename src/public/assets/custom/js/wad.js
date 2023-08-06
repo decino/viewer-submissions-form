@@ -32,27 +32,6 @@ const WadAnalyser = (function () {
             return map.trim().replace(/\0/g, '').replace(/(\r\n|\n|\r)/gm, "").replace(/['"]+/g, '');
         }
 
-        function getMapFromMapInfo(wadData) {
-            let mapString = "";
-
-            for (let mapChar = 0; mapChar < mapFormatSize; mapChar++) {
-                mapString += String.fromCharCode(wadData.getUint8(mapFormatPos + mapChar));
-            }
-            const lines = mapString.split('\n');
-
-            return lines
-                .filter(line => lineFilter(line))
-                .map(line => {
-                    let mapName = line.slice(4);
-                    // FIXME: Sometimes MAPINFO looks up existing DEH strings,
-                    // in that case omit the map name completely and use the map slot instead.
-                    if (line.includes("lookup")) {
-                        mapName = line.split(" ")[1];
-                    }
-                    return sanitiseString(mapName.replace('{', ''));
-                });
-        }
-
         function getMapFromUmapInfo(wadData) {
             let mapString = "";
 
@@ -83,7 +62,6 @@ const WadAnalyser = (function () {
         }
 
         return {
-            getMapFromMapInfo,
             getMapFromUmapInfo,
         };
     }());
@@ -207,6 +185,57 @@ const WadAnalyser = (function () {
             });
     }
 
+    function getMapFromMAPINFO(wadData, mapiLump, maps) {
+        const mapiString = readString(wadData, mapiLump.offset, mapiLump.length);
+
+        const lines = mapiString.split('\n');
+        console.table(lines); // TODO remove debug lines
+
+        // This only parses the ZDOOM formats.
+        // TODO: Implement MAPINFO Hexen format
+        // TODO: Implement MAPINFO Eternity format
+        // TODO: Implement MAPINFO Doomsday format
+
+        lines.map(line => line.trim())
+            .filter(line => line.slice(0, 4).toUpperCase() === "MAP ")
+            .map(line => line.slice(4).trim())
+            .forEach(line => {
+                // TODO: Sometimes MAPINFO looks up DEH strings, so read DEH first and pass it to this function
+                // TODO: Find example wad
+                // For now, keep the map slot as the name.
+                if (line.includes("lookup")) {
+                    return;
+                }
+
+                const space   = line.indexOf(" ");
+                const mapSlot = line.slice(0, space).toUpperCase();
+                if (!maps[mapSlot]) {
+                    return;
+                }
+
+                let mapName = line.slice(space + 1).trim();
+
+                if(mapName[0] === '"') {
+                    // Extract name from quotes
+                    for(let i = 1; i < mapName.length; i++) {
+                        if (mapName[i] == '"') {
+                            mapName = mapName.slice(1, i).trim();
+                            break;
+                        }
+                    }
+                } else {
+                    // Remove start of the optional data block
+                    const brace = mapName.indexOf("{");
+                    if (brace > 0) {
+                        mapName = mapName.slice(0, brace).trim();
+                    }
+                }
+                console.log(`mapSlot: ${mapSlot}, mapName: ${mapName}`); // TODO remove debug lines
+
+                maps[mapSlot] = mapName;
+            });
+    }
+
     function removeQuotesIfNecessary(maps) {
         Object.keys(maps)
             .map(mapSlot => {
@@ -239,9 +268,9 @@ const WadAnalyser = (function () {
             getMapFromDEHACKED(wadData, mapNameFormats["DEHACKED"], maps);
         }
 
-        // if(mapNameFormats["MAPINFO"]) {
-        //     console.log("getMapFromMapInfo");
-        // }
+        if(mapNameFormats["MAPINFO"]) {
+            getMapFromMAPINFO(wadData, mapNameFormats["MAPINFO"], maps);
+        }
 
         // if(mapNameFormats["UMAPINFO"]) {
         //     console.log("getMapFromUmapInfo");

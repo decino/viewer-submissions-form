@@ -179,6 +179,9 @@ const WadAnalyser = (function () {
                 //  12 -> MAP12
                 // 123 -> MAP123
                 const mapSlot = "MAP" + hustr.slice(6).padStart(2, "0");
+                if (!maps[mapSlot]) {
+                    return;
+                }
                 console.log(`mapSlot: ${mapSlot}, mapName: ${mapName}`); // TODO remove debug lines
 
                 maps[mapSlot] = mapName;
@@ -263,6 +266,7 @@ const WadAnalyser = (function () {
 
     function getMapNames(wadData, lumpTable, mapNameFormats) {
         const maps = getMapFromLumps(lumpTable);
+        console.log(maps); // TODO remove debug lines
 
         if(mapNameFormats["DEHACKED"]) {
             getMapFromDEHACKED(wadData, mapNameFormats["DEHACKED"], maps);

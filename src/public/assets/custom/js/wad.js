@@ -24,6 +24,17 @@ const WadAnalyser = (function () {
         let mapFormatPos = 0;
         let mapFormatSize = 0;
 
+        function getLumpName(wadData, offset, lumpIndex) {
+            let lumpName = "";
+
+            const lumpOffset = offset + (lumpIndex * lumpSize) + 8;
+            for (let index = 0; index < 8; index++) {
+                lumpName += String.fromCharCode(wadData.getUint8(lumpOffset + index));
+            }
+
+            return lumpName;
+        }
+
         function lineFilter(line) {
             return line.split(" ")[0].toUpperCase() === "MAP";
         }
@@ -74,6 +85,31 @@ const WadAnalyser = (function () {
             }
             return MapNameFormat.LUMP;
 
+        }
+
+        function getMapFromLumps(wadData, numLumps, offset) {
+            const retArr = [];
+
+            let lump = 0;
+            while (lump < numLumps) {
+                const candidateMapName = getLumpName(wadData, offset, lump++);
+                let numMandatoryFound = 0;
+                while (lump < numLumps) {
+                    const lumpName = sanitiseString(getLumpName(wadData, offset, lump++));
+                    const isMandatory = MapLumps[lumpName] ?? null;
+                    if (isMandatory === null) {
+                        lump--; // Backtrack
+                        break;
+                    } else if (isMandatory) {
+                        numMandatoryFound++;
+                        if (numMandatoryFound === 5) {
+                            retArr.push(sanitiseString(candidateMapName));
+                        }
+                    }
+                }
+            }
+
+            return retArr;
         }
 
         function getMapFromMapInfo(wadData) {
@@ -146,48 +182,12 @@ const WadAnalyser = (function () {
                 });
         }
 
-        function getLumpName(wadData, offset, lumpIndex) {
-            let lumpName = "";
-
-            const lumpOffset = offset + (lumpIndex * lumpSize) + 8;
-            for (let index = 0; index < 8; index++) {
-                lumpName += String.fromCharCode(wadData.getUint8(lumpOffset + index));
-            }
-
-            return lumpName;
-        }
-
-        function getMapFromLumps(wadData, numLumps, offset) {
-            const retArr = [];
-
-            let lump = 0;
-            while (lump < numLumps) {
-                const candidateMapName = getLumpName(wadData, offset, lump++);
-                let numMandatoryFound = 0;
-                while (lump < numLumps) {
-                    const lumpName = sanitiseString(getLumpName(wadData, offset, lump++));
-                    const isMandatory = MapLumps[lumpName] ?? null;
-                    if (isMandatory === null) {
-                        lump--; // Backtrack
-                        break;
-                    } else if (isMandatory) {
-                        numMandatoryFound++;
-                        if (numMandatoryFound === 5) {
-                            retArr.push(sanitiseString(candidateMapName));
-                        }
-                    }
-                }
-            }
-
-            return retArr;
-        }
-
         return {
             searchMapNameFormat,
+            getMapFromLumps,
             getMapFromMapInfo,
             getMapFromUmapInfo,
-            getMapFromDehacked,
-            getMapFromLumps
+            getMapFromDehacked
         };
     }());
 

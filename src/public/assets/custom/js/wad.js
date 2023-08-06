@@ -19,53 +19,6 @@ const WadAnalyser = (function () {
         BLOCKMAP: false,
     };
 
-    const MapProcessor = (function () {
-
-        let mapFormatPos = 0;
-        let mapFormatSize = 0;
-
-        function lineFilter(line) {
-            return line.split(" ")[0].toUpperCase() === "MAP";
-        }
-
-        function sanitiseString(map) {
-            return map.trim().replace(/\0/g, '').replace(/(\r\n|\n|\r)/gm, "").replace(/['"]+/g, '');
-        }
-
-        function getMapFromUmapInfo(wadData) {
-            let mapString = "";
-
-            for (let mapChar = 0; mapChar < mapFormatSize; mapChar++) {
-                mapString += String.fromCharCode(wadData.getUint8(mapFormatPos + mapChar));
-            }
-            const lines = mapString.split('\n');
-            const retArr = [];
-            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-                let line = lines[lineIndex];
-                if (lineFilter(line)) {
-                    let mapName = line.split(" ")[1] + ": ";
-                    while (!line.includes("}")) {
-                        lineIndex++;
-                        line = lines[lineIndex];
-
-                        let levelName = line.split("=");
-
-                        if (levelName[0].includes("levelname")) {
-                            mapName += levelName[1];
-                            break;
-                        }
-                    }
-                    retArr.push(sanitiseString(mapName));
-                }
-            }
-            return retArr;
-        }
-
-        return {
-            getMapFromUmapInfo,
-        };
-    }());
-
     function readString(wadData, offset, length) {
         let string = "";
 
@@ -239,6 +192,174 @@ const WadAnalyser = (function () {
             });
     }
 
+    function* tokenizer(lines) {
+        let i = 0;
+        while (i < lines.length) {
+            let line = lines[i++].trim();
+
+            // Handle text, string, "{", "}", "=", ","
+            while (line.length > 0) {
+                // Keep quoted text together. If end quote is missing, do nothing.
+                if (line.startsWith('"')) {
+                    const end = line.indexOf('"', 1);
+                    if (end > 0) {
+                        yield ["text", line.slice(1, end)];
+                        line = line.slice(end + 1).trim();
+                        continue;
+                    }
+                }
+
+                if (line[0] === '{' || line[0] === '}' || line[0] === '=' || line[0] === ',') {
+                    yield ["symbol", line[0]];
+                    line = line.slice(1).trim();
+                    continue;
+                }
+
+                const space = line.indexOf(" ");
+                if (space > 0) {
+                    yield ["text", line.slice(0, space)];
+                    line = line.slice(space + 1).trim();
+                    continue;
+                }
+
+                // Last token on line.
+                yield ["text", line];
+                break;
+            }
+            yield ["symbol", "newline"];
+        }
+    }
+
+    function* mapNameExtractorForUMAPINFO(tokens) {
+        // Only one of these is ever non-zero at the same time
+        let insideDeclarationState = 0; // 1 = "MAP" seen, 2 = map slot seen, 3+ = unknown token (ignore)
+        let insideBlockState       = 0; // 1 = "{" seen, 2 = (part of) key seen, 3 = '=' seen, 4 = (part of) value seen
+
+        let mapSlot = "";
+        let key = "";
+        let value = "";
+        let error = false;
+
+        for (const token of tokens) {
+// try{ // TODO remove debug lines
+            if (insideDeclarationState > 0) {
+                if (token[0] === "symbol") {
+                    if (token[1] === "{") {
+                        insideDeclarationState = 0;
+                        insideBlockState       = 1;
+                        continue;
+                    } else if (token[1] === "newline") {
+                        insideDeclarationState = 0;
+                        continue;
+                    }
+                }
+
+                if (insideDeclarationState == 1) {
+                    if (token[0] === "text") {
+                        mapSlot = token[1];
+                        insideDeclarationState = 2;
+                    } else {
+                        insideDeclarationState = 0;
+                        mapSlot                = "";
+                    }
+                }
+            } else if (insideBlockState > 0) {
+                if (token[0] === "symbol") {
+                    if (token[1] === "}" || token[1] === "newline") {
+                        if (mapSlot.length > 0 && key.toLocaleLowerCase() === "levelname" && value.length > 0) {
+                            yield [mapSlot.toUpperCase(), value];
+                        }
+
+                        key              = "";
+                        value            = "";
+
+                        if (token[1] === "}") {
+                            insideBlockState = 0;
+                            mapSlot          = "";
+                        } else {
+                            insideBlockState = 1;
+                        }
+
+                        continue;
+                    } else if (token[1] === "newline") {
+                        insideBlockState = 1;
+                        key              = "";
+                        value            = "";
+                        continue;
+                    }
+                }
+
+                error = false;
+                switch (insideBlockState) {
+                    case 1:
+                        if (token[0] === "text") {
+                            key = token[1];
+                            insideBlockState = 2;
+                        } else {
+                            error = true;
+                        }
+                        break;
+                    case 2:
+                        if (token[0] === "text") {
+                            key += " " + token[1];
+                        } else if (token[1] === '=') {
+                            insideBlockState = 3;
+                        } else {
+                            error = true;
+                        }
+                        break;
+                    case 3:
+                        if (token[0] === "text") {
+                            value = token[1];
+                            insideBlockState = 4;
+                        } else {
+                            error = true;
+                        }
+                        break;
+                    case 4:
+                        if (token[0] === "text") {
+                            value += " " + token[1];
+                        } else {
+                            error = true;
+                        }
+                        break;
+                }
+
+                if (error) {
+                    insideBlockState = 1;
+                    key              = "";
+                    value            = "";
+                }
+            } else {
+                if (token[0] === "text" && token[1].toUpperCase() === "MAP") {
+                    insideDeclarationState = 1;
+                } if (token[0] === "symbol" && token[1] === "{") {
+                    insideBlockState = 1;
+                }
+            }
+// }finally{
+// console.log(`token: ${token}, insideDeclarationState: ${insideDeclarationState}, insideBlockState: ${insideBlockState}, mapSlot: ${mapSlot}, key: ${key}, value: ${value}`);
+// }
+        }
+    }
+
+    function getMapFromUMAPINFO(wadData, umapLump, maps) {
+        const umapString = readString(wadData, umapLump.offset, umapLump.length);
+
+        const lines = umapString.split('\n');
+        console.table(lines); // TODO remove debug lines
+
+        const tokens = tokenizer(lines);
+        const mapSlotsAndNames = mapNameExtractorForUMAPINFO(tokens);
+
+        for (const mapSlotAndName of mapSlotsAndNames) {
+            console.log(mapSlotAndName);
+            if (maps[mapSlotAndName[0]]) {
+                maps[mapSlotAndName[0]] = mapSlotAndName[1];
+            }
+        }
+    }
+
     function removeQuotesIfNecessary(maps) {
         Object.keys(maps)
             .map(mapSlot => {
@@ -276,9 +397,9 @@ const WadAnalyser = (function () {
             getMapFromMAPINFO(wadData, mapNameFormats["MAPINFO"], maps);
         }
 
-        // if(mapNameFormats["UMAPINFO"]) {
-        //     console.log("getMapFromUmapInfo");
-        // }
+        if(mapNameFormats["UMAPINFO"]) {
+            getMapFromUMAPINFO(wadData, mapNameFormats["UMAPINFO"], maps);
+        }
 
         removeQuotesIfNecessary(maps);
         addMapSlotsToNameIfNecessary(maps);

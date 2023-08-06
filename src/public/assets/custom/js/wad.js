@@ -222,7 +222,7 @@ class WadReader {
 }
 
 
-class WadAnalyser extends WadReader {
+class WadMapAnalyser extends WadReader {
     static #isInternalConstructing = false;
 
     #MapLumps = {
@@ -241,10 +241,10 @@ class WadAnalyser extends WadReader {
 
     constructor(data) {
         super(data);
-        if (!WadAnalyser.#isInternalConstructing) {
+        if (!WadMapAnalyser.#isInternalConstructing) {
             throw new TypeError("PrivateConstructor is not constructable");
         }
-        WadAnalyser.#isInternalConstructing = false;
+        WadMapAnalyser.#isInternalConstructing = false;
     }
 
     get mapNames() {
@@ -259,8 +259,8 @@ class WadAnalyser extends WadReader {
             reader.onloadend = (event) => {
                 if (event.target.readyState === FileReader.DONE) {
                     const data = event.target.result;
-                    WadAnalyser.#isInternalConstructing = true;
-                    resolve(new WadAnalyser(new DataView(data)));
+                    WadMapAnalyser.#isInternalConstructing = true;
+                    resolve(new WadMapAnalyser(new DataView(data)));
                 }
             };
         });

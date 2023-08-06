@@ -68,7 +68,8 @@ Site.loadPage(async function (site) {
             select.innerHTML = null;
             const input = document.getElementById("levelToPlay");
             if (ext === "wad") {
-                const maps = await WadAnalyser.readFile(file);
+                const wadMapAnalyser = await WadMapAnalyser.create(file);
+                const maps = wadMapAnalyser.mapNames;
                 if (!maps || maps.length === 0) {
                     select.classList.add("hidden");
                     input.classList.remove("hidden");

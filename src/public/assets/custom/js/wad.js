@@ -43,50 +43,6 @@ const WadAnalyser = (function () {
             return map.trim().replace(/\0/g, '').replace(/(\r\n|\n|\r)/gm, "").replace(/['"]+/g, '');
         }
 
-        function searchMapNameFormat(wadData, numLumps, offset) {
-            const found = [];
-            for (let lump = 0; lump < numLumps; lump++) {
-                let name = "";
-
-                const lumpOffset = offset + (lump * lumpSize);
-                const position = wadData.getInt32(lumpOffset, true);
-                const size = wadData.getInt32(lumpOffset + 4, true);
-
-                for (let index = 0; index < 8; index++) {
-                    name += String.fromCharCode(wadData.getUint8(lumpOffset + 8 + index));
-                }
-                if (name === "MAPINFO\0") {
-                    found.push({
-                        format: MapNameFormat.MAPINFO,
-                        position,
-                        size
-                    });
-                } else if (name === "UMAPINFO") {
-                    found.push({
-                        format: MapNameFormat.UMAPINFO,
-                        position,
-                        size
-                    });
-                } else if (name === "DEHACKED") {
-                    found.push({
-                        format: MapNameFormat.DEHACKED,
-                        position,
-                        size
-                    });
-                }
-            }
-            if (found.length > 0) {
-                const itm = found.sort((a, b) =>
-                    a.format - b.format
-                ).shift();
-                mapFormatPos = itm.position;
-                mapFormatSize = itm.size;
-                return itm.format;
-            }
-            return MapNameFormat.LUMP;
-
-        }
-
         function getMapFromLumps(wadData, numLumps, offset) {
             const retArr = [];
 
@@ -183,7 +139,6 @@ const WadAnalyser = (function () {
         }
 
         return {
-            searchMapNameFormat,
             getMapFromLumps,
             getMapFromMapInfo,
             getMapFromUmapInfo,
@@ -191,34 +146,95 @@ const WadAnalyser = (function () {
         };
     }());
 
-    function processWad(wadData) {
+    function readString(wadData, offset, length) {
+        let string = "";
+
+        for (let index = 0; index < length; index++) {
+            string += String.fromCharCode(wadData.getUint8(offset + index));
+        }
+
+        return string;
+    }
+
+    function readHeader(wadData) {
+        if (wadData.byteLength < 12) {
+            throw new Error("Error: File too small to contain a header");
+        }
+
         // wadinfo_t
         // 0x00 identification (4 bytes)
-        // 0x04 numlumps (4 bytes)
-        // 0x08 infotableofs (4 bytes)
-        let identification = "";
+        // 0x04 numLumps (4 bytes)
+        // 0x08 infoTableoffset (4 bytes)
 
-        for (let index = 0; index < 4; index++) {
-            identification += String.fromCharCode(wadData.getUint8(index));
-        }
-        if (identification !== "PWAD" && identification !== "IWAD") {
-            throw new Error("Error: not a PWAD or IWAD");
-        }
-        const numLumps = wadData.getInt32(4, true);
-        const offset = wadData.getInt32(8, true);
+        const identification = readString(wadData, 0, 4);
+        console.log(`file size: ${wadData.byteLength}l, identification: ${identification}`); // TODO remove debug lines
 
-        const mapNameFormatType = MapProcessor.searchMapNameFormat(wadData, numLumps, offset);
-
-        switch (mapNameFormatType) {
-            case MapNameFormat.MAPINFO:
-                return MapProcessor.getMapFromMapInfo(wadData);
-            case MapNameFormat.UMAPINFO:
-                return MapProcessor.getMapFromUmapInfo(wadData);
-            case MapNameFormat.DEHACKED:
-                return MapProcessor.getMapFromDehacked(wadData);
-            default:
-                return MapProcessor.getMapFromLumps(wadData, numLumps, offset);
+        if (identification !== "IWAD" && identification !== "PWAD") {
+            throw new Error("Error: not a IWAD or PWAD");
         }
+
+        const numLumps        = wadData.getInt32(4, true);
+        const infoTableoffset = wadData.getInt32(8, true);
+        console.log(`numLumps: ${numLumps}, infoTableoffset: ${infoTableoffset}`); // TODO remove debug lines
+
+        if (wadData.byteLength < infoTableoffset + numLumps * 16) {
+            throw new Error("Error: Header corrupt or file truncated");
+        }
+
+        return {identification, numLumps, infoTableoffset};
+    }
+
+    function readLumpTable(wadData, header) {
+        lumpTable = [];
+
+        for (let lumpIndex = 0; lumpIndex < header.numLumps; lumpIndex++) {
+            const lumpOffset = header.infoTableoffset + lumpIndex * 16;
+
+            const position = wadData.getInt32(lumpOffset, true);
+            const size     = wadData.getInt32(lumpOffset + 4, true);
+            const name     = readString(wadData, lumpOffset + 8, 8).replace(/\0/g, "");
+
+            lumpTable.push({name, position, size});
+        }
+
+        return lumpTable;
+    }
+
+    function findMapNameFormats(lumpTable) {
+        const mapNameFormats = {};
+
+        for (let i = 0; i < lumpTable.length; i++) {
+            if (lumpTable[i].name === "DEHACKED" ||
+                lumpTable[i].name === "MAPINFO" ||
+                lumpTable[i].name === "UMAPINFO") {
+                mapNameFormats[lumpTable[i].name] = lumpTable[i];
+            }
+        }
+
+        console.table(mapNameFormats); // TODO remove debug lines
+        return mapNameFormats;
+    }
+
+    function getMapNames(lumpTable, mapNameFormats) {
+        console.log("getMapFromLumps");
+
+        if(mapNameFormats["MAPINFO"]) {
+            console.log("getMapFromMapInfo");
+        } else if(mapNameFormats["MAPINFO"]) {
+            console.log("getMapFromUmapInfo");
+        } else if(mapNameFormats["MAPINFO"]) {
+            console.log("getMapFromDehacked");
+        }
+    }
+
+    function processWad(wadData) {
+        const header = readHeader(wadData);
+
+        const lumpTable = readLumpTable(wadData, header);
+
+        const mapNameFormats = findMapNameFormats(lumpTable);
+
+        return getMapNames(lumpTable, mapNameFormats);
     }
 
     function readFile(file) {

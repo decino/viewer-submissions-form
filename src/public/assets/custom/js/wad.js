@@ -82,30 +82,9 @@ const WadAnalyser = (function () {
             return retArr;
         }
 
-        function getMapFromDehacked(wadData) {
-
-            let dehString = "";
-
-            for (let dehChar = 0; dehChar < mapFormatSize; dehChar++) {
-                dehString += String.fromCharCode(wadData.getUint8(mapFormatPos + dehChar));
-            }
-            const lines = dehString.split('\n');
-            return lines.filter(line => line.includes("HUSTR_"))
-                .map(line => {
-                    let mapName = line.split("=")[1]?.trim();
-                    // const mapNumber = line.split("_")[1];
-                    if (mapName[0] === " ") { // Some people and their inconsistent spaces...
-                        mapName = mapName.slice(1);
-                    }
-                    // FIXME: Some mappers don't add the map number in the DEH string. Cringe.
-                    return sanitiseString(mapName);
-                });
-        }
-
         return {
             getMapFromMapInfo,
             getMapFromUmapInfo,
-            getMapFromDehacked
         };
     }());
 
@@ -153,11 +132,11 @@ const WadAnalyser = (function () {
         for (let lumpIndex = 0; lumpIndex < header.numLumps; lumpIndex++) {
             const lumpOffset = header.infoTableoffset + lumpIndex * 16;
 
-            const position = wadData.getInt32(lumpOffset, true);
-            const size     = wadData.getInt32(lumpOffset + 4, true);
-            const name     = readString(wadData, lumpOffset + 8, 8).replace(/\0/g, "");
+            const offset = wadData.getInt32(lumpOffset, true);
+            const length = wadData.getInt32(lumpOffset + 4, true);
+            const name   = readString(wadData, lumpOffset + 8, 8).replace(/\0/g, "");
 
-            lumpTable.push({name, position, size});
+            lumpTable.push({name, offset, length});
         }
 
         return lumpTable;
@@ -205,12 +184,35 @@ const WadAnalyser = (function () {
         return maps;
     }
 
-    function getMapNames(lumpTable, mapNameFormats) {
+    function getMapFromDEHACKED(wadData, dehLump, maps) {
+        const dehString = readString(wadData, dehLump.offset, dehLump.length);
+
+        const lines = dehString.split('\n');
+        console.table(lines); // TODO remove debug lines
+
+        lines.filter(line => line.includes("HUSTR_"))
+            .forEach(line => {
+                const split   = line.indexOf("=");
+                const hustr   = line.slice(0, split).trim();
+                const mapName = line.slice(split + 1).trim();
+
+                // One leading zero:
+                //   1 -> MAP01
+                //  12 -> MAP12
+                // 123 -> MAP123
+                const mapSlot = "MAP" + hustr.slice(6).padStart(2, "0");
+                console.log(`mapSlot: ${mapSlot}, mapName: ${mapName}`); // TODO remove debug lines
+
+                maps[mapSlot] = mapName;
+            });
+    }
+
+    function getMapNames(wadData, lumpTable, mapNameFormats) {
         const maps = getMapFromLumps(lumpTable);
 
-        // if(mapNameFormats["DEHACKED"]) {
-        //     console.log("getMapFromDehacked");
-        // }
+        if(mapNameFormats["DEHACKED"]) {
+            getMapFromDEHACKED(wadData, mapNameFormats["DEHACKED"], maps);
+        }
 
         // if(mapNameFormats["MAPINFO"]) {
         //     console.log("getMapFromMapInfo");
@@ -233,7 +235,7 @@ const WadAnalyser = (function () {
 
         const mapNameFormats = findMapNameFormats(lumpTable);
 
-        return getMapNames(lumpTable, mapNameFormats);
+        return getMapNames(wadData, lumpTable, mapNameFormats);
     }
 
     function readFile(file) {

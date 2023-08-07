@@ -438,7 +438,7 @@ class WadMapAnalyser extends WadReader {
 
         // Discard map slots, keep names.
         // Maps for which no name was found have the slot as the name.
-        return Object.values(maps);
+        return Object.values(maps)?.sort();
     }
 
 }

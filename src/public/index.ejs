@@ -70,6 +70,11 @@
                                 isResults: false
                                 }); %>
                             </div>
+                            <% if (model.currentActiveRound.endDate){ %>
+                                <div class="card-footer">
+                                    <span class="badge text-bg-info">Submission deadline:</span> <%- `${model.getEndDate(model.currentActiveRound)}`; -%>
+                                </div>
+                            <% } %>
                         </div>
                     </div>
                 </div>

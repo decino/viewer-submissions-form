@@ -81,7 +81,7 @@
                 <div class="card-body">
                     <p class="card-text">Clicking this button will create a new submission round and enable people
                         to submit entries.</p>
-                    <button class="btn btn-outline-primary" id="makeNewRoundButton">Make new round</button>
+                    <button class="btn btn-outline-primary" id="makeNewRoundButton" data-bs-toggle="modal" data-bs-target="#newRoundModal">Make new round</button>
                 </div>
             </div>
         <% } %>
@@ -370,6 +370,32 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary" id="submissionStatusModalOk">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="newRoundModal" tabindex="-1" aria-labelledby="newRoundModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="newRoundModalLabel">Create a new round</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="newRoundModalInfoContent">
+                <div class="mb-3">
+                    <label for="roundName" class="form-label">New Password</label>
+                    <input type="text" class="form-control" id="roundName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="roundDeadline" class="form-label">Round deadline</label>
+                    <input type="date" class="form-control" id="roundDeadline">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="newRoundModalOk">Create</button>
             </div>
         </div>
     </div>
@@ -963,18 +989,25 @@
                 }
             });
 
-            document.getElementById("makeNewRoundButton")?.addEventListener("click", async ev => {
-                const roundName = prompt("Submission round name");
-                if (!roundName?.trim()) {
-                    alert("Please supply a round name.");
+            document.getElementById("newRoundModalOk").addEventListener("click", async ev => {
+                const roundName = document.getElementById("roundName").value;
+                if (!roundName) {
+                    alert("Please supply a name");
                     return;
                 }
+                const endDate = document.getElementById("roundDeadline").valueAsNumber;
                 site.loading(true);
                 let newRound;
                 try {
-                    newRound = await fetch(`${baseUrl}/submissionRound/newRound?name=${roundName}`, {
-                        method: "POST"
-                    });
+                    if (endDate) {
+                        newRound = await fetch(`${baseUrl}/submissionRound/newRound?name=${roundName}&endDate=${endDate}`, {
+                            method: "POST"
+                        });
+                    } else {
+                        newRound = await fetch(`${baseUrl}/submissionRound/newRound?name=${roundName}`, {
+                            method: "POST"
+                        });
+                    }
                 } finally {
                     site.loading(false);
                 }
@@ -983,7 +1016,7 @@
                     return;
                 }
                 window.location.reload();
-            });
+            })
         }
 
         function initDt() {

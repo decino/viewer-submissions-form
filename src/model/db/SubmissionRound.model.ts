@@ -29,6 +29,15 @@ export class SubmissionRoundModel extends AbstractModel {
     @Description("If this round is currently paused or not")
     public paused: boolean;
 
+    @Column({
+        name: "end_date",
+        nullable: true,
+        type: "datetime"
+    })
+    @Name("endDate")
+    @Description("If this round is currently paused or not")
+    public endDate: Date | null;
+
     @Name("submissions")
     @Description("List of submissions that belong to this round")
     @OneToMany(() => SubmissionModel, submissions => submissions.submissionRound, {

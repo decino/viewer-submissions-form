@@ -35,7 +35,7 @@ export class SubmissionRoundService implements OnInit {
         }
     }
 
-    public newSubmissionRound(name: string): Promise<SubmissionRoundModel> {
+    public newSubmissionRound(name: string, endDate: number | null): Promise<SubmissionRoundModel> {
         return this.ds.transaction(async entityManager => {
             const repo = entityManager.getRepository(SubmissionRoundModel);
             const activeRound = await repo.findOne({
@@ -47,9 +47,14 @@ export class SubmissionRoundService implements OnInit {
                 activeRound.active = false;
                 await repo.save(activeRound);
             }
+            let endateObj: Date | null = null;
+            if (typeof endDate === "number") {
+                endateObj = new Date(endDate);
+            }
             const newModel = entityManager.create(SubmissionRoundModel, {
                 active: true,
-                name
+                name,
+                endDate: endateObj
             });
             return repo.save(newModel);
         });

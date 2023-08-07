@@ -4,6 +4,8 @@ import GZDOOM_ACTIONS from "../model/constants/GZDoomActions";
 import {ObjectUtils} from "../utils/Utils";
 
 export class IndexDto {
+    private readonly months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
     public constructor(public currentActiveRound: SubmissionRoundModel | null,
                        public previousRounds: SubmissionRoundModel[]) {
     }
@@ -22,8 +24,18 @@ export class IndexDto {
         const month = createdAt.getUTCMonth();
         const year = createdAt.getUTCFullYear();
         const time = `${(createdAt.getUTCHours() < 10 ? '0' : '') + createdAt.getUTCHours()}:${(createdAt.getUTCMinutes() < 10 ? '0' : '') + createdAt.getUTCMinutes()}`;
-        const monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        return `${date}<sup>${this.nth(date)}</sup> of ${monthName[month]} ${year} at ${time} UTC`;
+        return `${date}<sup>${this.nth(date)}</sup> of ${this.months[month]} ${year} at ${time} UTC`;
+    }
+
+    public getEndDate(round: SubmissionRoundModel): string | null {
+        const endDate = round.endDate;
+        if (!endDate) {
+            return null;
+        }
+        const date = endDate.getUTCDate();
+        const month = endDate.getUTCMonth();
+        const year = endDate.getUTCFullYear();
+        return `${date}<sup>${this.nth(date)}</sup> of ${this.months[month]} ${year} UTC`;
     }
 
     private nth(d: number): string {

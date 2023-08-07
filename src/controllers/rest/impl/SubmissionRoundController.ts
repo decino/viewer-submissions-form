@@ -21,8 +21,8 @@ export class SubmissionRoundController extends BaseRestController {
     @Authorize("login")
     @Security("login")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)
-    public createRound(@QueryParams("name") name: string): unknown {
-        return this.submissionRoundService.newSubmissionRound(name);
+    public createRound(@QueryParams("name") name: string, @QueryParams("endDate") endDate?: number): unknown {
+        return this.submissionRoundService.newSubmissionRound(name, endDate ?? null);
     }
 
 

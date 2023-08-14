@@ -53,15 +53,12 @@ Site.loadPage(async function (site) {
         document.getElementById("wadFile")?.addEventListener("change", async ev => {
             const file = ev.currentTarget.files[0];
             const fileSizeAlert = document.getElementById("fileSizeError");
-            const submitButton = document.getElementById("submit");
             const uploadFile = ev.target;
             if (file && file.size > fileSizeLimit) {
                 Site.display(false, fileSizeAlert);
-                submitButton.disabled = true;
                 uploadFile.value = null;
             } else {
                 Site.display(true, fileSizeAlert);
-                submitButton.disabled = false;
             }
             const ext = file.name?.split(".")?.pop()?.toLowerCase();
             const select = document.getElementById("levelToPlaySelect");

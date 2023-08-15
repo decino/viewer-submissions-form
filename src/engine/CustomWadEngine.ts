@@ -22,6 +22,9 @@ export class CustomWadEngine {
     @Constant(GlobalEnv.ALLOWED_FILES)
     private readonly allowedFiles: string;
 
+    @Constant(GlobalEnv.ALLOWED_FILES_ZIP)
+    private readonly allowedFilesZip: string;
+
     public async getWad(round: number, entryId: number): Promise<CustomWadEntry | null> {
         const files = await fs.promises.readdir(`${this.basePath}/${round}/${entryId}`);
         if (files.length === 0) {
@@ -74,13 +77,10 @@ export class CustomWadEngine {
 
     private checkFileExt(customWad: PlatformMulterFile | string, isZip = false): void {
         const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
-        const fileExt = fileName.split(".").pop() ?? "";
-        const allowedFilesArr = this.allowedFiles.split(",");
-        if (!allowedFilesArr.includes(fileExt.toLowerCase())) {
+        const fileExt = fileName.split(".").pop()?.toLowerCase() ?? "";
+        const allowedFilesArr = isZip ? this.allowedFilesZip.split(",") : this.allowedFiles.split(",");
+        if (!allowedFilesArr.includes(fileExt)) {
             if (isZip) {
-                if (this.isTxt(customWad)) {
-                    return;
-                }
                 throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
             }
             throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);

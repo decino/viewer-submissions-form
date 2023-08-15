@@ -9,6 +9,7 @@ enum GlobalEnv {
     HTTPS = `${prefix}HTTPS`,
     HTTPS_PORT = `${prefix}HTTPS_PORT`,
     ALLOWED_FILES = `${prefix}ALLOWED_FILES`,
+    ALLOWED_FILES_ZIP = `${prefix}ALLOWED_FILES_ZIP`,
     ALLOWED_HEADERS = `${prefix}ALLOWED_HEADERS`,
     NODE_ENV = `${prefix}NODE_ENV`,
     BASE_URL = `${prefix}BASE_URL`,

@@ -998,6 +998,7 @@
                 const endDate = document.getElementById("roundDeadline").valueAsNumber;
                 site.loading(true);
                 let newRound;
+                let json;
                 try {
                     if (endDate) {
                         newRound = await fetch(`${baseUrl}/submissionRound/newRound?name=${roundName}&endDate=${endDate}`, {
@@ -1008,15 +1009,17 @@
                             method: "POST"
                         });
                     }
+                    json = await newRound.json();
                 } finally {
                     site.loading(false);
                 }
                 if (newRound.status !== 201) {
-                    alert("Unable to create a new submission round. See server logs for info.");
+                    console.error(json);
+                    alert(json.message);
                     return;
                 }
                 window.location.reload();
-            })
+            });
         }
 
         function initDt() {

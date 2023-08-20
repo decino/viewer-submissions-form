@@ -50,6 +50,9 @@ export class SubmissionRoundService implements OnInit {
             let endateObj: Date | null = null;
             if (typeof endDate === "number") {
                 endateObj = new Date(endDate);
+                if (endateObj.getTime() < Date.now()) {
+                    throw new BadRequest("Unable to set end date before today");
+                }
             }
             const newModel = entityManager.create(SubmissionRoundModel, {
                 active: true,

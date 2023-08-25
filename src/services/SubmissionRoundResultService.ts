@@ -68,7 +68,7 @@ export class SubmissionRoundResultService {
         return this.getMultipleRandom(chosenEntries, count);
     }
 
-    public async submitEntries(entryIds: number[], round?: SubmissionRoundModel): Promise<void> {
+    public async submitEntries(entryIds: number[], round?: SubmissionRoundModel, append = false): Promise<void> {
         let activeRound: SubmissionRoundModel | null;
         if (round) {
             activeRound = round;
@@ -85,7 +85,13 @@ export class SubmissionRoundResultService {
             if (!entry) {
                 throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
-            entry.playOrder = i + 1;
+            if (append) {
+                const playOrders = activeRound.submissions.filter(submission => submission.isChosen).map(submission => submission.playOrder);
+                const max = Math.max(...playOrders);
+                entry.playOrder = max + 1;
+            } else {
+                entry.playOrder = i + 1;
+            }
             entry.isChosen = true;
             if (!entry.status) {
                 entry.status = this.ds.manager.create(SubmissionStatusModel);
@@ -102,14 +108,17 @@ export class SubmissionRoundResultService {
         return allNonActiveRounds ?? [];
     }
 
-    public async addRandomEntry(roundId: number): Promise<SubmissionModel> {
+    public async addRandomEntry(roundId: number): Promise<SubmissionModel | null> {
         const round = await this.submissionRoundService.getSubmissionRound(roundId);
         if (!round) {
             throw new BadRequest(`Round ${roundId} does not exist.`);
         }
-        await this.buildResultSet(round.submissions);
+        if (round.submissions.length === 0) {
+            return null;
+        }
+        await this.buildResultSet(round.submissions.filter(submission => submission.isChosen));
         const entry = this.generateEntries(1)[0];
-        await this.submitEntries([entry.id], round);
+        await this.submitEntries([entry.id], round, true);
         return entry;
     }
 

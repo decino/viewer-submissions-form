@@ -130,7 +130,11 @@ const Site = (function () {
             if (item.type === "file") {
                 formData.append('file', item.files[0]);
             } else if (item.value) {
-                formData.append(item.name, item.value);
+                if (item.dataset.array) {
+                    formData.append(`${item.name}[]`, item.value);
+                } else {
+                    formData.append(item.name, item.value);
+                }
             }
         }
         return formData;

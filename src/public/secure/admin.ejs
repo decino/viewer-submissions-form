@@ -472,8 +472,7 @@
             return false;
         }
 
-        function showSubmissionInfoModel(no, id, wadName, wadLevel, submitterName, wadEngine, gzDoomAction, author, distributable, info, email, downloadUrl) {
-
+        function showSubmissionInfoModel(id, wadName, wadLevel, submitterName, wadEngine, gzDoomAction, author, distributable, info, email, downloadUrl) {
             const modalContentWrapper = document.getElementById("submissionInfoContent");
             const modalTitle = document.getElementById("submissionInfoModalLabel");
 
@@ -1023,6 +1022,26 @@
         }
 
         function initDt() {
+
+            async function getEntry(entryId) {
+                let json;
+                let result;
+                try {
+                    result = await fetch(`${baseUrl}/submission/getSubmission/${entryId}`, {
+                        method: "GET"
+                    });
+                    json = await result.json();
+                } finally {
+                    site.loading(false);
+                }
+
+                if (result.status !== 200) {
+                    console.error(json);
+                    throw new Error(json.message);
+                }
+                return json;
+            }
+
             $('.submissionsTable').each(function () {
                 const el = $(this);
                 let ds = el[0].dataset.isresults === "true";
@@ -1054,9 +1073,54 @@
                     {
                         extend: 'selectedSingle',
                         text: 'Full info',
-                        action: (e, dt) => {
+                        action: async (e, dt) => {
                             const selectedRow = dt.row({selected: true}).data();
-                            showSubmissionInfoModel.apply(undefined, selectedRow);
+                            let entry;
+                            try {
+                                entry = await getEntry(selectedRow[0]);
+                            } catch (e) {
+                                alert(e.message);
+                                return;
+                            }
+                            showSubmissionInfoModel(entry.id, entry.WADName, entry.level, entry.authorName, selectedRow[5], selectedRow[6], entry.author, entry.distributable, entry.info, entry.email, selectedRow[10]);
+                        }
+                    },
+                    {
+                        extend: 'selected',
+                        text: 'Delete',
+                        action: async (e, dt) => {
+                            const confirm = window.confirm("Are you sure you wish to delete these entries?");
+                            if (!confirm) {
+                                return;
+                            }
+                            const idArr = [];
+                            dt.rows({selected: true}).every(function () {
+                                const data = this.data();
+                                idArr.push(data[0]);
+                            });
+                            site.loading(true);
+                            let response;
+                            try {
+                                response = await fetch(`${baseUrl}/submission/deleteEntries`, {
+                                    method: "DELETE",
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(idArr)
+                                });
+                            } catch (e) {
+                                alert(e.message);
+                                return;
+                            } finally {
+                                site.loading(false);
+                            }
+                            const responseStatus = response.status;
+                            const responseJson = await response.json();
+                            if (responseStatus !== 200) {
+                                return alert(responseJson.message);
+                            }
+                            dt.rows({selected: true}).remove().draw(false);
                         }
                     }
                 ];
@@ -1065,48 +1129,11 @@
                 }
                 if (isPreviousRoundCard) {
                     dtOpts["columnDefs"] = [
-                        {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10, 11]}
+                        {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10]}
                     ];
                 }
                 if (!isPreviousRoundCard) {
-                    buttons.push({
-                            extend: 'selected',
-                            text: 'Delete',
-                            action: async (e, dt) => {
-                                const confirm = window.confirm("Are you sure you wish to delete these entries?");
-                                if (!confirm) {
-                                    return;
-                                }
-                                const idArr = [];
-                                dt.rows({selected: true}).every(function () {
-                                    const data = this.data();
-                                    idArr.push(data[0]);
-                                });
-                                site.loading(true);
-                                let response;
-                                try {
-                                    response = await fetch(`${baseUrl}/submission/deleteEntries`, {
-                                        method: "DELETE",
-                                        headers: {
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(idArr)
-                                    });
-                                } catch (e) {
-                                    alert(e.message);
-                                    return;
-                                } finally {
-                                    site.loading(false);
-                                }
-                                const responseStatus = response.status;
-                                const responseJson = await response.json();
-                                if (responseStatus !== 200) {
-                                    return alert(responseJson.message);
-                                }
-                                dt.rows({selected: true}).remove().draw(false);
-                            }
-                        },
+                    buttons.push(
                         {
                             extend: 'selectedSingle',
                             text: 'Modify',

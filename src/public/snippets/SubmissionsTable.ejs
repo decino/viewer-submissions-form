@@ -14,7 +14,7 @@ if (submissions.length > 0 || !isPReviousResults) {
             <% if(isAdmin){ %>
                 <th scope="col">ID.</th>
             <% } %>
-            <th scope="col">No.</th>
+            <th scope="col">Play order</th>
             <th scope="col">WAD</th>
             <th scope="col">Level</th>
             <% if(isAdmin || (isPReviousResults && isResults) ){ %>
@@ -26,7 +26,6 @@ if (submissions.length > 0 || !isPReviousResults) {
                 <th scope="col">Submitter is author</th>
                 <th scope="col">Distributable</th>
                 <th scope="col">Info</th>
-                <th scope="col">Submitter email</th>
             <% } %>
 
             <% if(isPReviousResults){ %>
@@ -64,9 +63,6 @@ if (submissions.length > 0 || !isPReviousResults) {
                 <td><%- chosenSubmission.submitterAuthor; -%></td>
                 <td><%- chosenSubmission.distributable; -%></td>
                 <td><%- chosenSubmission.info; -%></td>
-                <td>
-                    <a href="mailto:<%- chosenSubmission.submitterEmail; -%>"><%- chosenSubmission.submitterEmail; -%></a>
-                </td>
             <% } %>
             <% if(isPReviousResults){ %>
                 <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>

@@ -8,6 +8,7 @@ import {SubmissionRoundResultService} from "../../../services/SubmissionRoundRes
 import {BodyParams} from "@tsed/platform-params";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
 import {Authorize} from "@tsed/passport";
+import {BadRequest} from "@tsed/exceptions";
 
 @Controller("/submissionRoundResult")
 export class SubmissionRoundResultController extends BaseRestController {
@@ -44,9 +45,12 @@ export class SubmissionRoundResultController extends BaseRestController {
     @Post("/addRandomEntry")
     @Authorize("login")
     @Security("login")
-    @Returns(StatusCodes.OK)
-    public async addRandomEntry(@Res() res: PlatformResponse, @QueryParams("roundId") roundId: number): Promise<unknown> {
+    @Returns(StatusCodes.OK, SubmissionModel)
+    public async addRandomEntry(@QueryParams("roundId") roundId: number): Promise<unknown> {
         const entryAdded = await this.submissionRoundResultService.addRandomEntry(roundId);
-        return super.doSuccess(res, `${entryAdded.wadName} map ${entryAdded.wadLevel} has been chosen.`);
+        if (!entryAdded) {
+            throw new BadRequest("No more submissions to pick from");
+        }
+        return entryAdded;
     }
 }

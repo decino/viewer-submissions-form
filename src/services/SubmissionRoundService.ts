@@ -116,7 +116,8 @@ export class SubmissionRoundService implements OnInit {
                 active: false,
                 submissions: submissionsModels,
                 name: `Round #0${roundId}`,
-                createdAt: date
+                createdAt: date,
+                startDate: date
             });
         });
         return submissionRoundModelRepository.save(submissionRounds);
@@ -205,6 +206,7 @@ export class SubmissionRoundService implements OnInit {
             });
             if (currentlyActive) {
                 currentlyActive.active = false;
+                currentlyActive.startDate = new Date();
                 await submissionRepo.save(currentlyActive);
                 await submissionModelRepository.remove(invalidEntries);
                 return true;

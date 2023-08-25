@@ -93,7 +93,7 @@ export class CustomWadEngine {
         const entries = zip.getEntries();
         for (const entry of entries) {
             this.checkFileExt(entry.entryName, true);
-            if (this.isTxt(entry.entryName)) {
+            if (this.isExt(entry.entryName, "txt") || this.isExt(entry.entryName, "deh")) {
                 continue;
             }
             const buff = await this.getZipData(entry);
@@ -112,10 +112,10 @@ export class CustomWadEngine {
         });
     }
 
-    private isTxt(customWad: PlatformMulterFile | string): boolean {
+    private isExt(customWad: PlatformMulterFile | string, ext: string): boolean {
         const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
         const fileExt = fileName.split(".").pop() ?? "";
-        return fileExt.toLowerCase() === "txt";
+        return fileExt.toLowerCase() === ext;
     }
 
 }

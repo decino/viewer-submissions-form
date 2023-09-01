@@ -128,7 +128,7 @@ Site.loadPage(async function (site) {
             site.loading(true);
             wadNameInput.setAttribute("placeholder", "Attempting to obtain name from url...");
             wadNameInput.setAttribute("disabled", "true");
-            const proxyURl = new URL(`https://api.codetabs.com/v1/proxy?quest=${url}`);
+            const proxyURl = new URL(`${baseUrl}/utils/corsProxy?url=${url}`);
             let result;
             try {
                 result = await fetch(proxyURl);

@@ -11,6 +11,7 @@ enum GlobalEnv {
     ALLOWED_FILES = `${prefix}ALLOWED_FILES`,
     ALLOWED_FILES_ZIP = `${prefix}ALLOWED_FILES_ZIP`,
     ALLOWED_HEADERS = `${prefix}ALLOWED_HEADERS`,
+    ALLOWED_HEADERS_ZIP = `${prefix}ALLOWED_HEADERS_ZIP`,
     NODE_ENV = `${prefix}NODE_ENV`,
     BASE_URL = `${prefix}BASE_URL`,
     HELP_EMAIL = `${prefix}HELP_EMAIL`,

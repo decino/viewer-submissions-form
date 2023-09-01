@@ -1,9 +1,10 @@
-import {Constant, Injectable, ProviderScope} from "@tsed/di";
+import {Inject, Injectable, ProviderScope} from "@tsed/di";
 import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
-import GlobalEnv from "../model/constants/GlobalEnv";
 import {BadRequest} from "@tsed/exceptions";
 import AdmZip, {IZipEntry} from "adm-zip";
+import {SettingsService} from "../services/SettingsService";
+import SETTING from "../model/constants/Settings";
 
 export type CustomWadEntry = {
     content: Buffer,
@@ -16,14 +17,15 @@ export type CustomWadEntry = {
 export class CustomWadEngine {
     private readonly basePath = `${__dirname}/../../customWads`;
 
-    @Constant(GlobalEnv.ALLOWED_HEADERS)
-    private readonly allowedHeaders: string;
+    @Inject()
+    private readonly settingsService: SettingsService;
 
-    @Constant(GlobalEnv.ALLOWED_FILES)
-    private readonly allowedFiles: string;
+    // map of file extension to header BOM
+    private allowedFilesMap: Map<string, string | null> = new Map();
 
-    @Constant(GlobalEnv.ALLOWED_FILES_ZIP)
-    private readonly allowedFilesZip: string;
+    // map of file extension to header BOM for zips only
+    private allowedFilesZipMap: Map<string, string | null> = new Map();
+
 
     public async getWad(round: number, entryId: number): Promise<CustomWadEntry | null> {
         const files = await fs.promises.readdir(`${this.basePath}/${round}/${entryId}`);
@@ -37,6 +39,26 @@ export class CustomWadEngine {
         };
     }
 
+    public async getHeaderMapping(zip: boolean): Promise<Map<string, string | null>> {
+        let extensions: string | null;
+        if (zip) {
+            extensions = await this.settingsService.getSetting(SETTING.ALLOWED_FILES_ZIP);
+        } else {
+            extensions = await this.settingsService.getSetting(SETTING.ALLOWED_FILES);
+        }
+        if (!extensions) {
+            return new Map();
+        }
+        let headers: string | null;
+        if (zip) {
+            headers = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS_ZIP);
+        } else {
+            headers = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS);
+        }
+        return this.mapExtensions(extensions, headers);
+    }
+
+
     public async moveWad(entryId: number, customWad: PlatformMulterFile, round: number): Promise<void> {
         const newFolder = `${this.basePath}/${round}/${entryId}`;
         await fs.promises.mkdir(newFolder, {recursive: true});
@@ -44,13 +66,16 @@ export class CustomWadEngine {
     }
 
     public async validateFile(customWad: PlatformMulterFile): Promise<void> {
-        this.checkFileExt(customWad);
+        this.allowedFilesMap = await this.getHeaderMapping(false);
+        this.allowedFilesZipMap = await this.getHeaderMapping(true);
+
+        this.checkFileExt(customWad, false);
         const fileExt = customWad.originalname.split(".").pop() ?? "";
         if (fileExt === "zip") {
             await this.analyseZip(customWad);
         }
         const buffer = await fs.promises.readFile(customWad.path);
-        this.checkHeaders(buffer);
+        this.checkHeaders(buffer, false, fileExt);
     }
 
     public deleteCustomWad(entry: number, round: number): Promise<void>;
@@ -60,10 +85,36 @@ export class CustomWadEngine {
         return fs.promises.rm(toDelete, {recursive: true, force: true});
     }
 
-    private checkHeaders(buffer: Buffer, isZip = false): void {
-        const allowedHeaders = this.allowedHeaders;
-        if (!allowedHeaders) {
+    private mapExtensions(extensions: string, headers: string | null): Map<string, string | null> {
+        const retMap: Map<string, string | null> = new Map();
+        const extensionsArr = extensions.split(",").map(f => f.toLowerCase());
+        if (!headers) {
+            for (const extension of extensionsArr) {
+                retMap.set(extension, null);
+            }
+            return retMap;
+        }
+        const headersArr = headers.split(",");
+        for (let i = 0; i < extensionsArr.length; i++) {
+            const extension = extensionsArr[i];
+            let headerMapping: string | null = headersArr[i];
+            if (headerMapping === "null") {
+                headerMapping = null;
+            }
+            retMap.set(extension, headerMapping);
+        }
+        return retMap;
+    }
+
+    private checkHeaders(buffer: Buffer, isZip: boolean, ext: string): void {
+        // const allowedHeaders = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS);
+        const allowedHeaders = isZip ? this.allowedFilesZipMap.get(ext) : this.allowedFilesMap.get(ext);
+        if (allowedHeaders === null) {
+            // no mapping for header
             return;
+        } else if (allowedHeaders === undefined) {
+            // should never happen. this means the extension is not in the allowed files map
+            throw new BadRequest("Unable to map extension to an header BOM");
         }
         const header = buffer.toString("ascii", 0, 4);
         const allowedHeadersArr = allowedHeaders.split(",");
@@ -75,15 +126,17 @@ export class CustomWadEngine {
         }
     }
 
-    private checkFileExt(customWad: PlatformMulterFile | string, isZip = false): void {
+    private checkFileExt(customWad: PlatformMulterFile | string, isZip: boolean): void {
         const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
         const fileExt = fileName.split(".").pop()?.toLowerCase() ?? "";
-        const allowedFilesArr = isZip ? this.allowedFilesZip.split(",") : this.allowedFiles.split(",");
-        if (!allowedFilesArr.includes(fileExt)) {
+        const map = isZip ? this.allowedFilesZipMap : this.allowedFilesMap;
+        const allowedFilesArr = map.has(fileExt);
+        const allowedAllFiles = [...map.keys()];
+        if (!allowedFilesArr) {
             if (isZip) {
-                throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+                throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedAllFiles.join(", ")}`);
             }
-            throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedFilesArr.join(", ")}`);
+            throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedAllFiles.join(", ")}`);
         }
     }
 
@@ -93,11 +146,10 @@ export class CustomWadEngine {
         const entries = zip.getEntries();
         for (const entry of entries) {
             this.checkFileExt(entry.entryName, true);
-            if (this.isExt(entry.entryName, "txt") || this.isExt(entry.entryName, "deh")) {
-                continue;
-            }
+            const fileName = customWad.originalname;
+            const fileExt = fileName.split(".").pop() ?? "";
             const buff = await this.getZipData(entry);
-            this.checkHeaders(buff, true);
+            this.checkHeaders(buff, true, fileExt);
         }
     }
 
@@ -111,11 +163,4 @@ export class CustomWadEngine {
             });
         });
     }
-
-    private isExt(customWad: PlatformMulterFile | string, ext: string): boolean {
-        const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
-        const fileExt = fileName.split(".").pop() ?? "";
-        return fileExt.toLowerCase() === ext;
-    }
-
 }

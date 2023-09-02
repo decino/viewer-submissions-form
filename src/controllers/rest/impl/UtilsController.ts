@@ -14,9 +14,9 @@ export class UtilsController extends BaseRestController {
 
     @Get("/corsProxy")
     @Returns(StatusCodes.OK, String)
-    public corsProxy(@QueryParams("url") url: string): Promise<unknown> {
+    public async corsProxy(@QueryParams("url") url: string): Promise<unknown> {
         try {
-            return this.corsProxyService.getHtml(url);
+            return await this.corsProxyService.getHtml(url);
         } catch (e) {
             throw new BadRequest(e.message);
         }

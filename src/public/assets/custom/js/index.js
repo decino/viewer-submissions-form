@@ -133,13 +133,14 @@ Site.loadPage(async function (site) {
             try {
                 result = await fetch(proxyURl);
             } catch {
-                site.loading(false);
                 return;
             } finally {
                 wadNameInput.removeAttribute("placeholder");
                 wadNameInput.removeAttribute("disabled");
+                site.loading(false);
             }
             if (result.status !== 200) {
+                console.error(`Unable to load resource at ${url}`);
                 return;
             }
             const htmlText = await result.text();

@@ -65,13 +65,13 @@ export class CustomWadEngine {
         return fs.promises.rename(customWad.path, `${newFolder}/${customWad.originalname}`);
     }
 
-    public async validateFile(customWad: PlatformMulterFile): Promise<void> {
+    public async validateWad(customWad: PlatformMulterFile): Promise<void> {
         this.allowedFilesMap = await this.getHeaderMapping(false);
         this.allowedFilesZipMap = await this.getHeaderMapping(true);
 
         this.checkFileExt(customWad, false);
-        const fileExt = customWad.originalname.split(".").pop() ?? "";
-        if (fileExt === "zip") {
+        const fileExt = this.getFileExt(customWad);
+        if (fileExt === "ZIP") {
             await this.analyseZip(customWad);
         }
         const buffer = await fs.promises.readFile(customWad.path);
@@ -87,7 +87,7 @@ export class CustomWadEngine {
 
     private mapExtensions(extensions: string, headers: string | null): Map<string, string | null> {
         const retMap: Map<string, string | null> = new Map();
-        const extensionsArr = extensions.split(",").map(f => f.toLowerCase());
+        const extensionsArr = extensions.split(",").map(f => f.toUpperCase());
         if (!headers) {
             for (const extension of extensionsArr) {
                 retMap.set(extension, null);
@@ -107,7 +107,6 @@ export class CustomWadEngine {
     }
 
     private checkHeaders(buffer: Buffer, isZip: boolean, ext: string): void {
-        // const allowedHeaders = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS);
         const allowedHeaders = isZip ? this.allowedFilesZipMap.get(ext) : this.allowedFilesMap.get(ext);
         if (allowedHeaders === null) {
             // no mapping for header
@@ -127,8 +126,7 @@ export class CustomWadEngine {
     }
 
     private checkFileExt(customWad: PlatformMulterFile | string, isZip: boolean): void {
-        const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
-        const fileExt = fileName.split(".").pop()?.toLowerCase() ?? "";
+        const fileExt = this.getFileExt(customWad);
         const map = isZip ? this.allowedFilesZipMap : this.allowedFilesMap;
         const allowedFilesArr = map.has(fileExt);
         const allowedAllFiles = [...map.keys()];
@@ -140,14 +138,20 @@ export class CustomWadEngine {
         }
     }
 
+    private getFileExt(customWad: PlatformMulterFile | string): string {
+        const fileName = typeof customWad === "string" ? customWad : customWad.originalname;
+        const fileExt = fileName.split(".").pop()?.toLowerCase() ?? "";
+        return fileExt.toUpperCase();
+    }
+
     private async analyseZip(customWad: PlatformMulterFile): Promise<void> {
         const buffer = await fs.promises.readFile(customWad.path);
         const zip = new AdmZip(buffer);
         const entries = zip.getEntries();
         for (const entry of entries) {
             this.checkFileExt(entry.entryName, true);
-            const fileName = customWad.originalname;
-            const fileExt = fileName.split(".").pop() ?? "";
+            const fileName = entry.entryName;
+            const fileExt = this.getFileExt(fileName);
             const buff = await this.getZipData(entry);
             this.checkHeaders(buff, true, fileExt);
         }

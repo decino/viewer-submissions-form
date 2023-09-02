@@ -64,7 +64,7 @@ export class SubmissionService implements OnInit {
         }
         if (customWad) {
             try {
-                await this.customWadEngine.validateFile(customWad);
+                await this.customWadEngine.validateWad(customWad);
             } catch (e) {
                 await this.customWadEngine.deleteCustomWad(customWad);
                 throw e;

@@ -6,4 +6,5 @@ export * from "./BaseRestController";
 export * from "./impl/SubmissionController";
 export * from "./impl/SubmissionRoundController";
 export * from "./impl/SubmissionRoundResultController";
+export * from "./impl/UtilsController";
 export * from "./impl/security/PassportCtrl";

@@ -8,7 +8,7 @@ export class SettingsModel extends AbstractModel {
 
     @Column({
         nullable: false,
-        type: "integer",
+        type: "text",
         unique: true
     })
     @Name("setting")

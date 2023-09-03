@@ -39,7 +39,40 @@ export class CustomWadEngine {
         };
     }
 
-    public async getHeaderMapping(zip: boolean): Promise<Map<string, string | null>> {
+    public async moveWad(entryId: number, customWad: PlatformMulterFile, round: number): Promise<void> {
+        const newFolder = `${this.basePath}/${round}/${entryId}`;
+        await fs.promises.mkdir(newFolder, {recursive: true});
+        return fs.promises.rename(customWad.path, `${newFolder}/${customWad.originalname}`);
+    }
+
+    public async validateWad(customWad: PlatformMulterFile): Promise<void> {
+        const [filesMap, filesZipMap] = await this.getMappings();
+        this.allowedFilesMap = filesMap;
+        this.allowedFilesZipMap = filesZipMap;
+
+        this.checkFileExt(customWad, false);
+        const fileExt = this.getFileExt(customWad);
+        if (fileExt === "ZIP") {
+            await this.analyseZip(customWad);
+        }
+        const buffer = await fs.promises.readFile(customWad.path);
+        this.checkHeaders(buffer, false, fileExt);
+    }
+
+    public deleteCustomWad(entry: number, round: number): Promise<void>;
+    public deleteCustomWad(entry: PlatformMulterFile): Promise<void>;
+    public deleteCustomWad(entry: number | PlatformMulterFile, round?: number): Promise<void> {
+        const toDelete = typeof entry === "number" ? `${this.basePath}/${round}/${entry}` : entry.path;
+        return fs.promises.rm(toDelete, {recursive: true, force: true});
+    }
+
+    public async getMappings(): Promise<[Map<string, string | null>, Map<string, string | null>]> {
+        const mappings = await this.getHeaderMapping(false);
+        const zipMappings = await this.getHeaderMapping(true);
+        return [mappings, zipMappings];
+    }
+
+    private async getHeaderMapping(zip: boolean): Promise<Map<string, string | null>> {
         let extensions: string | null;
         if (zip) {
             extensions = await this.settingsService.getSetting(SETTING.ALLOWED_FILES_ZIP);
@@ -56,33 +89,6 @@ export class CustomWadEngine {
             headers = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS);
         }
         return this.mapExtensions(extensions, headers);
-    }
-
-
-    public async moveWad(entryId: number, customWad: PlatformMulterFile, round: number): Promise<void> {
-        const newFolder = `${this.basePath}/${round}/${entryId}`;
-        await fs.promises.mkdir(newFolder, {recursive: true});
-        return fs.promises.rename(customWad.path, `${newFolder}/${customWad.originalname}`);
-    }
-
-    public async validateWad(customWad: PlatformMulterFile): Promise<void> {
-        this.allowedFilesMap = await this.getHeaderMapping(false);
-        this.allowedFilesZipMap = await this.getHeaderMapping(true);
-
-        this.checkFileExt(customWad, false);
-        const fileExt = this.getFileExt(customWad);
-        if (fileExt === "ZIP") {
-            await this.analyseZip(customWad);
-        }
-        const buffer = await fs.promises.readFile(customWad.path);
-        this.checkHeaders(buffer, false, fileExt);
-    }
-
-    public deleteCustomWad(entry: number, round: number): Promise<void>;
-    public deleteCustomWad(entry: PlatformMulterFile): Promise<void>;
-    public deleteCustomWad(entry: number | PlatformMulterFile, round?: number): Promise<void> {
-        const toDelete = typeof entry === "number" ? `${this.basePath}/${round}/${entry}` : entry.path;
-        return fs.promises.rm(toDelete, {recursive: true, force: true});
     }
 
     private mapExtensions(extensions: string, headers: string | null): Map<string, string | null> {

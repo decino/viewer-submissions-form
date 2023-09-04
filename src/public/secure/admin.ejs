@@ -105,6 +105,9 @@
                     <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
                             data-bs-target="#changeDetailsModel">Change Details
                     </button>
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                            data-bs-target="#headerValidationModal">Validation settings
+                    </button>
                 </div>
             </div>
         </div>
@@ -396,6 +399,39 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary" id="newRoundModalOk">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="headerValidationModal" tabindex="-1" aria-labelledby="headerValidationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="headerValidationModalLabel">Define wad validation mappings</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="headerValidationModalInfoContent">
+                <div class="alert alert-primary" role="alert">
+                    <p>Use the control below to map file extensions to the header</p>
+                    <hr/>
+                    <p class="mb-0">You can leave the header mapping empty to skip header validation for that file type</p>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">File extension</span>
+                    <input type="text" aria-label="First name" class="form-control">
+                    <span class="input-group-text">file header(s)</span>
+                    <input type="text" aria-label="Last name" class="form-control">
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0 ml-2" type="checkbox" value="" aria-label="Checkbox for following text input">
+                        <span style="margin-left: 5px;">is zip</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="headerValidationModalOk">Submit</button>
             </div>
         </div>
     </div>

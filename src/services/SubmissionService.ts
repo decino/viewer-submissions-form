@@ -14,6 +14,7 @@ import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 import GlobalEnv from "../model/constants/GlobalEnv";
+import {WadValidationService} from "./WadValidationService";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -37,6 +38,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private logger: Logger;
+
+    @Inject()
+    private wadValidationService: WadValidationService;
 
     @Constant(GlobalEnv.HELP_EMAIL)
     private readonly helpEmail: string;
@@ -64,7 +68,7 @@ export class SubmissionService implements OnInit {
         }
         if (customWad) {
             try {
-                await this.customWadEngine.validateFile(customWad);
+                await this.wadValidationService.validateWad(customWad);
             } catch (e) {
                 await this.customWadEngine.deleteCustomWad(customWad);
                 throw e;
@@ -77,7 +81,7 @@ export class SubmissionService implements OnInit {
         if (customWad) {
             await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
         }
-        saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.submitterEmail, entry.id);
+        saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.id);
         return saveEntry;
     }
 

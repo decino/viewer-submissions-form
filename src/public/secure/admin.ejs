@@ -105,6 +105,9 @@
                     <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
                             data-bs-target="#changeDetailsModel">Change Details
                     </button>
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                            data-bs-target="#headerValidationModal">Validation settings
+                    </button>
                 </div>
             </div>
         </div>
@@ -402,6 +405,65 @@
 </div>
 
 
+<div class="modal fade" id="headerValidationModal" tabindex="-1" aria-labelledby="headerValidationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="headerValidationModalLabel">Define wad validation mappings</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="headerValidationModalInfoContent">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-primary" role="alert">
+                                <p>Use the control below to map file extensions to the header</p>
+                                <hr/>
+                                <p class="mb-0">You can leave the header mapping empty to skip header validation for that file type</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card-group mb-3">
+                            <div class="card border-primary">
+                                <div class="card-header">non-zip files</div>
+                                <div class="card-body text-primary">
+                                    <div id="customExtContent"></div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-success" type="button" id="addMapping">Add entry</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border-primary">
+                                <div class="card-header">zip files</div>
+                                <div class="card-body text-primary">
+                                    <div id="customExtContentZip"></div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-success" type="button" id="addMappingZip">Add entry</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="alert alert-danger w-100 hidden" id="headerValidationError" role="alert"></div>
+                <div class="alert alert-success w-100 hidden" id="headerValidationOk" role="alert">
+                    mappings have been saved successfully
+                </div>
+                <button type="button" class="btn btn-outline-primary" id="headerValidationModalOk">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal fade" id="changeDetailsModel" tabindex="-1" aria-labelledby="changeDetailsModelLabel"
      aria-hidden="true">
     <div class="modal-dialog">
@@ -445,6 +507,7 @@
         const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
         const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
         const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
+        const headerValidationModal = new bootstrap.Modal('#headerValidationModal');
         const dtMap = new Map();
         <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
@@ -497,6 +560,187 @@
 
         function loadEventListeners() {
             const changeDetailsModal = new bootstrap.Modal('#changeDetailsModel');
+
+
+            ((() => {
+                function getMappingHtml(extensions, headers, isZip) {
+                    let retHtml = ``;
+                    for (let i = 0; i < extensions.length; i++) {
+                        const extension = extensions[i];
+                        const header = headers[i];
+                        retHtml += `
+                            <div class="input-group m-3" style="width: auto;" data-zip="${isZip}">
+                                <span class="input-group-text">Extension</span>
+                                <button class="btn btn-outline-danger btn-sm removeMapping" type="button">Remove</button>
+                                <input type="text" aria-label="First name" class="form-control extensionInput" required value="${extension}">
+                                <span class="input-group-text">Header</span>
+                                <input type="text" aria-label="Last name" placeholder="null" class="form-control headerInput" ${header === null ? "" : `value="${header}"`} ${header === "PK\x03\x04" ? "disabled" : ""}>
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0 ml-2 isZipCheck"  type="checkbox" value="" aria-label="Checkbox for following text input" ${header === "PK\x03\x04" ? "checked" : ""}>
+                                    <span style="margin-left: 5px;">is zip</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return retHtml;
+                }
+
+                function getNewMapping(isZip) {
+                    return `
+                    <div class="input-group m-3" style="width: auto;" data-zip="${isZip}">
+                        <span class="input-group-text">Extension</span>
+                        <button class="btn btn-outline-danger btn-sm removeMapping" type="button">Remove</button>
+                        <input type="text" aria-label="First name" class="form-control extensionInput" required>
+                        <span class="input-group-text">Header</span>
+                        <input type="text" aria-label="Last name" placeholder="null" class="form-control headerInput">
+                        <div class="input-group-text">
+                            <input class="form-check-input mt-0 ml-2 isZipCheck"  type="checkbox" value="" aria-label="Checkbox for following text input">
+                            <span style="margin-left: 5px;">is zip</span>
+                        </div>
+                    </div>
+                    `;
+                }
+
+                function showValidationOk(show) {
+                    const errorAlert = document.getElementById("headerValidationError");
+                    const okAlert = document.getElementById("headerValidationOk");
+                    errorAlert.classList.add("hidden");
+                    errorAlert.innerText = null;
+                    if (show) {
+                        okAlert.classList.remove("hidden");
+                    } else {
+                        okAlert.classList.add("hidden");
+                    }
+                }
+
+                function showValidationError(txt, show) {
+                    const alert = document.getElementById("headerValidationError");
+                    const okAlert = document.getElementById("headerValidationOk");
+                    okAlert.classList.add("hidden");
+                    if (show) {
+                        alert.classList.remove("hidden");
+                        alert.innerText = txt;
+                    } else {
+                        alert.classList.add("hidden");
+                        alert.innerText = null;
+                    }
+
+                }
+
+                const extContentEl = document.getElementById("customExtContent");
+                const extContentZipEl = document.getElementById("customExtContentZip");
+
+                document.getElementById("headerValidationModal")?.addEventListener("shown.bs.modal", async () => {
+                    let resp;
+                    let wadValidationMapping;
+                    site.loading(true);
+                    extContentEl.innerHTML = null;
+                    extContentZipEl.innerHTML = null;
+                    try {
+                        resp = await fetch(`${baseUrl}/utils/wadValidation`, {
+                            method: "GET"
+                        });
+                        wadValidationMapping = await resp.json();
+                    } finally {
+                        site.loading(false);
+                    }
+                    if (resp.status !== 200) {
+                        alert(wadValidationMapping.message);
+                        return;
+                    }
+                    showValidationError(null, false);
+                    showValidationOk(false);
+                    wadValidationMapping.allowedHeaders = wadValidationMapping.allowedHeaders.map(header => header && decodeURIComponent(header));
+                    wadValidationMapping.allowedHeadersZip = wadValidationMapping.allowedHeadersZip.map(header => header && decodeURIComponent(header));
+
+                    extContentEl.innerHTML = getMappingHtml(wadValidationMapping.allowedExtensions, wadValidationMapping.allowedHeaders, false);
+                    extContentZipEl.innerHTML = getMappingHtml(wadValidationMapping.allowedExtensionsZip, wadValidationMapping.allowedHeadersZip, true);
+
+                    Array.from(document.getElementsByClassName("removeMapping")).forEach(value => {
+                        value.addEventListener("click", ev => {
+                            const {target} = ev;
+                            const container = target.closest(".input-group");
+                            container.remove();
+                        });
+                    });
+
+                    Array.from(document.getElementsByClassName("isZipCheck")).forEach(value => {
+                        value.addEventListener("change", ev => {
+                            const {target} = ev;
+                            const checked = target.checked;
+                            const input = target.closest(".input-group").querySelector(".headerInput");
+                            if (!checked) {
+                                input.disabled = false;
+                                input.value = null;
+                            } else {
+                                input.value = "PK\x03\x04";
+                                input.disabled = true;
+                            }
+                        });
+                    });
+                });
+
+                document.getElementById("addMapping")?.addEventListener("click", () => {
+                    extContentEl.insertAdjacentHTML("beforeend", getNewMapping(false));
+                });
+                document.getElementById("addMappingZip")?.addEventListener("click", () => {
+                    extContentZipEl.insertAdjacentHTML("beforeend", getNewMapping(true));
+                });
+
+                document.getElementById("headerValidationModalOk").addEventListener("click", async () => {
+                    showValidationError(null, false);
+                    showValidationOk(false);
+                    const obj = {
+                        allowedExtensions: [],
+                        allowedHeaders: [],
+                        allowedExtensionsZip: [],
+                        allowedHeadersZip: []
+                    };
+
+                    const inputGroups = Array.from(document.getElementById("headerValidationModalInfoContent").querySelectorAll(".input-group"));
+                    for (const inputGroup of inputGroups) {
+                        const extensionValue = inputGroup.querySelector(".extensionInput").value;
+                        let headerValue = inputGroup.querySelector(".headerInput").value;
+                        const isZip = inputGroup.dataset.zip === "true";
+                        if (!extensionValue) {
+                            showValidationError("Unable to have empty extension values", true);
+                            return;
+                        }
+                        if (!headerValue) {
+                            headerValue = null;
+                        } else {
+                            headerValue = encodeURIComponent(headerValue);
+                        }
+                        if (isZip) {
+                            obj.allowedExtensionsZip.push(extensionValue);
+                            obj.allowedHeadersZip.push(headerValue === "" ? null : headerValue);
+                        } else {
+                            obj.allowedExtensions.push(extensionValue);
+                            obj.allowedHeaders.push(headerValue === "" ? null : headerValue);
+                        }
+                    }
+
+                    site.loading(true);
+                    let setValidationResp;
+                    let json;
+                    try {
+                        setValidationResp = await fetch(`${baseUrl}/utils/wadValidation`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(obj)
+                        });
+                    } finally {
+                        site.loading(false);
+                    }
+                    if (setValidationResp.status !== 200) {
+                        json = await setValidationResp.json();
+                        showValidationError(json.message, true);
+                        return;
+                    }
+                    showValidationOk(true);
+                });
+            })());
             document.getElementById("changeDetailsModel").addEventListener("show.bs.modal", () => {
                 document.getElementById("changePassword").value = null;
                 document.getElementById("changePasswordRepeat").value = null;

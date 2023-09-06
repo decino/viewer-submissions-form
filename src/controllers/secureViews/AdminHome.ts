@@ -1,12 +1,12 @@
 import {Controller, Inject} from "@tsed/di";
 import {Get, Security, View} from "@tsed/schema";
-import {IndexDto} from "../../DTO/IndexDto";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
 import {Hidden} from "@tsed/swagger";
 import {Authorize} from "@tsed/passport";
 import {Req} from "@tsed/common";
 import {CustomUserInfoModel} from "../../model/auth/CustomUserInfoModel";
+import {AdminDto} from "../../DTO/AdminDto";
 
 @Controller("/")
 @Hidden()
@@ -27,7 +27,7 @@ export class AdminHome {
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         const user = req.user as CustomUserInfoModel;
         return {
-            indexModel: new IndexDto(currentActiveRound, previousRounds),
+            indexModel: new AdminDto(currentActiveRound, previousRounds),
             user
         };
     }

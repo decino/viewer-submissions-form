@@ -40,7 +40,9 @@ export class WadValidationService {
         const allowedHeadersZip = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS_ZIP);
 
         if (allowedHeaders) {
-            retVal.allowedHeaders = allowedHeaders.split(",").map(header => encodeURIComponent(header));
+            retVal.allowedHeaders = allowedHeaders.split(",")
+                .map(header => encodeURIComponent(header))
+                .map(ext => ext === "null" ? null : ext);
         }
         if (allowedFiles) {
             retVal.allowedExtensions = allowedFiles.split(",");
@@ -49,7 +51,9 @@ export class WadValidationService {
             retVal.allowedExtensionsZip = allowedFilesZip.split(",");
         }
         if (allowedHeadersZip) {
-            retVal.allowedHeadersZip = allowedHeadersZip.split(",").map(header => encodeURIComponent(header));
+            retVal.allowedHeadersZip = allowedHeadersZip.split(",")
+                .map(header => encodeURIComponent(header))
+                .map(ext => ext === "null" ? null : ext);
         }
         return retVal;
     }

@@ -10,8 +10,8 @@ import {BadRequest} from "@tsed/exceptions";
     if (allowedExtensionsZip.length !== allowedHeadersZip.length) {
         throw new BadRequest("Zip extensions and headers must contain equal entries");
     }
-    data.allowedHeaders = allowedHeaders.map(header => decodeURIComponent(header));
-    data.allowedHeadersZip = allowedHeadersZip.map(header => decodeURIComponent(header));
+    data.allowedHeaders = allowedHeaders.map(header => decodeURIComponent(header ?? "null"));
+    data.allowedHeadersZip = allowedHeadersZip.map(header => decodeURIComponent(header ?? "null"));
     return data;
 })
 export class WadValidationModel {
@@ -26,7 +26,7 @@ export class WadValidationModel {
     @Property()
     @CollectionOf(String)
     @Default([])
-    public allowedHeaders: string[] = [];
+    public allowedHeaders: (string | null)[] = [];
 
     @Required()
     @Property()
@@ -38,5 +38,5 @@ export class WadValidationModel {
     @Property()
     @CollectionOf(String)
     @Default([])
-    public allowedHeadersZip: string[] = [];
+    public allowedHeadersZip: (string | null)[] = [];
 }

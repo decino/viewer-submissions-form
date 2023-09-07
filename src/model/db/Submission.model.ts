@@ -8,6 +8,7 @@ import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.mod
 import process from "process";
 import xss from "xss";
 import {SubmissionStatusModel} from "./SubmissionStatus.model";
+import STATUS from "../constants/STATUS";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -205,6 +206,11 @@ export class SubmissionModel extends AbstractModel {
         if (this.submissionRound?.active || !this.isChosen) {
             return false;
         }
+
+        if (this.status.status !== STATUS.COMPLETED) {
+            return false;
+        }
+
         return !(this.submitterAuthor && !this.distributable);
     }
 

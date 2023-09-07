@@ -99,7 +99,7 @@ export class WadValidationService {
 
     private mapExtensions(extensions: string, headers: string | null): Map<string, string | null> {
         const retMap: Map<string, string | null> = new Map();
-        const extensionsArr = extensions.split(",").map(f => f.toUpperCase());
+        const extensionsArr = extensions.toUpperCase().split(",");
         if (!headers) {
             for (const extension of extensionsArr) {
                 retMap.set(extension, null);

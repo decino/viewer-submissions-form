@@ -628,6 +628,16 @@
 
                 }
 
+                function bindRemove() {
+                    Array.from(document.getElementsByClassName("removeMapping")).forEach(value => {
+                        value.addEventListener("click", ev => {
+                            const {target} = ev;
+                            const container = target.closest(".input-group");
+                            container.remove();
+                        });
+                    });
+                }
+
                 const extContentEl = document.getElementById("customExtContent");
                 const extContentZipEl = document.getElementById("customExtContentZip");
 
@@ -657,14 +667,7 @@
                     extContentEl.innerHTML = getMappingHtml(wadValidationMapping.allowedExtensions, wadValidationMapping.allowedHeaders, false);
                     extContentZipEl.innerHTML = getMappingHtml(wadValidationMapping.allowedExtensionsZip, wadValidationMapping.allowedHeadersZip, true);
 
-                    Array.from(document.getElementsByClassName("removeMapping")).forEach(value => {
-                        value.addEventListener("click", ev => {
-                            const {target} = ev;
-                            const container = target.closest(".input-group");
-                            container.remove();
-                        });
-                    });
-
+                    bindRemove();
                     Array.from(document.getElementsByClassName("isZipCheck")).forEach(value => {
                         value.addEventListener("change", ev => {
                             const {target} = ev;
@@ -683,9 +686,11 @@
 
                 document.getElementById("addMapping")?.addEventListener("click", () => {
                     extContentEl.insertAdjacentHTML("beforeend", getNewMapping(false));
+                    bindRemove();
                 });
                 document.getElementById("addMappingZip")?.addEventListener("click", () => {
                     extContentZipEl.insertAdjacentHTML("beforeend", getNewMapping(true));
+                    bindRemove();
                 });
 
                 document.getElementById("headerValidationModalOk").addEventListener("click", async () => {

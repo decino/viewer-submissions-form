@@ -638,6 +638,23 @@
                     });
                 }
 
+                function bindCheckbox() {
+                    Array.from(document.getElementsByClassName("isZipCheck")).forEach(value => {
+                        value.addEventListener("change", ev => {
+                            const {target} = ev;
+                            const checked = target.checked;
+                            const input = target.closest(".input-group").querySelector(".headerInput");
+                            if (!checked) {
+                                input.disabled = false;
+                                input.value = null;
+                            } else {
+                                input.value = "PK\x03\x04";
+                                input.disabled = true;
+                            }
+                        });
+                    });
+                }
+
                 const extContentEl = document.getElementById("customExtContent");
                 const extContentZipEl = document.getElementById("customExtContentZip");
 
@@ -668,29 +685,18 @@
                     extContentZipEl.innerHTML = getMappingHtml(wadValidationMapping.allowedExtensionsZip, wadValidationMapping.allowedHeadersZip, true);
 
                     bindRemove();
-                    Array.from(document.getElementsByClassName("isZipCheck")).forEach(value => {
-                        value.addEventListener("change", ev => {
-                            const {target} = ev;
-                            const checked = target.checked;
-                            const input = target.closest(".input-group").querySelector(".headerInput");
-                            if (!checked) {
-                                input.disabled = false;
-                                input.value = null;
-                            } else {
-                                input.value = "PK\x03\x04";
-                                input.disabled = true;
-                            }
-                        });
-                    });
+                    bindCheckbox();
                 });
 
                 document.getElementById("addMapping")?.addEventListener("click", () => {
                     extContentEl.insertAdjacentHTML("beforeend", getNewMapping(false));
                     bindRemove();
+                    bindCheckbox();
                 });
                 document.getElementById("addMappingZip")?.addEventListener("click", () => {
                     extContentZipEl.insertAdjacentHTML("beforeend", getNewMapping(true));
                     bindRemove();
+                    bindCheckbox();
                 });
 
                 document.getElementById("headerValidationModalOk").addEventListener("click", async () => {

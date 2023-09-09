@@ -2,7 +2,7 @@ import {Inject, Service} from "@tsed/di";
 import {WadValidationModel} from "../model/rest/wadValidationModel";
 import SETTING from "../model/constants/Settings";
 import {SettingsService} from "./SettingsService";
-import {PlatformMulterFile} from "@tsed/common";
+import {Logger, PlatformMulterFile} from "@tsed/common";
 import fs from "fs";
 import {BadRequest} from "@tsed/exceptions";
 import AdmZip, {IZipEntry} from "adm-zip";
@@ -12,6 +12,9 @@ export class WadValidationService {
 
     @Inject()
     private settingsService: SettingsService;
+
+    @Inject()
+    private logger: Logger;
 
     // map of file extension to header BOM
     private allowedFilesMap: Map<string, string | null> = new Map();
@@ -130,6 +133,7 @@ export class WadValidationService {
         const header = buffer.toString("ascii", 0, 4);
         const allowedHeadersArr = allowedHeaders.split(",");
         if (!allowedHeadersArr.includes(header)) {
+            this.logger.error(`validation failure: File uploaded declares itself as a ${ext}, but the header of the file is ${header}`);
             if (isZip) {
                 throw new BadRequest("Invalid file inside of ZIP: header mismatch.");
             }

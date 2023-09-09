@@ -80,6 +80,7 @@ export class SubmissionRoundService implements OnInit {
                     submitterEmail: `foo@example${index}.com`,
                     submitterName: submission.submitter,
                     submissionValid: true,
+                    verified: true
                 };
                 if (submission.chosen) {
                     const status = this.ds.manager.create(SubmissionStatusModel, {
@@ -133,7 +134,7 @@ export class SubmissionRoundService implements OnInit {
             return null;
         }
         if (filterInvalidEntries) {
-            found.submissions = found.submissions.filter(submission => submission.submissionValid);
+            found.submissions = found.submissions.filter(submission => submission.isSubmissionValid());
         }
         return found;
     }

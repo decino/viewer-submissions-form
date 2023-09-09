@@ -36,7 +36,7 @@ export class SubmissionRoundResultService {
             throw new BadRequest("There are no entries in this round!");
         }
         for (const entry of allEntries) {
-            if (!entry.submissionValid) {
+            if (!entry.isSubmissionValid()) {
                 // invalid entry? skip it
                 continue;
             }

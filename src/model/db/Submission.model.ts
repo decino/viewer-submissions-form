@@ -199,6 +199,15 @@ export class SubmissionModel extends AbstractModel {
     @Description("If this submission was picked for this round")
     public isChosen: boolean;
 
+    @Column({
+        nullable: false,
+        type: "boolean",
+        default: false
+    })
+    @Name("verified")
+    @Description("If submission is verified")
+    public verified: boolean;
+
     public downloadable(admin = false): boolean {
         if (admin) {
             return true;
@@ -230,6 +239,10 @@ export class SubmissionModel extends AbstractModel {
 
     public getGzActionAsString(): string[] {
         return this.gzDoomActions?.map(action => GZDOOM_ACTIONS[action]) ?? [];
+    }
+
+    public isSubmissionValid(): boolean {
+        return this.verified && this.submissionValid;
     }
 
     @BeforeInsert()

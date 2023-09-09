@@ -241,7 +241,7 @@ export class SubmissionModel extends AbstractModel {
         return this.gzDoomActions?.map(action => GZDOOM_ACTIONS[action]) ?? [];
     }
 
-    public isSubmissionValid(): boolean {
+    public isSubmissionValidAndVerified(): boolean {
         return this.verified && this.submissionValid;
     }
 

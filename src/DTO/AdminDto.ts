@@ -14,6 +14,6 @@ export class AdminDto extends IndexDto {
     }
 
     public get submissions(): SubmissionModel[] {
-        return this.currentActiveRound!.submissions.filter(submission => submission.isSubmissionValid());
+        return this.currentActiveRound!.submissions.filter(submission => submission.isSubmissionValidAndVerified());
     }
 }

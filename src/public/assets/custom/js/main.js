@@ -3,6 +3,8 @@ const Site = (function () {
     let isInit = false;
     const socket = io(`${mainRul}/submission`, {path: '/socket.io/submission/'});
 
+    let uploadAbortController = null;
+
     const loading = function loading(show) {
         const loader = document.getElementById("loader");
         const overlay = document.getElementById("overlay");
@@ -13,6 +15,13 @@ const Site = (function () {
             overlay.classList.add("hidden");
             loader.classList.add("hidden");
         }
+    };
+
+    window.abortUpload = function abortUpload() {
+        if (!uploadAbortController) {
+            return;
+        }
+        uploadAbortController.abort("Unable to upload file. reCAPTCHA has expired while upload was in progress. please email this submission directly");
     };
 
     const submitEntryForm = async function submitEntryForm(ev, endpoint, urlEncoded = false) {
@@ -37,14 +46,22 @@ const Site = (function () {
 
         const formData = serialiseForm(urlEncoded);
         formData.append("g-recaptcha-response", reCAPTCHAResponse);
+
+        uploadAbortController = new AbortController();
+        const signal = uploadAbortController.signal;
         Site.loading(true);
         let response;
         try {
             response = await fetch(`${baseUrl}/submission/${endpoint}`, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                signal
             });
         } catch (e) {
+            if (e instanceof DOMException && uploadAbortController.signal.aborted) {
+                showError(uploadAbortController.signal.reason);
+                return;
+            }
             showError(e.message);
             return false;
         } finally {
@@ -59,6 +76,7 @@ const Site = (function () {
             return false;
         }
         showSuccess();
+        uploadAbortController = null;
         return true;
     };
 
@@ -214,6 +232,6 @@ const Site = (function () {
         showError,
         onEntry,
         onDelete,
-        initPRevSubmissionToggle
+        initPRevSubmissionToggle,
     };
 }());

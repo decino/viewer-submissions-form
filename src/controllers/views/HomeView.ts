@@ -31,6 +31,12 @@ export class HomeView {
         };
     }
 
+    @Get("/tos")
+    @View("tos.ejs")
+    public showTos(): unknown {
+        return null;
+    }
+
 
     @Get("/login")
     @View("login.ejs")

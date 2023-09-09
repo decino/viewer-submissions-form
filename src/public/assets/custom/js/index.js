@@ -65,8 +65,14 @@ Site.loadPage(async function (site) {
             select.innerHTML = null;
             const input = document.getElementById("levelToPlay");
             if (ext === "wad") {
-                const wadMapAnalyser = await WadMapAnalyser.create(file);
-                const maps = wadMapAnalyser.mapNames;
+                let wadMapAnalyser;
+                let maps = [];
+                try {
+                    wadMapAnalyser = await WadMapAnalyser.create(file);
+                    maps = wadMapAnalyser.mapNames;
+                } catch (e) {
+                    console.error(e);
+                }
                 if (!maps || maps.length === 0) {
                     select.classList.add("hidden");
                     input.classList.remove("hidden");

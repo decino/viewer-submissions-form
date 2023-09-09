@@ -255,12 +255,16 @@ class WadMapAnalyser extends WadReader {
     static create(file) {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             reader.onloadend = (event) => {
                 if (event.target.readyState === FileReader.DONE) {
                     const data = event.target.result;
                     WadMapAnalyser.#isInternalConstructing = true;
-                    resolve(new WadMapAnalyser(new DataView(data)));
+                    try {
+                        resolve(new WadMapAnalyser(new DataView(data)));
+                    } catch (e) {
+                        reject(e);
+                    }
                 }
             };
         });

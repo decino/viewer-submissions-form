@@ -134,7 +134,7 @@ export class SubmissionRoundService implements OnInit {
             return null;
         }
         if (filterInvalidEntries) {
-            found.submissions = found.submissions.filter(submission => submission.isSubmissionValid());
+            found.submissions = found.submissions.filter(submission => submission.isSubmissionValidAndVerified());
         }
         return found;
     }

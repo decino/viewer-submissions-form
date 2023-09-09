@@ -12,6 +12,7 @@ import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 import {Authorize} from "@tsed/passport";
 import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/ReCAPTCHAMiddleWare";
 import {SubmissionStatusModel} from "../../../model/db/SubmissionStatus.model";
+import {SubmissionConfirmationService} from "../../../services/SubmissionConfirmationService";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -21,6 +22,9 @@ export class SubmissionController extends BaseRestController {
 
     @Inject()
     private customWadEngine: CustomWadEngine;
+
+    @Inject()
+    private submissionConfirmationService: SubmissionConfirmationService;
 
     @Post("/addEntry")
     @UseBefore(ReCAPTCHAMiddleWare)
@@ -93,6 +97,15 @@ export class SubmissionController extends BaseRestController {
         res.attachment(entry.customWadFileName as string);
         res.contentType("application/octet-stream");
         return wad.content;
+    }
+
+    @Post("/verifyEntries")
+    @Authorize("login")
+    @Security("login")
+    @Returns(StatusCodes.OK, SuccessModel)
+    public async verifyEntries(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
+        await this.submissionConfirmationService.verifySubmissions(ids);
+        return super.doSuccess(res, `Entries have been deleted.`);
     }
 
     @Delete("/deleteEntries")

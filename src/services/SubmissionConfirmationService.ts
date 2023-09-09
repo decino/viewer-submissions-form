@@ -1,10 +1,9 @@
 import {Constant, Inject, OnInit, Service} from "@tsed/di";
 import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource} from "typeorm";
+import {DataSource, In} from "typeorm";
 import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
-import {NotFound} from "@tsed/exceptions";
+import {BadRequest, NotFound} from "@tsed/exceptions";
 import {SubmissionModel} from "../model/db/Submission.model";
-import {Logger} from "@tsed/common";
 import {EmailService} from "./EmailService";
 import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
@@ -18,9 +17,6 @@ export class SubmissionConfirmationService implements OnInit {
     private ds: DataSource;
 
     @Inject()
-    private logger: Logger;
-
-    @Inject()
     private emailService: EmailService;
 
     @Inject()
@@ -32,7 +28,7 @@ export class SubmissionConfirmationService implements OnInit {
     @Constant(GlobalEnv.BASE_URL)
     private readonly baseUrl: string;
 
-    public processConfirmation(confirmationUid: string): Promise<void> {
+    public processConfirmation(confirmationUid: string): Promise<SubmissionModel> {
         return this.ds.manager.transaction(async entityManager => {
             const confirmationModelRepository = entityManager.getRepository(PendingEntryConfirmationModel);
             const submissionModelRepository = entityManager.getRepository(SubmissionModel);
@@ -50,10 +46,32 @@ export class SubmissionConfirmationService implements OnInit {
             await submissionModelRepository.save(submission);
             await confirmationModelRepository.remove(confirmationEntry);
             return submission;
-        }).then(submission => {
-            this.submissionSocket.emitSubmission(submission);
-            this.discordBotDispatcherService.dispatch(submission);
         });
+    }
+
+    public async verifySubmissions(ids: number[]): Promise<void> {
+        const submissionModelRepository = this.ds.getRepository(SubmissionModel);
+        const entries = await submissionModelRepository.find({
+            where: {
+                id: In(ids),
+                submissionValid: true,
+                verified: false
+            },
+            relations: ["submissionRound"]
+        });
+        if (!entries || entries.length === 0) {
+            throw new BadRequest(`No submissions with ids ${ids.join(", ")} found that need verification`);
+        }
+        for (const entry of entries) {
+            entry.verified = true;
+        }
+        await submissionModelRepository.save(entries);
+        for (const entry of entries) {
+            this.submissionSocket.emitSubmission(entry);
+
+            // ignore promise
+            this.discordBotDispatcherService.dispatch(entry);
+        }
     }
 
 

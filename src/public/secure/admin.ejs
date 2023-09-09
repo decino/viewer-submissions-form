@@ -60,11 +60,28 @@
             </div>
             <div class="row mt-5">
                 <div class="col-md-12">
+                    <div class="card border-primary mb-3 ml-3" id="validationSubmissionsPanel">
+                        <div class="card-header">Submissions requiring verification</div>
+                        <div class="card-body">
+                            <div class="card-body">
+                                <%- include('../snippets/SubmissionsTable.ejs', {
+                                submissions: indexModel.unverifiedSubmissions,
+                                isPReviousResults: true,
+                                isAdmin: true,
+                                isResults: false
+                                }); %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-12">
                     <div class="card border-primary mb-3 ml-3" id="currentSubmissionsPanel">
                         <div class="card-header">Current submissions</div>
                         <div class="card-body">
                             <%- include('../snippets/SubmissionsTable.ejs', {
-                            submissions: indexModel.currentActiveRound.submissions,
+                            submissions: indexModel.submissions,
                             isPReviousResults: true,
                             isAdmin: true,
                             isResults: false
@@ -1299,8 +1316,9 @@
 
             $('.submissionsTable').each(function () {
                 const el = $(this);
+                const isValidationTable = el[0].closest("#validationSubmissionsPanel") !== null;
                 let ds = el[0].dataset.isresults === "true";
-                if (el[0].closest("#currentSubmissionsPanel") !== null) {
+                if (el[0].closest("#currentSubmissionsPanel") !== null || isValidationTable) {
                     ds = true;
                 }
                 const isPreviousRoundCard = el.closest(".preRoundCard").length > 0;
@@ -1485,6 +1503,48 @@
                                 setYoutubeLinkModal.show();
                             }
                         });
+                }
+                if (isValidationTable) {
+                    buttons.push(
+                        {
+                            extend: 'selected',
+                            text: 'Verify',
+                            action: async (e, dt) => {
+                                const confirm = window.confirm("Are you sure you wish to verify these entries?");
+                                if (!confirm) {
+                                    return;
+                                }
+                                const idArr = [];
+                                dt.rows({selected: true}).every(function () {
+                                    const data = this.data();
+                                    idArr.push(data[0]);
+                                });
+                                site.loading(true);
+                                let response;
+                                try {
+                                    response = await fetch(`${baseUrl}/submission/verifyEntries`, {
+                                        method: "POST",
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(idArr)
+                                    });
+                                } catch (e) {
+                                    alert(e.message);
+                                    return;
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const responseStatus = response.status;
+                                const responseJson = await response.json();
+                                if (responseStatus !== 200) {
+                                    return alert(responseJson.message);
+                                }
+                                window.location.reload();
+                            }
+                        }
+                    )
                 }
                 dtOpts["buttons"] = buttons;
                 const table = new DataTable(el, dtOpts);

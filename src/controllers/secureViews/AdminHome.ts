@@ -23,7 +23,7 @@ export class AdminHome {
     @Security("login")
     @View("/secure/admin.ejs")
     public async showAdmin(@Req() req: Req): Promise<unknown> {
-        const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         const user = req.user as CustomUserInfoModel;
         return {

@@ -7,7 +7,8 @@ import GlobalEnv from "../model/constants/GlobalEnv";
 type SubmissionPayload = {
     wadName: string,
     wadLevel: string,
-    info: string | null
+    submissionRound: string,
+    info: string | null,
 }
 
 @Service()
@@ -29,7 +30,8 @@ export class DiscordBotDispatcherService implements OnInit {
         const payload: SubmissionPayload = {
             wadName: entry.wadName,
             info: entry.info,
-            wadLevel: entry.wadLevel
+            wadLevel: entry.wadLevel,
+            submissionRound: entry.submissionRound!.name
         };
 
         let response: Response;

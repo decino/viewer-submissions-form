@@ -2,13 +2,13 @@ import {Inject, Service} from "@tsed/di";
 import {WadValidationModel} from "../model/rest/wadValidationModel";
 import SETTING from "../model/constants/Settings";
 import {SettingsService} from "./SettingsService";
-import {Logger, PlatformMulterFile} from "@tsed/common";
+import {AfterInit, Logger, PlatformMulterFile} from "@tsed/common";
 import fs from "fs";
 import {BadRequest} from "@tsed/exceptions";
 import AdmZip, {IZipEntry} from "adm-zip";
 
 @Service()
-export class WadValidationService {
+export class WadValidationService implements AfterInit {
 
     @Inject()
     private settingsService: SettingsService;
@@ -22,6 +22,11 @@ export class WadValidationService {
     // map of file extension to header BOM for zips only
     private allowedFilesZipMap: Map<string, string | null> = new Map();
 
+    public async $afterInit(): Promise<void> {
+        this.logger.info("Loading wad validation settings...");
+        await this.loadMappings();
+    }
+
     public async setValidation(model: WadValidationModel): Promise<void> {
         const {allowedExtensionsZip, allowedHeadersZip, allowedHeaders, allowedExtensions} = model;
         const allowedHeadersStr = allowedHeaders.join(",");
@@ -32,6 +37,7 @@ export class WadValidationService {
         await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_HEADERS, allowedHeadersStr);
         await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_FILES_ZIP, allowedZipExtensions);
         await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_HEADERS_ZIP, allowedZipHeaders);
+        await this.loadMappings();
     }
 
     public async getValidationMappings(): Promise<WadValidationModel> {
@@ -62,14 +68,11 @@ export class WadValidationService {
     }
 
     public async validateWad(customWad: PlatformMulterFile): Promise<void> {
-        const [filesMap, filesZipMap] = await this.getMappings();
 
         // no validation defined
-        if (filesMap.size === 0 && filesZipMap.size === 0) {
+        if (this.allowedFilesMap.size === 0 && this.allowedFilesZipMap.size === 0) {
             return;
         }
-        this.allowedFilesMap = filesMap;
-        this.allowedFilesZipMap = filesZipMap;
 
         this.checkFileExt(customWad, false);
         const fileExt = this.getFileExt(customWad);
@@ -78,6 +81,12 @@ export class WadValidationService {
         }
         const buffer = await fs.promises.readFile(customWad.path);
         this.checkHeaders(buffer, false, fileExt);
+    }
+
+    private async loadMappings(): Promise<void> {
+        const [filesMap, filesZipMap] = await this.getMappings();
+        this.allowedFilesMap = filesMap;
+        this.allowedFilesZipMap = filesZipMap;
     }
 
     private async getMappings(): Promise<[Map<string, string | null>, Map<string, string | null>]> {

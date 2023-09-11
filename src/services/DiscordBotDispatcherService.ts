@@ -8,6 +8,7 @@ type SubmissionPayload = {
     wadName: string,
     wadLevel: string,
     submissionRound: string,
+    timeStamp: number,
     info: string | null,
 }
 
@@ -31,6 +32,7 @@ export class DiscordBotDispatcherService implements OnInit {
             wadName: entry.wadName,
             info: entry.info,
             wadLevel: entry.wadLevel,
+            timeStamp: entry.createdAt.getTime(),
             submissionRound: entry.submissionRound!.name
         };
 

@@ -243,35 +243,34 @@ export class SubmissionService implements OnInit {
         return parsedInt.toString();
     }
 
-    private scanDb(): Promise<unknown> {
+    private async scanDb(): Promise<unknown> {
         const submissionModelRepository = this.ds.getRepository(SubmissionModel);
-        return submissionModelRepository.find({
+        const entries = await submissionModelRepository.find({
             where: {
                 submissionValid: false
             },
             relations: ["confirmation"]
-        }).then(entries => {
-            if (!entries || entries.length === 0) {
-                return;
-            }
-            const twentyMins = 1200000;
-            const now = Date.now();
-            const entriesToDelete: SubmissionModel [] = [];
-            for (const entry of entries) {
-                const createdAt = entry?.confirmation?.createdAt?.getTime() ?? null;
-                if (createdAt === null) {
-                    continue;
-                }
-                if (now - createdAt > twentyMins) {
-                    entriesToDelete.push(entry);
-                }
-            }
-            if (entriesToDelete.length === 0) {
-                return;
-            }
-            this.logger.info(`Found ${entriesToDelete.length} pending submissions that have expired. Deleting...`);
-            const entryIds = entriesToDelete.map(entry => entry.id);
-            return this.deleteEntries(entryIds);
         });
+        if (!entries || entries.length === 0) {
+            return;
+        }
+        const twentyMins = 1200000;
+        const now = Date.now();
+        const entriesToDelete: SubmissionModel[] = [];
+        for (const entry of entries) {
+            const createdAt = entry?.confirmation?.createdAt?.getTime() ?? null;
+            if (createdAt === null) {
+                continue;
+            }
+            if (now - createdAt > twentyMins) {
+                entriesToDelete.push(entry);
+            }
+        }
+        if (entriesToDelete.length === 0) {
+            return;
+        }
+        this.logger.info(`Found ${entriesToDelete.length} pending submissions that have expired. Deleting...`);
+        const entryIds = entriesToDelete.map(entry_1 => entry_1.id);
+        return this.deleteEntries(entryIds);
     }
 }

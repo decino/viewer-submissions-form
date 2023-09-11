@@ -157,8 +157,8 @@ export class WadValidationService {
             return;
         }
         const allowedFilesArr = map.has(fileExt);
-        const allowedAllFiles = [...map.keys()];
         if (!allowedFilesArr) {
+            const allowedAllFiles = [...map.keys()];
             if (isZip) {
                 throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedAllFiles.join(", ")}`);
             }

@@ -59,16 +59,16 @@ const opts: Partial<TsED.Configuration> = {
         ]
     },
     statics: {
-        "/": [
+        "/assets": [
             {
-                root: `${__dirname}/public`
+                root: `${__dirname}/public/assets`
             }
         ],
-        "/secure": [
+        "/tos": [
             {
-                root: `${__dirname}/public`
+                root: `${__dirname}/public/tos.html`
             }
-        ]
+        ],
     },
     socketIO: {
         cors: {
@@ -96,6 +96,7 @@ const opts: Partial<TsED.Configuration> = {
     ],
     views: {
         root: `${__dirname}/public`,
+        viewEngine: "ejs",
         extensions: {
             ejs: "ejs"
         },

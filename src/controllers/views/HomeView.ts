@@ -2,7 +2,7 @@ import {Get, View} from "@tsed/schema";
 import {Controller, Inject} from "@tsed/di";
 import {SubmissionRoundService} from "../../services/SubmissionRoundService";
 import {SubmissionConfirmationService} from "../../services/SubmissionConfirmationService";
-import {PlatformResponse, QueryParams, Req, Res} from "@tsed/common";
+import {QueryParams, Req, Res} from "@tsed/common";
 import {NotFound} from "@tsed/exceptions";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
 import {IndexDto} from "../../DTO/IndexDto";
@@ -31,12 +31,6 @@ export class HomeView {
         };
     }
 
-    @Get("/tos")
-    @View("tos.ejs")
-    public showTos(): unknown {
-        return null;
-    }
-
 
     @Get("/login")
     @View("login.ejs")
@@ -49,7 +43,7 @@ export class HomeView {
 
     @Get("/processSubmission")
     @View("submissionSuccessful.ejs")
-    public async createRound(@Res() res: PlatformResponse, @QueryParams("uid") uid: string): Promise<unknown> {
+    public async createRound(@QueryParams("uid") uid: string): Promise<unknown> {
         const retStre = {
             message: "Your submission has been submitted and is awaiting manual verification. It will show as soon as it is verified.",
             success: true

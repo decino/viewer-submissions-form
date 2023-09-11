@@ -63,6 +63,11 @@ export class WadValidationService {
 
     public async validateWad(customWad: PlatformMulterFile): Promise<void> {
         const [filesMap, filesZipMap] = await this.getMappings();
+
+        // no validation defined
+        if (filesMap.size === 0 && filesZipMap.size === 0) {
+            return;
+        }
         this.allowedFilesMap = filesMap;
         this.allowedFilesZipMap = filesZipMap;
 
@@ -122,7 +127,11 @@ export class WadValidationService {
     }
 
     private checkHeaders(buffer: Buffer, isZip: boolean, ext: string): void {
-        const allowedHeaders = isZip ? this.allowedFilesZipMap.get(ext) : this.allowedFilesMap.get(ext);
+        const map = isZip ? this.allowedFilesZipMap : this.allowedFilesMap;
+        if (map.size === 0) {
+            return;
+        }
+        const allowedHeaders = isZip ? map.get(ext) : map.get(ext);
         if (allowedHeaders === null) {
             // no mapping for header
             return;
@@ -144,6 +153,9 @@ export class WadValidationService {
     private checkFileExt(customWad: PlatformMulterFile | string, isZip: boolean): void {
         const fileExt = this.getFileExt(customWad);
         const map = isZip ? this.allowedFilesZipMap : this.allowedFilesMap;
+        if (map.size === 0) {
+            return;
+        }
         const allowedFilesArr = map.has(fileExt);
         const allowedAllFiles = [...map.keys()];
         if (!allowedFilesArr) {

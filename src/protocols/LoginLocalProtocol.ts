@@ -22,11 +22,11 @@ export class LoginLocalProtocol implements OnVerify {
     @Inject()
     private usersService: UsersService;
 
-    public async $onVerify(@Req() request: Req, @BodyParams() credentials: UserModel): Promise<UserModel | null> {
+    public async $onVerify(@Req() request: Req, @BodyParams() credentials: UserModel): Promise<UserModel | false> {
         const {email, password} = credentials;
         const user = await this.usersService.getUser(email, password);
         if (!user) {
-            throw new Unauthorized("Wrong credentials.");
+            return false;
         }
         return user;
     }

@@ -2,6 +2,7 @@ import {Configuration, Constant, Inject} from "@tsed/di";
 import {BeforeRoutesInit, PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
+import "@tsed/socketio";
 import {config} from "./config";
 import * as rest from "./controllers/rest/index";
 import * as views from "./controllers/views/index";

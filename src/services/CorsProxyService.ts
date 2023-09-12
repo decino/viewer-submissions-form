@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 export class CorsProxyService {
     public async getHtml(url: string): Promise<string> {
         const response = await fetch(url, {
-            method: "POST"
+            method: "GET"
         });
         if (!response.ok) {
             throw new Error(`Unable to get response ${response.statusText}`);

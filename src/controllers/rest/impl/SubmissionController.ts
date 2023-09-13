@@ -109,7 +109,7 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Delete("/deleteEntries")
-    @Authorize("login")
+    @Authorize(["login", "basic"])
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)

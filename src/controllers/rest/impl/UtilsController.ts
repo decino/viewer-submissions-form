@@ -30,7 +30,7 @@ export class UtilsController extends BaseRestController {
     }
 
     @Get("/wadValidation")
-    @Authorize(["login", "basic"])
+    @Authorize(["login"])
     @Security("login")
     @Returns(StatusCodes.OK, WadValidationModel)
     public async getWadValidation(): Promise<WadValidationModel> {

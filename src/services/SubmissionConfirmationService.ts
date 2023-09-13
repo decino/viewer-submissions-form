@@ -70,7 +70,7 @@ export class SubmissionConfirmationService implements OnInit {
             this.submissionSocket.emitSubmission(entry);
 
             // ignore promise
-            this.discordBotDispatcherService.dispatch(entry);
+            this.discordBotDispatcherService.sendNewSubmission(entry);
         }
     }
 

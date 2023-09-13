@@ -6,14 +6,22 @@ export class AdminDto extends IndexDto {
     public constructor(currentActiveRound: SubmissionRoundModel | null,
                        previousRounds: SubmissionRoundModel[]) {
         super(currentActiveRound, previousRounds);
-        this.currentActiveRound!.submissions = this.currentActiveRound!.submissions.filter(submission => submission.submissionValid);
+        if (this.currentActiveRound) {
+            this.currentActiveRound.submissions = this.currentActiveRound.submissions.filter(submission => submission.submissionValid);
+        }
     }
 
     public get unverifiedSubmissions(): SubmissionModel[] {
-        return this.currentActiveRound!.submissions.filter(submission => submission.submissionValid && !submission.verified);
+        if (!this.currentActiveRound) {
+            return [];
+        }
+        return this.currentActiveRound.submissions.filter(submission => submission.submissionValid && !submission.verified);
     }
 
     public get submissions(): SubmissionModel[] {
-        return this.currentActiveRound!.submissions.filter(submission => submission.isSubmissionValidAndVerified());
+        if (!this.currentActiveRound) {
+            return [];
+        }
+        return this.currentActiveRound.submissions.filter(submission => submission.isSubmissionValidAndVerified());
     }
 }

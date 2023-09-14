@@ -100,7 +100,7 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Post("/verifyEntries")
-    @Authorize("login")
+    @Authorize(["login", "basic"])
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     public async verifyEntries(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {

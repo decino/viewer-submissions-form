@@ -46,6 +46,9 @@ export class SubmissionConfirmationService implements OnInit {
             await submissionModelRepository.save(submission);
             await confirmationModelRepository.remove(confirmationEntry);
             return submission;
+        }).then(submission => {
+            this.discordBotDispatcherService.sendPendingSubmission(submission);
+            return submission;
         });
     }
 
@@ -70,7 +73,7 @@ export class SubmissionConfirmationService implements OnInit {
             this.submissionSocket.emitSubmission(entry);
 
             // ignore promise
-            this.discordBotDispatcherService.dispatch(entry);
+            this.discordBotDispatcherService.sendNewSubmission(entry);
         }
     }
 

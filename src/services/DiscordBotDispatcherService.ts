@@ -12,6 +12,14 @@ type SubmissionPayload = {
     info: string | null,
 }
 
+type PendingValidationPayload = {
+    wadName: string,
+    email: string,
+    submitterName: string | null,
+    info: string | null,
+    id: number
+}
+
 @Service()
 export class DiscordBotDispatcherService implements OnInit {
 
@@ -24,10 +32,27 @@ export class DiscordBotDispatcherService implements OnInit {
     private logger: Logger;
 
     public $onInit(): void {
-        this.dispatchAddress = `${this.botUri}/bot/postSubmission`;
+        this.dispatchAddress = `${this.botUri}/bot`;
     }
 
-    public async dispatch(entry: SubmissionModel): Promise<void> {
+    public async sendPendingSubmission(submission: SubmissionModel): Promise<void> {
+        const payload: PendingValidationPayload = {
+            wadName: submission.wadName,
+            email: submission.submitterEmail,
+            submitterName: submission.submitterName,
+            info: submission.info,
+            id: submission.id
+        };
+
+        try {
+            await this.doPost("postPendingValidationRequest", payload);
+        } catch (e) {
+            this.logger.warn(`Unable to send entry to bot.`, e.message);
+        }
+
+    }
+
+    public async sendNewSubmission(entry: SubmissionModel): Promise<void> {
         const payload: SubmissionPayload = {
             wadName: entry.wadName,
             info: entry.info,
@@ -36,9 +61,17 @@ export class DiscordBotDispatcherService implements OnInit {
             submissionRound: entry.submissionRound!.name
         };
 
+        try {
+            await this.doPost("postSubmission", payload);
+        } catch (e) {
+            this.logger.warn(`Unable to send entry to bot.`, e.message);
+        }
+    }
+
+    private async doPost(endpoint: string, payload: unknown): Promise<Record<string, unknown>> {
         let response: Response;
         try {
-            response = await fetch(this.dispatchAddress, {
+            response = await fetch(`${this.dispatchAddress}/${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -48,12 +81,12 @@ export class DiscordBotDispatcherService implements OnInit {
             });
         } catch (e) {
             this.logger.warn(`Unable to send entry to bot.`, e);
-            return;
+            throw e;
         }
+        const json = await response.json();
         if (!response.ok) {
-            const json = await response.json();
-            this.logger.warn(`Bot response error :${json.error}\ninfo:${json.message}`);
-            return;
+            throw new Error(`Bot response error :${json.error}\ninfo:${json.message}`);
         }
+        return json;
     }
 }

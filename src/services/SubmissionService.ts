@@ -199,7 +199,7 @@ export class SubmissionService implements OnInit {
             'cleanOldEntries',
             () => this.scanDb() as Promise<void>
         );
-        const job = new SimpleIntervalJob({minutes: 1,}, task);
+        const job = new SimpleIntervalJob({minutes: 1}, task);
         this.scheduler.addSimpleIntervalJob(job);
     }
 

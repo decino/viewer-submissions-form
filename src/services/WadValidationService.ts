@@ -140,7 +140,7 @@ export class WadValidationService implements AfterInit {
         if (map.size === 0) {
             return;
         }
-        const allowedHeaders = isZip ? map.get(ext) : map.get(ext);
+        const allowedHeaders = map.get(ext);
         if (allowedHeaders === null) {
             // no mapping for header
             return;
@@ -186,8 +186,8 @@ export class WadValidationService implements AfterInit {
         const zip = new AdmZip(buffer);
         const entries = zip.getEntries();
         for (const entry of entries) {
-            this.checkFileExt(entry.entryName, true);
             const fileName = entry.entryName;
+            this.checkFileExt(fileName, true);
             const fileExt = this.getFileExt(fileName);
             const buff = await this.getZipData(entry);
             this.checkHeaders(buff, true, fileExt);

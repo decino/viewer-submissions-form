@@ -3,17 +3,21 @@ import {BeforeRoutesInit, PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
 import "@tsed/socketio";
+import "@tsed/swagger";
+// custom index imports
 import "./protocols";
+import "./filters";
+import "./engine/impl/HttpErrorRenderers";
+import * as rest from "./controllers/rest";
+import * as views from "./controllers/views";
+import * as secureViews from "./controllers/secureViews";
+// custom index imports end
 import {config} from "./config";
-import * as rest from "./controllers/rest/index";
-import * as views from "./controllers/views/index";
-import * as secureViews from "./controllers/secureViews/index";
 import {CustomUserInfoModel} from "./model/auth/CustomUserInfoModel";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import methodOverride from "method-override";
-import "@tsed/swagger";
 import {isProduction} from "./config/envs";
 import helmet from "helmet";
 import process from "process";
@@ -23,8 +27,6 @@ import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
 import {DataSource} from "typeorm";
 import {SessionModel} from "./model/db/Session.model";
 import compression from "compression";
-import "./filters/HttpExceptionFilter";
-import "./engine/impl/HttpErrorRenderers/index";
 import GlobalEnv from "./model/constants/GlobalEnv";
 
 const opts: Partial<TsED.Configuration> = {

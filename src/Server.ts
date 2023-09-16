@@ -39,7 +39,6 @@ const opts: Partial<TsED.Configuration> = {
         }
         return false;
     }()),
-    componentsScan: [`./services/**/**.js`],
     multer: {
         dest: `${__dirname}/../customWads`,
         limits: {

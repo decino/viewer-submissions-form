@@ -172,8 +172,7 @@ export class SubmissionModel extends AbstractModel {
     @Name("submissionRound")
     @Description("The submission round this entry belongs to")
     @ManyToOne("SubmissionRoundModel", "submissions", {
-        ...AbstractModel.cascadeOps,
-        eager: true
+        ...AbstractModel.cascadeOps
     })
     @JoinColumn({
         name: "submissionRoundId",

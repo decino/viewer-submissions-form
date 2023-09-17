@@ -43,18 +43,15 @@ export class SubmissionRoundRepo {
         return this.submissionRoundDao.getAllRounds(includeActive);
     }
 
-    public endActiveRound(): Promise<boolean> {
-        return this.submissionRoundDao.dataSource.transaction(async entityManager => {
-            const currentActiveRound = await this.submissionRoundDao.retrieveActiveRound(entityManager);
-            if (!currentActiveRound) {
-                return false;
-            }
-
-            // TODO: remove invalid entries
-            currentActiveRound.active = false;
-            await this.submissionRoundDao.saveOrUpdateRounds(currentActiveRound, entityManager);
-            return true;
-        });
+    public async endActiveRound(): Promise<boolean> {
+        const currentActiveRound = await this.submissionRoundDao.retrieveActiveRound();
+        if (!currentActiveRound) {
+            return false;
+        }
+        currentActiveRound.active = false;
+        currentActiveRound.submissions = currentActiveRound.submissions.filter(submission => submission.isSubmissionValidAndVerified());
+        await this.submissionRoundDao.saveOrUpdateRounds(currentActiveRound);
+        return true;
     }
 
     public async pauseRound(pause: boolean): Promise<void> {

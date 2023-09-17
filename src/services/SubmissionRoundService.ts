@@ -150,36 +150,13 @@ export class SubmissionRoundService implements OnInit {
 
     public endActiveSubmissionRound(): Promise<boolean> {
         return this.submissionRoundRepo.endActiveRound();
-        /*  return this.ds.transaction(async entityManager => {
-             const submissionRepo = entityManager.getRepository(SubmissionRoundModel);
-             const submissionModelRepository = entityManager.getRepository(SubmissionModel);
-             const currentlyActive = await submissionRepo.findOne({
-                 where: {
-                     active: true
-                 }
-             });
-             // remove any pending/invalid entries
-             const invalidEntries = await submissionModelRepository.find({
-                 where: {
-                     submissionValid: false
-                 },
-                 relations: ["confirmation"]
-             });
-             if (currentlyActive) {
-                 currentlyActive.active = false;
-                 await submissionRepo.save(currentlyActive);
-                 await submissionModelRepository.remove(invalidEntries);
-                 return true;
-             }
-             return false;
-         }); */
     }
 
     public pauseRound(pause: boolean): Promise<void> {
         try {
             return this.submissionRoundRepo.pauseRound(pause);
         } catch (e) {
-            throw new BadRequest(e.message);
+            throw new BadRequest(e.message, e);
         }
     }
 

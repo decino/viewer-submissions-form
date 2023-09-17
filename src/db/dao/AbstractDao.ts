@@ -1,13 +1,20 @@
-import {EntityManager, EntityTarget, Repository} from "typeorm";
+import {DataSource, EntityManager, EntityTarget, Repository} from "typeorm";
 import type {ObjectLiteral} from "typeorm/common/ObjectLiteral";
 
 export abstract class AbstractDao<T extends ObjectLiteral> {
 
-    protected dao: Repository<T>;
+    private readonly dao: Repository<T>;
 
-    protected getTransaction(model: EntityTarget<T>, transaction?: EntityManager): Repository<T> {
-        return transaction ? transaction.getRepository(model) : this.dao;
+    protected constructor(protected readonly ds: DataSource, model: EntityTarget<T>) {
+        this.dao = ds.getRepository(model);
     }
 
+    public get dataSource(): DataSource {
+        return this.ds;
+    }
+
+    protected getEntityManager(transaction?: EntityManager): Repository<T> {
+        return transaction ? transaction.getRepository(this.dao.target) : this.dao;
+    }
 
 }

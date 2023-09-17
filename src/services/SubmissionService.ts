@@ -1,6 +1,4 @@
 import {Constant, Inject, OnInit, Service} from "@tsed/di";
-import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource, In} from "typeorm";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
 import {BadRequest, NotFound} from "@tsed/exceptions";
@@ -9,20 +7,17 @@ import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
-import {SubmissionModification} from "../utils/typeings";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {WadValidationService} from "./WadValidationService";
+import {SubmissionRepo} from "../db/repo/SubmissionRepo";
 
 @Service()
 export class SubmissionService implements OnInit {
 
     private readonly scheduler = new ToadScheduler();
-
-    @Inject(SQLITE_DATA_SOURCE)
-    private ds: DataSource;
 
     @Inject()
     private submissionRoundService: SubmissionRoundService;
@@ -41,6 +36,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private wadValidationService: WadValidationService;
+
+    @Inject()
+    private submissionRepo: SubmissionRepo;
 
     @Constant(GlobalEnv.HELP_EMAIL)
     private readonly helpEmail: string;
@@ -76,8 +74,7 @@ export class SubmissionService implements OnInit {
             entry.customWadFileName = customWad.originalname;
         }
         entry.submissionRoundId = currentActiveRound.id;
-        const repo = this.ds.getRepository(SubmissionModel);
-        const saveEntry = await repo.save(entry);
+        const saveEntry = await this.submissionRepo.saveOrUpdateSubmission(entry);
         if (customWad) {
             await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
         }
@@ -86,112 +83,97 @@ export class SubmissionService implements OnInit {
     }
 
     public async addYoutubeToSubmission(submissionId: number, youtubeLink: string | null): Promise<void> {
-        const repo = this.ds.getRepository(SubmissionModel);
-        const submission = await repo.findOneBy({
-            id: submissionId
-        });
+        const submission = await this.submissionRepo.retrieveSubmission(submissionId);
         if (!submission) {
             throw new BadRequest(`Unable to find submission of id ${submissionId}.`);
         }
         submission.youtubeLink = youtubeLink;
-        await repo.save(submission);
+        await this.submissionRepo.saveOrUpdateSubmission(submission);
     }
 
     public async modifyStatus(status: SubmissionStatusModel): Promise<void> {
-        const repo = this.ds.getRepository(SubmissionStatusModel);
-        const submission = await repo.findOne({
-            where: {
-                submissionId: status.submissionId
-            }
-        });
-        if (!submission) {
-            throw new BadRequest(`Unable to find submission with id ${status.submissionId}.`);
+        try {
+            await this.submissionRepo.setSubmissionStatus(status);
+        } catch (e) {
+            throw new BadRequest(e.message, e);
         }
-        submission.status = status.status;
-        submission.additionalInfo = status.additionalInfo ?? null;
-
-        await repo.save(submission);
     }
 
     public async modifyEntry(entry: Record<string, unknown>): Promise<void> {
-        const repo = this.ds.getRepository(SubmissionModel);
-        const mappedObj: SubmissionModification = {};
+        const submission = await this.submissionRepo.retrieveSubmission(Number.parseInt(entry.id as string));
+
+        if (!submission) {
+            throw new BadRequest(`Unable to find submission of id ${entry.id}.`);
+        }
+
         if (entry.WADName) {
-            mappedObj["wadName"] = entry.WADName as string;
+            submission.wadName = entry.WADName as string;
         }
+
         if (entry.WAD) {
-            mappedObj["wadURL"] = entry.WAD as string;
+            submission.wadURL = entry.WAD as string;
         }
+
         if (entry.level) {
-            mappedObj["wadLevel"] = entry.level as string;
+            submission.wadLevel = entry.level as string;
         }
+
         if (entry.engine) {
-            mappedObj["wadEngine"] = entry.engine as DOOM_ENGINE;
+            submission.wadEngine = entry.engine as DOOM_ENGINE;
         }
+
         if (entry.author) {
-            mappedObj["submitterAuthor"] = entry.author === "true";
-        }
-        if (mappedObj["submitterAuthor"] && entry.distributable) {
-            mappedObj["distributable"] = entry.distributable === "true";
+            submission.submitterAuthor = entry.author === "true";
         }
 
-        mappedObj["submitterName"] = entry.authorName as string ?? null;
+        if (submission.submitterAuthor && entry.distributable) {
+            submission.distributable = entry.distributable === "true";
+        }
 
-        const model = repo.create(mappedObj);
-        await repo.update({
-            id: Number.parseInt(entry.id as string)
-        }, model);
+        submission.submitterName = entry.authorName as string ?? null;
+
+        await this.submissionRepo.saveOrUpdateSubmission(submission);
     }
 
     public getEntry(id: number): Promise<SubmissionModel | null> {
-        const repo = this.ds.getRepository(SubmissionModel);
-        return repo.findOne({
-            relations: ["submissionRound", "status"],
-            where: {
-                id
-            }
-        });
+        return this.submissionRepo.retrieveSubmission(id);
     }
 
     public async getAllEntries(roundId = -1): Promise<SubmissionModel[]> {
         if (roundId === -1) {
             const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
             if (!currentActiveRound) {
-                throw new Error("No round exists.");
+                throw new BadRequest("No round exists.");
             }
             roundId = currentActiveRound.id;
         }
-        const repo = this.ds.getRepository(SubmissionModel);
-        const entries = await repo.find({
-            where: {
-                submissionRoundId: roundId
-            }
-        });
-        return entries ?? [];
+        return this.submissionRepo.getAllSubmissions(roundId);
     }
 
 
-    public async deleteEntries(ids: number[]): Promise<SubmissionModel[] | null> {
-        const repo = this.ds.getRepository(SubmissionModel);
-
-        const entries = await repo.find({
-            where: {
-                id: In(ids)
-            }
-        });
-        if (!entries || entries.length === 0) {
-            return null;
-        }
+    public async deleteEntries(ids: number[]): Promise<boolean> {
+        const submissionsToDelete = await this.submissionRepo.getSubmissions(ids);
         const pArr: Promise<void>[] = [];
-        for (const entry of entries) {
+
+        for (const entry of submissionsToDelete) {
             if (entry.customWadFileName) {
                 pArr.push(this.customWadEngine.deleteCustomWad(entry.id, entry.submissionRoundId));
             }
         }
-        await Promise.all(pArr);
-        const remove = await repo.remove(entries);
+
+        try {
+            await Promise.all(pArr);
+        } catch (e) {
+            throw new e;
+        }
+
+        const remove = await this.submissionRepo.deleteSubmissions(submissionsToDelete);
+        if (!remove) {
+            return false;
+        }
+
         this.submissionSocket.emitSubmissionDelete(ids);
-        return remove;
+        return true;
     }
 
     public $onInit(): void {
@@ -244,20 +226,14 @@ export class SubmissionService implements OnInit {
     }
 
     private async scanDb(): Promise<unknown> {
-        const submissionModelRepository = this.ds.getRepository(SubmissionModel);
-        const entries = await submissionModelRepository.find({
-            where: {
-                submissionValid: false
-            },
-            relations: ["confirmation"]
-        });
-        if (!entries || entries.length === 0) {
+        const invalidEntries = await this.submissionRepo.getInvalidSubmissions();
+        if (!invalidEntries || invalidEntries.length === 0) {
             return;
         }
         const twentyMins = 1200000;
         const now = Date.now();
         const entriesToDelete: SubmissionModel[] = [];
-        for (const entry of entries) {
+        for (const entry of invalidEntries) {
             const createdAt = entry?.confirmation?.createdAt?.getTime() ?? null;
             if (createdAt === null) {
                 continue;
@@ -270,7 +246,7 @@ export class SubmissionService implements OnInit {
             return;
         }
         this.logger.info(`Found ${entriesToDelete.length} pending submissions that have expired. Deleting...`);
-        const entryIds = entriesToDelete.map(entry_1 => entry_1.id);
+        const entryIds = entriesToDelete.map(entry => entry.id);
         return this.deleteEntries(entryIds);
     }
 }

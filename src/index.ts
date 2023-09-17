@@ -6,13 +6,15 @@ import {DataSource, Logger as TypeOrmLogger} from "typeorm";
 import {SQLITE_DATA_SOURCE} from "./model/di/tokens";
 
 
+export const dataSource = new DataSource({
+    type: "better-sqlite3",
+    entities: [`${__dirname}/model/db/**/*.model.{ts,js}`],
+    synchronize: true,
+    database: "main.sqlite"
+});
+
 async function bootstrap(): Promise<void> {
-    const dataSource = new DataSource({
-        type: "better-sqlite3",
-        entities: [`${__dirname}/model/db/**/*.model.{ts,js}`],
-        synchronize: true,
-        database: "main.sqlite"
-    });
+
 
     registerProvider<DataSource>({
         provide: SQLITE_DATA_SOURCE,

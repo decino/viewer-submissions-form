@@ -171,7 +171,10 @@ export class SubmissionModel extends AbstractModel {
 
     @Name("submissionRound")
     @Description("The submission round this entry belongs to")
-    @ManyToOne("SubmissionRoundModel", "submissions", AbstractModel.cascadeOps)
+    @ManyToOne("SubmissionRoundModel", "submissions", {
+        ...AbstractModel.cascadeOps,
+        eager: true
+    })
     @JoinColumn({
         name: "submissionRoundId",
         referencedColumnName: "id"
@@ -180,13 +183,16 @@ export class SubmissionModel extends AbstractModel {
 
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
-    @OneToOne("PendingEntryConfirmationModel", "submission")
+    @OneToOne("PendingEntryConfirmationModel", "submission", {
+        eager: true
+    })
     public confirmation: PendingEntryConfirmationModel;
 
     @Name("status")
     @Description("The current status of this submission")
     @OneToOne("SubmissionStatusModel", "submission", {
-        cascade: true
+        cascade: true,
+        eager: true
     })
     public status: SubmissionStatusModel;
 

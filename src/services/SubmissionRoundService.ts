@@ -1,6 +1,4 @@
 import {Inject, OnInit, Service} from "@tsed/di";
-import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {BadRequest} from "@tsed/exceptions";
@@ -10,12 +8,11 @@ import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 import STATUS from "../model/constants/STATUS";
 import {Logger} from "@tsed/logger";
+import {SubmissionRoundRepo} from "../db/repo/SubmissionRoundRepo";
+import {Builder} from "builder-pattern";
 
 @Service()
 export class SubmissionRoundService implements OnInit {
-
-    @Inject(SQLITE_DATA_SOURCE)
-    private ds: DataSource;
 
     @Inject()
     private customWadEngine: CustomWadEngine;
@@ -26,6 +23,9 @@ export class SubmissionRoundService implements OnInit {
     @Inject()
     private logger: Logger;
 
+    @Inject()
+    private submissionRoundRepo: SubmissionRoundRepo;
+
     public async $onInit(): Promise<void> {
         const allRounds = await this.getAllSubmissionRounds(true);
         if (allRounds.length === 0) {
@@ -35,41 +35,28 @@ export class SubmissionRoundService implements OnInit {
         }
     }
 
-    public newSubmissionRound(name: string, endDate: number | null): Promise<SubmissionRoundModel> {
-        return this.ds.transaction(async entityManager => {
-            const repo = entityManager.getRepository(SubmissionRoundModel);
-            const activeRound = await repo.findOne({
-                where: {
-                    active: true
-                }
-            });
-            if (activeRound) {
-                activeRound.active = false;
-                await repo.save(activeRound);
+    public async newSubmissionRound(name: string, endDate: number | null): Promise<SubmissionRoundModel> {
+        const activeRound = await this.submissionRoundRepo.retrieveActiveRound();
+        if (activeRound) {
+            activeRound.active = false;
+            await this.submissionRoundRepo.saveOrUpdateRounds(activeRound);
+        }
+        let endateObj: Date | null = null;
+        if (typeof endDate === "number") {
+            endateObj = new Date(endDate);
+            if (endateObj.getTime() < Date.now()) {
+                throw new BadRequest("Unable to set end date before today");
             }
-            let endateObj: Date | null = null;
-            if (typeof endDate === "number") {
-                endateObj = new Date(endDate);
-                if (endateObj.getTime() < Date.now()) {
-                    throw new BadRequest("Unable to set end date before today");
-                }
-            }
-            const newModel = entityManager.create(SubmissionRoundModel, {
-                active: true,
-                name,
-                endDate: endateObj
-            });
-            return repo.save(newModel);
-        });
+        }
+        return this.submissionRoundRepo.createRound(name, endateObj);
     }
 
     public async syncRound(): Promise<SubmissionRoundModel[]> {
-        const submissionRoundModelRepository = this.ds.getRepository(SubmissionRoundModel);
         const entries = await this.decinoRoundHistoryImporterEngine.getSubmissionRounds();
         const submissionRounds = entries.map(entry => {
             const {submissions, roundId} = entry;
             const submissionsModels: SubmissionModel[] = submissions.map((submission, index) => {
-                const obj: Partial<SubmissionModel> = {
+                const submissionModelTemplate: Partial<SubmissionModel> = {
                     submissionRoundId: roundId,
                     youtubeLink: submission.youTubeLink,
                     wadLevel: submission.level,
@@ -83,13 +70,13 @@ export class SubmissionRoundService implements OnInit {
                     verified: true
                 };
                 if (submission.chosen) {
-                    const status = this.ds.manager.create(SubmissionStatusModel, {
-                        status: STATUS.COMPLETED
-                    });
-                    obj.playOrder = submission.no;
-                    obj.status = status;
+                    const status = Builder(SubmissionStatusModel)
+                        .status(STATUS.COMPLETED)
+                        .build();
+                    submissionModelTemplate.playOrder = submission.no;
+                    submissionModelTemplate.status = status;
                 }
-                return this.ds.manager.create(SubmissionModel, obj as SubmissionModel);
+                return Builder(SubmissionModel, submissionModelTemplate).build();
             });
             let date: Date;
             // UTC time is 0 based so months need -1
@@ -112,116 +99,88 @@ export class SubmissionRoundService implements OnInit {
                 default:
                     date = new Date();
             }
-            return submissionRoundModelRepository.create({
+            return Builder(SubmissionRoundModel, {
                 id: roundId,
                 active: false,
                 submissions: submissionsModels,
                 name: `Round #0${roundId}`,
                 createdAt: date
-            });
+            }).build();
         });
-        return submissionRoundModelRepository.save(submissionRounds);
+        return this.submissionRoundRepo.saveOrUpdateRounds(submissionRounds);
     }
 
     public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {
-        const found = await this.ds.manager.findOne(SubmissionRoundModel, {
-            where: {
-                active: true
-            },
-            relations: ["submissions"]
-        });
-        if (!found) {
+        const activeRound = await this.submissionRoundRepo.retrieveActiveRound();
+        if (!activeRound) {
             return null;
         }
         if (filterInvalidEntries) {
-            found.submissions = found.submissions.filter(submission => submission.isSubmissionValidAndVerified());
+            activeRound.submissions = activeRound.submissions.filter(submission => submission.isSubmissionValidAndVerified());
         }
-        return found;
+        return activeRound;
     }
 
     public getSubmissionRound(roundId: number): Promise<SubmissionRoundModel | null> {
-        return this.ds.manager.findOne(SubmissionRoundModel, {
-            where: {
-                id: roundId
-            },
-            relations: ["submissions", "submissions.status"]
-        });
+        return this.submissionRoundRepo.retrieveRound(roundId);
     }
 
     public async deleteRound(roundId: number): Promise<boolean> {
-        await this.ds.transaction(async entityManager => {
-            const repo = entityManager.getRepository(SubmissionRoundModel);
-            const round = await repo.findOne({
-                where: {
-                    id: roundId,
-                },
-                relations: ["submissions"]
-            });
-            if (!round) {
-                throw new BadRequest(`Unable to find round ${roundId}`);
+        const existingRound = await this.submissionRoundRepo.retrieveRound(roundId);
+        if (!existingRound) {
+            throw new BadRequest(`Unable to find round ${roundId}`);
+        }
+        const pArr: Promise<void>[] = [];
+        for (const submission of existingRound.submissions) {
+            if (submission.customWadFileName) {
+                pArr.push(this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId));
             }
-            const pArr: Promise<void>[] = [];
-            for (const submission of round.submissions) {
-                if (submission.customWadFileName) {
-                    pArr.push(this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId));
-                }
-            }
+        }
+        try {
             await Promise.all(pArr);
-            await repo.remove(round);
-        });
-        return true;
+        } catch (e) {
+            throw e;
+        }
+        return this.submissionRoundRepo.deleteRound(existingRound);
     }
 
-    public async getAllSubmissionRounds(includeActive = true): Promise<SubmissionRoundModel[]> {
-        const repo = this.ds.getRepository(SubmissionRoundModel);
-        if (includeActive) {
-            return (await repo.find({
-                relations: ["submissions", "submissions.status"]
-            })) ?? [];
-        }
-        const foundWithoutActive = await repo.find({
-            where: {
-                active: false
-            },
-            relations: ["submissions", "submissions.status"]
-        });
-        return foundWithoutActive ?? [];
+    public getAllSubmissionRounds(includeActive = true): Promise<SubmissionRoundModel[]> {
+        return this.submissionRoundRepo.getAllRounds(includeActive);
     }
 
     public endActiveSubmissionRound(): Promise<boolean> {
-        return this.ds.transaction(async entityManager => {
-            const submissionRepo = entityManager.getRepository(SubmissionRoundModel);
-            const submissionModelRepository = entityManager.getRepository(SubmissionModel);
-            const currentlyActive = await submissionRepo.findOne({
-                where: {
-                    active: true
-                }
-            });
-            // remove any pending/invalid entries
-            const invalidEntries = await submissionModelRepository.find({
-                where: {
-                    submissionValid: false
-                },
-                relations: ["confirmation"]
-            });
-            if (currentlyActive) {
-                currentlyActive.active = false;
-                await submissionRepo.save(currentlyActive);
-                await submissionModelRepository.remove(invalidEntries);
-                return true;
-            }
-            return false;
-        });
+        return this.submissionRoundRepo.endActiveRound();
+        /*  return this.ds.transaction(async entityManager => {
+             const submissionRepo = entityManager.getRepository(SubmissionRoundModel);
+             const submissionModelRepository = entityManager.getRepository(SubmissionModel);
+             const currentlyActive = await submissionRepo.findOne({
+                 where: {
+                     active: true
+                 }
+             });
+             // remove any pending/invalid entries
+             const invalidEntries = await submissionModelRepository.find({
+                 where: {
+                     submissionValid: false
+                 },
+                 relations: ["confirmation"]
+             });
+             if (currentlyActive) {
+                 currentlyActive.active = false;
+                 await submissionRepo.save(currentlyActive);
+                 await submissionModelRepository.remove(invalidEntries);
+                 return true;
+             }
+             return false;
+         }); */
     }
 
-    public async pauseRound(pause: boolean): Promise<void> {
-        const currentActiveRound = await this.getCurrentActiveSubmissionRound(false);
-        if (!currentActiveRound) {
-            throw new BadRequest("No active round to pause.");
+    public pauseRound(pause: boolean): Promise<void> {
+        try {
+            return this.submissionRoundRepo.pauseRound(pause);
+        } catch (e) {
+            throw new BadRequest(e.message);
         }
-        const repo = this.ds.getRepository(SubmissionRoundModel);
-        currentActiveRound.paused = pause;
-        await repo.save(currentActiveRound);
     }
 
 }

@@ -54,7 +54,7 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
             rounds = await manager.find();
         } else {
             rounds = await manager.findBy({
-                active: true
+                active: false
             });
         }
         return rounds ?? [];

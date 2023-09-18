@@ -9,11 +9,18 @@ import process from "process";
 import xss from "xss";
 import {SubmissionStatusModel} from "./SubmissionStatus.model";
 import STATUS from "../constants/STATUS";
+import {AfterDeserialize} from "@tsed/json-mapper";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
 @Index(["submissionRoundId", "submitterEmail"], {
     unique: true
+})
+@AfterDeserialize((data: SubmissionModel) => {
+    if (data.info) {
+        data.info = data.info.slice(0, 4096);
+    }
+    return data;
 })
 export class SubmissionModel extends AbstractModel {
 

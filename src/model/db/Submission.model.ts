@@ -185,7 +185,7 @@ export class SubmissionModel extends AbstractModel {
     @OneToOne("PendingEntryConfirmationModel", "submission", {
         eager: true
     })
-    public confirmation: PendingEntryConfirmationModel;
+    public confirmation: PendingEntryConfirmationModel | null;
 
     @Name("status")
     @Description("The current status of this submission")
@@ -193,7 +193,7 @@ export class SubmissionModel extends AbstractModel {
         cascade: true,
         eager: true
     })
-    public status: SubmissionStatusModel;
+    public status: SubmissionStatusModel | null;
 
     @Column({
         nullable: false,
@@ -221,7 +221,7 @@ export class SubmissionModel extends AbstractModel {
             return false;
         }
 
-        if (this.status.status !== STATUS.COMPLETED) {
+        if (this.status?.status !== STATUS.COMPLETED) {
             return false;
         }
 

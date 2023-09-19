@@ -2,6 +2,7 @@ import {Inject, Injectable, ProviderScope} from "@tsed/di";
 import {SubmissionRoundModel} from "../../model/db/SubmissionRound.model";
 import {SubmissionRoundDao} from "../dao/SubmissionRoundDao";
 import {Builder} from "builder-pattern";
+import {SubmissionDao} from "../dao/SubmissionDao";
 
 @Injectable({
     scope: ProviderScope.SINGLETON
@@ -10,6 +11,9 @@ export class SubmissionRoundRepo {
 
     @Inject()
     private submissionRoundDao: SubmissionRoundDao;
+
+    @Inject()
+    private submissionDao: SubmissionDao;
 
     public createRound(name: string, endDate: Date | null): Promise<SubmissionRoundModel> {
         const model = Builder(SubmissionRoundModel)
@@ -43,15 +47,17 @@ export class SubmissionRoundRepo {
         return this.submissionRoundDao.getAllRounds(includeActive);
     }
 
-    public async endActiveRound(): Promise<boolean> {
-        const currentActiveRound = await this.submissionRoundDao.retrieveActiveRound();
-        if (!currentActiveRound) {
-            return false;
-        }
-        currentActiveRound.active = false;
-        currentActiveRound.submissions = currentActiveRound.submissions.filter(submission => submission.isSubmissionValidAndVerified());
-        await this.submissionRoundDao.saveOrUpdateRounds(currentActiveRound);
-        return true;
+    public endActiveRound(): Promise<boolean> {
+        return this.submissionRoundDao.dataSource.transaction(async entityManager => {
+            const currentActiveRound = await this.submissionRoundDao.retrieveActiveRound(entityManager);
+            if (!currentActiveRound) {
+                return false;
+            }
+            const invalidEntries = currentActiveRound.submissions.filter(submission => !submission.isSubmissionValidAndVerified());
+            await this.submissionDao.deleteSubmissions(invalidEntries, entityManager);
+            await this.submissionRoundDao.setActive(currentActiveRound, false, entityManager);
+            return true;
+        });
     }
 
     public async pauseRound(pause: boolean): Promise<void> {

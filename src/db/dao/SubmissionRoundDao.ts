@@ -67,4 +67,12 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
         }
         return manager.save(models);
     }
+
+    public async setActive(round: SubmissionRoundModel, active: boolean, transaction?: EntityManager): Promise<void> {
+        await this.getEntityManager(transaction).update({
+            id: round.id
+        }, {
+            active
+        });
+    }
 }

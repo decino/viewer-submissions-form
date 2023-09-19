@@ -2,6 +2,7 @@ import {Inject, Injectable, ProviderScope} from "@tsed/di";
 import {SubmissionStatusModel} from "../../model/db/SubmissionStatus.model";
 import {SubmissionDao} from "../dao/SubmissionDao";
 import {SubmissionModel} from "../../model/db/Submission.model";
+import {SubmissionConfirmationDao} from "../dao/SubmissionConfirmationDao";
 
 @Injectable({
     scope: ProviderScope.SINGLETON
@@ -11,9 +12,36 @@ export class SubmissionRepo {
     @Inject()
     private submissionDao: SubmissionDao;
 
+    @Inject()
+    private submissionConfirmationDao: SubmissionConfirmationDao;
+
     public saveOrUpdateSubmission(entry: SubmissionModel): Promise<SubmissionModel> {
         return this.submissionDao.saveOrUpdateSubmission(entry);
     }
+
+    public validateSubmission(submission: SubmissionModel): Promise<SubmissionModel> {
+        return this.submissionDao.dataSource.transaction(async entityManager => {
+            submission.submissionValid = true;
+            const updatedEntry = await this.submissionDao.saveOrUpdateSubmission(submission, entityManager);
+            if (updatedEntry.confirmation) {
+                await this.submissionConfirmationDao.deleteConfirmation(updatedEntry.confirmation, entityManager);
+                updatedEntry.confirmation = null;
+            }
+            return updatedEntry;
+        });
+    }
+
+    public getUnverifiedSubmissions(ids: number[]): Promise<SubmissionModel[]> {
+        return this.submissionDao.getUnverifiedSubmissions(ids);
+    }
+
+    public verifySubmissions(submissions: SubmissionModel[]): Promise<SubmissionModel[]> {
+        for (const submission of submissions) {
+            submission.verified = true;
+        }
+        return this.submissionDao.saveOrUpdateSubmissions(submissions);
+    }
+
 
     public retrieveSubmission(id: number): Promise<SubmissionModel | null> {
         return this.submissionDao.getSubmission(id);

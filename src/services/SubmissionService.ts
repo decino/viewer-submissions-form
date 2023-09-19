@@ -145,7 +145,7 @@ export class SubmissionService implements OnInit {
             if (!currentActiveRound) {
                 throw new BadRequest("No round exists.");
             }
-            roundId = currentActiveRound.id;
+            return currentActiveRound.submissions;
         }
         return this.submissionRepo.getAllSubmissions(roundId);
     }

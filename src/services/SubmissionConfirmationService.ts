@@ -1,6 +1,4 @@
 import {Constant, Inject, OnInit, Service} from "@tsed/di";
-import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource, In} from "typeorm";
 import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
 import {BadRequest, NotFound} from "@tsed/exceptions";
 import {SubmissionModel} from "../model/db/Submission.model";
@@ -9,12 +7,11 @@ import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
+import {SubmissionConfirmationRepo} from "../db/repo/SubmissionConfirmationRepo";
+import {SubmissionRepo} from "../db/repo/SubmissionRepo";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
-
-    @Inject(SQLITE_DATA_SOURCE)
-    private ds: DataSource;
 
     @Inject()
     private emailService: EmailService;
@@ -25,51 +22,34 @@ export class SubmissionConfirmationService implements OnInit {
     @Inject()
     private submissionSocket: SubmissionSocket;
 
+    @Inject()
+    private submissionConfirmationRepo: SubmissionConfirmationRepo;
+
+    @Inject()
+    private submissionRepo: SubmissionRepo;
+
     @Constant(GlobalEnv.BASE_URL)
     private readonly baseUrl: string;
 
-    public processConfirmation(confirmationUid: string): Promise<SubmissionModel> {
-        return this.ds.manager.transaction(async entityManager => {
-            const confirmationModelRepository = entityManager.getRepository(PendingEntryConfirmationModel);
-            const submissionModelRepository = entityManager.getRepository(SubmissionModel);
-            const confirmationEntry = await confirmationModelRepository.findOne({
-                where: {
-                    confirmationUid
-                },
-                relations: ["submission", "submission.submissionRound"]
-            });
-            if (!confirmationEntry) {
-                throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
-            }
-            const submission = confirmationEntry.submission;
-            submission.submissionValid = true;
-            await submissionModelRepository.save(submission);
-            await confirmationModelRepository.remove(confirmationEntry);
-            return submission;
-        }).then(submission => {
-            this.discordBotDispatcherService.sendPendingSubmission(submission);
-            return submission;
-        });
+    public async processConfirmation(confirmationUid: string): Promise<SubmissionModel> {
+        const confirmation = await this.submissionConfirmationRepo.getConfirmation(confirmationUid);
+        if (!confirmation) {
+            throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
+        }
+        const updatedSubmission = await this.submissionRepo.validateSubmission(confirmation.submission);
+        // ignore promise
+        this.discordBotDispatcherService.sendPendingSubmission(updatedSubmission);
+        return updatedSubmission;
     }
 
     public async verifySubmissions(ids: number[]): Promise<void> {
-        const submissionModelRepository = this.ds.getRepository(SubmissionModel);
-        const entries = await submissionModelRepository.find({
-            where: {
-                id: In(ids),
-                submissionValid: true,
-                verified: false
-            },
-            relations: ["submissionRound"]
-        });
-        if (!entries || entries.length === 0) {
+        const unverifiedSubmissions = await this.submissionRepo.getUnverifiedSubmissions(ids);
+        if (!unverifiedSubmissions || unverifiedSubmissions.length === 0) {
             throw new BadRequest(`No submissions with ids ${ids.join(", ")} found that need verification`);
         }
-        for (const entry of entries) {
-            entry.verified = true;
-        }
-        await submissionModelRepository.save(entries);
-        for (const entry of entries) {
+        const verifiedEntries = await this.submissionRepo.verifySubmissions(unverifiedSubmissions);
+
+        for (const entry of verifiedEntries) {
             this.submissionSocket.emitSubmission(entry);
 
             // ignore promise
@@ -78,23 +58,14 @@ export class SubmissionConfirmationService implements OnInit {
     }
 
 
-    public async generateConfirmationEntry(round: number): Promise<PendingEntryConfirmationModel> {
-        const confirmationModelRepository = this.ds.getRepository(PendingEntryConfirmationModel);
-        const newEntry = this.ds.manager.create(PendingEntryConfirmationModel, {
-            submissionId: round
-        });
-        const saveEntry = await confirmationModelRepository.save(newEntry);
-        const entry = await confirmationModelRepository.findOne({
-            relations: ["submission"],
-            where: {
-                id: saveEntry.id
-            }
-        });
-        if (!entry) {
-            throw Error("Unable to query DB.");
+    public async generateConfirmationEntry(submissionId: number): Promise<PendingEntryConfirmationModel> {
+        const savedEntry = await this.submissionConfirmationRepo.createConfirmation(submissionId);
+        const entryWithSubmission = await this.submissionConfirmationRepo.getConfirmation(savedEntry.confirmationUid);
+        if (!entryWithSubmission) {
+            throw new Error("Unable to query Db");
         }
-        await this.sendConfirmationEmail(entry);
-        return saveEntry;
+        await this.sendConfirmationEmail(entryWithSubmission);
+        return savedEntry;
     }
 
     public $onInit(): Promise<any> | void {

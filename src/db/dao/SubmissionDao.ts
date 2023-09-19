@@ -21,6 +21,10 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return this.getEntityManager(transaction).save(entry);
     }
 
+    public saveOrUpdateSubmissions(entries: SubmissionModel[], transaction?: EntityManager): Promise<SubmissionModel[]> {
+        return this.getEntityManager(transaction).save(entries);
+    }
+
     public getSubmission(id: number, transaction?: EntityManager): Promise<SubmissionModel | null> {
         return this.getEntityManager(transaction).findOne({
             where: {
@@ -39,15 +43,30 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         });
     }
 
+    public getUnverifiedSubmissions(ids: number[], transaction?: EntityManager): Promise<SubmissionModel[]> {
+        return this.getEntityManager(transaction).find({
+            where: {
+                id: In(ids),
+                submissionValid: true,
+                verified: false
+            },
+            relations: ["submissionRound"]
+        });
+    }
+
     public getAllSubmissions(roundId: number, transaction?: EntityManager): Promise<SubmissionModel[]> {
-        return this.getEntityManager(transaction).findBy({
-            id: roundId
+        return this.getEntityManager(transaction).find({
+            where: {
+                submissionRoundId: roundId,
+            },
+            relations: ["submissionRound"]
         });
     }
 
     public async deleteSubmissions(submissions: SubmissionModel[], transaction?: EntityManager): Promise<boolean> {
+        const entityManager = this.getEntityManager(transaction);
         try {
-            await this.getEntityManager(transaction).remove(submissions);
+            await entityManager.remove(submissions);
         } catch (e) {
             this.logger.error(e);
             return false;

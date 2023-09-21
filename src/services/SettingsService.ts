@@ -1,10 +1,8 @@
 import {Constant, Inject, OnInit, Service} from "@tsed/di";
 import SETTING from "../model/constants/Settings";
-import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource} from "typeorm";
-import {SettingsModel} from "../model/db/Settings.model";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {Logger} from "@tsed/common";
+import {SettingsRepo} from "../db/repo/SettingsRepo";
 
 @Service()
 export class SettingsService implements OnInit {
@@ -21,54 +19,27 @@ export class SettingsService implements OnInit {
     @Constant(GlobalEnv.ALLOWED_HEADERS_ZIP)
     private readonly defaultAllowedHeadersZip: string;
 
-    @Inject(SQLITE_DATA_SOURCE)
-    private ds: DataSource;
-
     @Inject()
     private logger: Logger;
 
+    @Inject()
+    private settingRepo: SettingsRepo;
+
     public async getSetting(setting: SETTING): Promise<string | null> {
-        const repo = this.ds.getRepository(SettingsModel);
-        const value = await repo.findOneBy({
-            setting
-        });
-        return value?.value ?? null;
+        const settingModel = await this.settingRepo.getSetting(setting);
+        return settingModel?.value ?? null;
     }
 
     public async hasSetting(setting: SETTING): Promise<boolean> {
-        const repo = this.ds.getRepository(SettingsModel);
-        const value = await repo.countBy({
-            setting
-        });
-        return value !== 0;
+        return this.settingRepo.hasSetting(setting);
     }
 
     public async saveOrUpdateSetting(setting: SETTING, value: string): Promise<void> {
-        const repo = this.ds.getRepository(SettingsModel);
-        let obj = await repo.findOneBy({
-            setting
-        });
-        if (!obj) {
-            obj = repo.create({
-                setting,
-                value
-            });
-        } else {
-            obj.value = value;
-        }
-        await repo.save(obj);
+        await this.settingRepo.saveOrUpdateSetting(setting, value);
     }
 
-    public async deleteSetting(setting: SETTING): Promise<boolean> {
-        const repo = this.ds.getRepository(SettingsModel);
-        const obj = await repo.findOneBy({
-            setting
-        });
-        if (!obj) {
-            throw new Error(`Unable to find setting`);
-        }
-        const result = await repo.remove(obj);
-        return result !== null;
+    public deleteSetting(setting: SETTING): Promise<boolean> {
+        return this.settingRepo.deleteSetting(setting);
     }
 
     public async $onInit(): Promise<void> {

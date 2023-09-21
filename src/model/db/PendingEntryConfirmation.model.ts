@@ -23,7 +23,9 @@ export class PendingEntryConfirmationModel extends AbstractModel {
     })
     public submissionId: number;
 
-    @OneToOne("SubmissionModel", "confirmation", AbstractModel.cascadeOps)
+    @OneToOne("SubmissionModel", "confirmation", {
+        ...AbstractModel.cascadeOps
+    })
     @JoinColumn({
         name: "submissionId",
         referencedColumnName: "id"

@@ -1,12 +1,11 @@
 import {Inject, Service} from "@tsed/di";
 import {SubmissionModel} from "../model/db/Submission.model";
 import {SubmissionService} from "./SubmissionService";
-import {SQLITE_DATA_SOURCE} from "../model/di/tokens";
-import {DataSource} from "typeorm";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionRoundService} from "./SubmissionRoundService";
 import {BadRequest, InternalServerError} from "@tsed/exceptions";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
+import {SubmissionRepo} from "../db/repo/SubmissionRepo";
 
 @Service()
 export class SubmissionRoundResultService {
@@ -17,8 +16,8 @@ export class SubmissionRoundResultService {
     @Inject()
     private submissionRoundService: SubmissionRoundService;
 
-    @Inject(SQLITE_DATA_SOURCE)
-    private ds: DataSource;
+    @Inject()
+    private submissionRepo: SubmissionRepo;
 
     // Map of wad names to an array of submissions
     private readonly entryCache: Map<string, SubmissionModel[]> = new Map();
@@ -94,11 +93,11 @@ export class SubmissionRoundResultService {
             }
             entry.isChosen = true;
             if (!entry.status) {
-                entry.status = this.ds.manager.create(SubmissionStatusModel);
+                entry.status = new SubmissionStatusModel();
             }
             entries.push(entry);
         }
-        await this.ds.manager.save(SubmissionModel, entries);
+        await this.submissionRepo.saveOrUpdateSubmissions(entries);
         await this.submissionRoundService.endActiveSubmissionRound();
         this.entryCache.clear();
     }
@@ -116,7 +115,7 @@ export class SubmissionRoundResultService {
         if (round.submissions.length === 0) {
             return null;
         }
-        await this.buildResultSet(round.submissions.filter(submission => submission.isChosen));
+        await this.buildResultSet(round.submissions.filter(submission => !submission.isChosen));
         const entry = this.generateEntries(1)[0];
         await this.submitEntries([entry.id], round, true);
         return entry;

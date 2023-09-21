@@ -21,6 +21,5 @@ if (isProduction) {
 
 export default <PlatformLoggerSettings>{
     disableRoutesSummary: isProduction,
-    logRequest: !isProduction,
-    level: "debug"
+    logRequest: !isProduction
 };

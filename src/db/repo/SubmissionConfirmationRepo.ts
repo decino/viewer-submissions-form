@@ -22,7 +22,7 @@ export class SubmissionConfirmationRepo {
         return this.submissionConfirmationDao.getConfirmation(confirmationUid);
     }
 
-    public async deleteConfirmation(confirmation: PendingEntryConfirmationModel): Promise<boolean> {
+    public deleteConfirmation(confirmation: PendingEntryConfirmationModel): Promise<boolean> {
         return this.submissionConfirmationDao.deleteConfirmation(confirmation);
     }
 

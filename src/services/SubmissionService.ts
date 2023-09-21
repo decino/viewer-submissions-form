@@ -93,7 +93,8 @@ export class SubmissionService implements OnInit {
 
     public async modifyStatus(status: SubmissionStatusModel): Promise<void> {
         try {
-            await this.submissionRepo.setSubmissionStatus(status);
+            const foo = await this.submissionRepo.setSubmissionStatus(status);
+            console.log(foo);
         } catch (e) {
             throw new BadRequest(e.message, e);
         }

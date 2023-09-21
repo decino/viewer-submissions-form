@@ -15,6 +15,10 @@ export class SubmissionRepo {
     @Inject()
     private submissionConfirmationDao: SubmissionConfirmationDao;
 
+    public saveOrUpdateSubmissions(submissions: SubmissionModel[]): Promise<SubmissionModel[]> {
+        return this.submissionDao.saveOrUpdateSubmissions(submissions);
+    }
+
     public saveOrUpdateSubmission(entry: SubmissionModel): Promise<SubmissionModel> {
         return this.submissionDao.saveOrUpdateSubmission(entry);
     }
@@ -39,7 +43,7 @@ export class SubmissionRepo {
         for (const submission of submissions) {
             submission.verified = true;
         }
-        return this.submissionDao.saveOrUpdateSubmissions(submissions);
+        return this.saveOrUpdateSubmissions(submissions);
     }
 
 
@@ -53,10 +57,10 @@ export class SubmissionRepo {
 
     public async setSubmissionStatus(status: SubmissionStatusModel): Promise<SubmissionModel> {
         const submission = await this.retrieveSubmission(status.submissionId);
-        if (!submission) {
+        if (!submission || !submission.status) {
             throw new Error(`Unable to find submission with id ${status.submissionId}.`);
         }
-        submission.status = status;
+        submission.status.status = status.status;
         submission.status.additionalInfo = status.additionalInfo ?? null;
         return this.saveOrUpdateSubmission(submission);
     }

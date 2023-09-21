@@ -35,6 +35,9 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
     }
 
     public getSubmissions(ids: number[], transaction?: EntityManager): Promise<SubmissionModel[]> {
+        if (ids.length === 0) {
+            throw new Error("Please supply ids");
+        }
         return this.getEntityManager(transaction).find({
             where: {
                 id: In(ids)
@@ -44,6 +47,9 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
     }
 
     public getUnverifiedSubmissions(ids: number[], transaction?: EntityManager): Promise<SubmissionModel[]> {
+        if (ids.length === 0) {
+            throw new Error("Please supply ids");
+        }
         return this.getEntityManager(transaction).find({
             where: {
                 id: In(ids),

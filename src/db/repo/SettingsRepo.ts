@@ -30,7 +30,7 @@ export class SettingsRepo {
         if (!settingToDelete) {
             throw new Error("Unable to find setting");
         }
-        return await this.settingsDao.deleteSetting(settingToDelete) !== null;
+        return this.settingsDao.deleteSetting(settingToDelete);
     }
 
     public hasSetting(setting: SETTING): Promise<boolean> {

@@ -67,13 +67,13 @@ export class SubmissionRepo {
 
     public async deleteSubmissions(submissions: SubmissionModel[]): Promise<boolean>;
     public async deleteSubmissions(submissions: number[]): Promise<boolean>;
-    public async deleteSubmissions(entries: number[] | SubmissionModel[]): Promise<boolean> {
+    public async deleteSubmissions(submissions: number[] | SubmissionModel[]): Promise<boolean> {
         let submissionsToDelete: SubmissionModel[];
 
-        if (typeof entries[0] === "number") {
-            submissionsToDelete = await this.getSubmissions(entries as number[]);
+        if (typeof submissions[0] === "number") {
+            submissionsToDelete = await this.getSubmissions(submissions as number[]);
         } else {
-            submissionsToDelete = entries as SubmissionModel[];
+            submissionsToDelete = submissions as SubmissionModel[];
         }
 
         if (!submissionsToDelete || submissionsToDelete.length === 0) {

@@ -19,8 +19,8 @@ export class SettingsDao extends AbstractDao<SettingsModel> {
     }
 
     public saveOrUpdateSetting(setting: SettingsModel, transaction?: EntityManager): Promise<SettingsModel> {
-        const entityManger = this.getEntityManager(transaction);
-        return entityManger.save(setting);
+        const entityManager = this.getEntityManager(transaction);
+        return entityManager.save(setting);
     }
 
     public async deleteSetting(setting: SettingsModel, transaction?: EntityManager): Promise<boolean> {
@@ -35,8 +35,8 @@ export class SettingsDao extends AbstractDao<SettingsModel> {
     }
 
     public async hasSetting(setting: SETTING, transaction?: EntityManager): Promise<boolean> {
-        const entityManger = this.getEntityManager(transaction);
-        const count = await entityManger.countBy({
+        const entityManager = this.getEntityManager(transaction);
+        const count = await entityManager.countBy({
             setting
         });
         return count !== 0;

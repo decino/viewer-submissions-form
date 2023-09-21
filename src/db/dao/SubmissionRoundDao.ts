@@ -62,9 +62,7 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
 
     public saveOrUpdateRounds(models: SubmissionRoundModel | SubmissionRoundModel[], transaction?: EntityManager): Promise<SubmissionRoundModel | SubmissionRoundModel[]> {
         const manager = this.getEntityManager(transaction);
-        if (!Array.isArray(models)) {
-            return manager.save(models);
-        }
+        // @ts-ignore
         return manager.save(models);
     }
 

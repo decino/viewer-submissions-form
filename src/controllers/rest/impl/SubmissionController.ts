@@ -105,7 +105,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.OK, SuccessModel)
     public async verifyEntries(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
         await this.submissionConfirmationService.verifySubmissions(ids);
-        return super.doSuccess(res, `Entries have been deleted.`);
+        return super.doSuccess(res, `Entries have been verified.`);
     }
 
     @Delete("/deleteEntries")

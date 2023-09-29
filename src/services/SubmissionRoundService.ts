@@ -111,12 +111,9 @@ export class SubmissionRoundService implements OnInit {
     }
 
     public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {
-        const activeRound = await this.submissionRoundRepo.retrieveActiveRound();
+        const activeRound = await this.submissionRoundRepo.retrieveActiveRound(filterInvalidEntries);
         if (!activeRound) {
             return null;
-        }
-        if (filterInvalidEntries) {
-            activeRound.submissions = activeRound.submissions.filter(submission => submission.isSubmissionValidAndVerified());
         }
         return activeRound;
     }

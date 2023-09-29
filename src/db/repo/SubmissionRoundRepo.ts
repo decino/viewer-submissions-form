@@ -24,8 +24,8 @@ export class SubmissionRoundRepo {
         return this.submissionRoundDao.createRound(model);
     }
 
-    public retrieveActiveRound(): Promise<SubmissionRoundModel | null> {
-        return this.submissionRoundDao.retrieveActiveRound();
+    public retrieveActiveRound(filterInvalidEntries = false): Promise<SubmissionRoundModel | null> {
+        return this.submissionRoundDao.retrieveActiveRound(filterInvalidEntries);
     }
 
     public retrieveRound(roundId: number): Promise<SubmissionRoundModel | null> {
@@ -49,7 +49,7 @@ export class SubmissionRoundRepo {
 
     public endActiveRound(): Promise<boolean> {
         return this.submissionRoundDao.dataSource.transaction(async entityManager => {
-            const currentActiveRound = await this.submissionRoundDao.retrieveActiveRound(entityManager);
+            const currentActiveRound = await this.submissionRoundDao.retrieveActiveRound(false, entityManager);
             if (!currentActiveRound) {
                 return false;
             }

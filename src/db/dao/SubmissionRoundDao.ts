@@ -22,8 +22,14 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
         return manager.save(model);
     }
 
-    public retrieveActiveRound(transaction?: EntityManager): Promise<SubmissionRoundModel | null> {
+    public retrieveActiveRound(filterInvalidEntries = false, transaction?: EntityManager): Promise<SubmissionRoundModel | null> {
         const manager = this.getEntityManager(transaction);
+        if (filterInvalidEntries) {
+            return manager.createQueryBuilder("submissionRound")
+                .leftJoinAndSelect("submissionRound.submissions", "submission", "submission.submissionValid = true AND submission.verified = true")
+                .where("submissionRound.active = true")
+                .getOne();
+        }
         return manager.findOneBy({
             active: true
         });

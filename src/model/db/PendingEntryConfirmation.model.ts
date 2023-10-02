@@ -1,7 +1,6 @@
 import {AbstractModel} from "./AbstractModel";
 import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from "typeorm";
-import * as crypto from "crypto";
-import {UUID} from "crypto";
+import {randomUUID, UUID} from "crypto";
 import type {SubmissionModel} from "./Submission.model";
 import {Description, Example, Name} from "@tsed/schema";
 
@@ -36,6 +35,6 @@ export class PendingEntryConfirmationModel extends AbstractModel {
 
     @BeforeInsert()
     private generateUid(): void {
-        this.confirmationUid = crypto.randomUUID();
+        this.confirmationUid = randomUUID();
     }
 }

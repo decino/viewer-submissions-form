@@ -2,6 +2,7 @@ import {PendingEntryConfirmationModel} from "../../model/db/PendingEntryConfirma
 import {Inject, Injectable, ProviderScope} from "@tsed/di";
 import {SubmissionConfirmationDao} from "../dao/SubmissionConfirmationDao";
 import {Builder} from "builder-pattern";
+import {UUID} from "crypto";
 
 @Injectable({
     scope: ProviderScope.SINGLETON
@@ -18,7 +19,7 @@ export class SubmissionConfirmationRepo {
         return this.submissionConfirmationDao.createConfirmation(entry);
     }
 
-    public getConfirmation(confirmationUid: string): Promise<PendingEntryConfirmationModel | null> {
+    public getConfirmation(confirmationUid: UUID): Promise<PendingEntryConfirmationModel | null> {
         return this.submissionConfirmationDao.getConfirmation(confirmationUid);
     }
 

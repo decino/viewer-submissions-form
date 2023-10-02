@@ -9,6 +9,7 @@ import GlobalEnv from "../model/constants/GlobalEnv";
 import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
 import {SubmissionConfirmationRepo} from "../db/repo/SubmissionConfirmationRepo";
 import {SubmissionRepo} from "../db/repo/SubmissionRepo";
+import {UUID} from "crypto";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -31,7 +32,7 @@ export class SubmissionConfirmationService implements OnInit {
     @Constant(GlobalEnv.BASE_URL)
     private readonly baseUrl: string;
 
-    public async processConfirmation(confirmationUid: string): Promise<SubmissionModel> {
+    public async processConfirmation(confirmationUid: UUID): Promise<SubmissionModel> {
         const confirmation = await this.submissionConfirmationRepo.getConfirmation(confirmationUid);
         if (!confirmation) {
             throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);

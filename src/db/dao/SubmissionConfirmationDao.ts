@@ -4,6 +4,7 @@ import {Inject, Injectable, ProviderScope} from "@tsed/di";
 import {Logger} from "@tsed/logger";
 import {SQLITE_DATA_SOURCE} from "../../model/di/tokens";
 import {DataSource, EntityManager} from "typeorm";
+import {UUID} from "crypto";
 
 @Injectable({
     scope: ProviderScope.SINGLETON
@@ -23,7 +24,7 @@ export class SubmissionConfirmationDao extends AbstractDao<PendingEntryConfirmat
         return this.getEntityManager(transaction).save(pendingEntryConfirmationModel);
     }
 
-    public getConfirmation(confirmationUid: string, transaction?: EntityManager): Promise<PendingEntryConfirmationModel | null> {
+    public getConfirmation(confirmationUid: UUID, transaction?: EntityManager): Promise<PendingEntryConfirmationModel | null> {
         return this.getEntityManager(transaction).findOne({
             where: {
                 confirmationUid

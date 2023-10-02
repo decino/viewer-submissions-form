@@ -7,6 +7,7 @@ import {NotFound} from "@tsed/exceptions";
 import {SubmissionRoundResultService} from "../../services/SubmissionRoundResultService";
 import {IndexDto} from "../../DTO/IndexDto";
 import {Hidden} from "@tsed/swagger";
+import {UUID} from "crypto";
 
 @Controller("/")
 @Hidden()
@@ -43,7 +44,7 @@ export class HomeView {
 
     @Get("/processSubmission")
     @View("submissionSuccessful.ejs")
-    public async createRound(@QueryParams("uid") uid: string): Promise<unknown> {
+    public async processSubmission(@QueryParams("uid") uid: UUID): Promise<unknown> {
         const retStre = {
             message: "Your submission has been submitted and is awaiting manual verification. It will show as soon as it is verified.",
             success: true

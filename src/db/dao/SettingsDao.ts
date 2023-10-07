@@ -2,7 +2,7 @@ import {Inject, Injectable, ProviderScope} from "@tsed/di";
 import {AbstractDao} from "./AbstractDao";
 import {SettingsModel} from "../../model/db/Settings.model";
 import {SQLITE_DATA_SOURCE} from "../../model/di/tokens";
-import {DataSource, EntityManager} from "typeorm";
+import {DataSource, EntityManager, In} from "typeorm";
 import {Logger} from "@tsed/logger";
 import SETTING from "../../model/constants/Settings";
 
@@ -16,6 +16,11 @@ export class SettingsDao extends AbstractDao<SettingsModel> {
 
     public constructor(@Inject(SQLITE_DATA_SOURCE) ds: DataSource) {
         super(ds, SettingsModel);
+    }
+
+    public saveOrUpdateSettings(settings: SettingsModel[], transaction?: EntityManager): Promise<SettingsModel[]> {
+        const entityManager = this.getEntityManager(transaction);
+        return entityManager.save(settings);
     }
 
     public saveOrUpdateSetting(setting: SettingsModel, transaction?: EntityManager): Promise<SettingsModel> {
@@ -40,6 +45,12 @@ export class SettingsDao extends AbstractDao<SettingsModel> {
             setting
         });
         return count !== 0;
+    }
+
+    public getSettings(settings: SETTING[], transaction?: EntityManager): Promise<SettingsModel[]> {
+        return this.getEntityManager(transaction).findBy({
+            setting: In(settings)
+        });
     }
 
     public getSetting(setting: SETTING, transaction?: EntityManager): Promise<SettingsModel | null> {

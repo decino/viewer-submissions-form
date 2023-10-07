@@ -6,6 +6,7 @@ import {AfterInit, Logger, PlatformMulterFile} from "@tsed/common";
 import fs from "fs";
 import {BadRequest} from "@tsed/exceptions";
 import AdmZip, {IZipEntry} from "adm-zip";
+import {SettingsTuple} from "../utils/typeings";
 
 @Service()
 export class WadValidationService implements AfterInit {
@@ -33,20 +34,27 @@ export class WadValidationService implements AfterInit {
         const allowedExtensionsStr = allowedExtensions.join(",");
         const allowedZipHeaders = allowedHeadersZip.join(",");
         const allowedZipExtensions = allowedExtensionsZip.join(",");
-        await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_FILES, allowedExtensionsStr);
-        await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_HEADERS, allowedHeadersStr);
-        await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_FILES_ZIP, allowedZipExtensions);
-        await this.settingsService.saveOrUpdateSetting(SETTING.ALLOWED_HEADERS_ZIP, allowedZipHeaders);
+
+        const settingsTuple: SettingsTuple = [
+            [SETTING.ALLOWED_FILES, allowedExtensionsStr],
+            [SETTING.ALLOWED_HEADERS, allowedHeadersStr],
+            [SETTING.ALLOWED_FILES_ZIP, allowedZipExtensions],
+            [SETTING.ALLOWED_HEADERS_ZIP, allowedZipHeaders],
+        ];
+
+        await this.settingsService.saveOrUpdateSettings(settingsTuple);
         await this.loadMappings();
     }
 
     public async getValidationMappings(): Promise<WadValidationModel> {
         const retVal = new WadValidationModel();
 
-        const allowedHeaders = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS);
-        const allowedFiles = await this.settingsService.getSetting(SETTING.ALLOWED_FILES);
-        const allowedFilesZip = await this.settingsService.getSetting(SETTING.ALLOWED_FILES_ZIP);
-        const allowedHeadersZip = await this.settingsService.getSetting(SETTING.ALLOWED_HEADERS_ZIP);
+        const [allowedHeaders, allowedFiles, allowedFilesZip, allowedHeadersZip] = await this.settingsService.getSettings([
+            SETTING.ALLOWED_HEADERS,
+            SETTING.ALLOWED_FILES,
+            SETTING.ALLOWED_FILES_ZIP,
+            SETTING.ALLOWED_HEADERS_ZIP,
+        ]);
 
         if (allowedHeaders) {
             retVal.allowedHeaders = allowedHeaders.split(",")

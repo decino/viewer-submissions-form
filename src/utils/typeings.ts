@@ -1,5 +1,6 @@
 import {SubmissionModel} from "../model/db/Submission.model";
 import {Exception} from "@tsed/exceptions";
+import SETTING from "../model/constants/Settings";
 
 export type SubmissionModification = Partial<SubmissionModel>;
 
@@ -16,4 +17,6 @@ export type HttpErrorRenderObj = {
     title: string | null,
     message: string,
     internalError: Exception
-}
+};
+
+export type SettingsTuple = [SETTING, string][];

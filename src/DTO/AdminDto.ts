@@ -1,11 +1,13 @@
 import {IndexDto} from "./IndexDto";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionModel} from "../model/db/Submission.model";
+import {WadValidationService} from "../services/WadValidationService";
 
 export class AdminDto extends IndexDto {
     public constructor(currentActiveRound: SubmissionRoundModel | null,
-                       previousRounds: SubmissionRoundModel[]) {
-        super(currentActiveRound, previousRounds);
+                       previousRounds: SubmissionRoundModel[],
+                       wadValidationService: WadValidationService) {
+        super(currentActiveRound, previousRounds, wadValidationService);
         if (this.currentActiveRound) {
             this.currentActiveRound.submissions = this.currentActiveRound.submissions.filter(submission => submission.submissionValid);
         }

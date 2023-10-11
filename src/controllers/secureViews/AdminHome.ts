@@ -7,6 +7,7 @@ import {Authorize} from "@tsed/passport";
 import {Req} from "@tsed/common";
 import {CustomUserInfoModel} from "../../model/auth/CustomUserInfoModel";
 import {AdminDto} from "../../DTO/AdminDto";
+import {WadValidationService} from "../../services/WadValidationService";
 
 @Controller("/")
 @Hidden()
@@ -18,6 +19,9 @@ export class AdminHome {
     @Inject()
     private submissionRoundResultService: SubmissionRoundResultService;
 
+    @Inject()
+    private wadValidationService: WadValidationService;
+
     @Get()
     @Authorize("login")
     @Security("login")
@@ -27,7 +31,7 @@ export class AdminHome {
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         const user = req.user as CustomUserInfoModel;
         return {
-            indexModel: new AdminDto(currentActiveRound, previousRounds),
+            indexModel: new AdminDto(currentActiveRound, previousRounds, this.wadValidationService),
             user
         };
     }

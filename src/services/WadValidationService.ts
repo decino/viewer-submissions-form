@@ -23,6 +23,10 @@ export class WadValidationService implements AfterInit {
     // map of file extension to header BOM for zips only
     private allowedFilesZipMap: Map<string, string | null> = new Map();
 
+    public get allowedFiles(): string[] {
+        return [...this.allowedFilesMap.keys()];
+    }
+
     public async $afterInit(): Promise<void> {
         this.logger.info("Loading wad validation settings...");
         await this.loadMappings();

@@ -8,6 +8,7 @@ import {SubmissionRoundResultService} from "../../services/SubmissionRoundResult
 import {IndexDto} from "../../DTO/IndexDto";
 import {Hidden} from "@tsed/swagger";
 import {UUID} from "crypto";
+import {WadValidationService} from "../../services/WadValidationService";
 
 @Controller("/")
 @Hidden()
@@ -22,13 +23,16 @@ export class HomeView {
     @Inject()
     private submissionConfirmationService: SubmissionConfirmationService;
 
+    @Inject()
+    private wadValidationService: WadValidationService;
+
     @Get()
     @View("index.ejs")
     public async showRoot(): Promise<unknown> {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         return {
-            model: new IndexDto(currentActiveRound, previousRounds)
+            model: new IndexDto(currentActiveRound, previousRounds, this.wadValidationService)
         };
     }
 

@@ -2,12 +2,21 @@ import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import GZDOOM_ACTIONS from "../model/constants/GZDoomActions";
 import {ObjectUtils} from "../utils/Utils";
+import {WadValidationService} from "../services/WadValidationService";
 
 export class IndexDto {
     private readonly months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+    private readonly _allowedUploadExtensions: string;
+
     public constructor(public currentActiveRound: SubmissionRoundModel | null,
-                       public previousRounds: SubmissionRoundModel[]) {
+                       public previousRounds: SubmissionRoundModel[],
+                       public wadValidationService: WadValidationService) {
+        this._allowedUploadExtensions = wadValidationService.allowedFiles.map(ext => `.${ext}`).join(",");
+    }
+
+    public get allowedUploadExtensions(): string {
+        return this._allowedUploadExtensions;
     }
 
     public get doomEngines(): Record<string, unknown> {

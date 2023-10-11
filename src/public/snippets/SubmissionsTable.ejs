@@ -34,6 +34,10 @@ submissions = submissions.filter(submission => {
             <th scope="col">Status</th>
             <th scope="col">Comments</th>
         <% } %>
+
+        <% if (isAdmin || isPReviousResults){ %>
+            <th scope="col">Format</th>
+        <% } %>
     </tr>
     </thead>
     <tbody>
@@ -96,6 +100,9 @@ submissions = submissions.filter(submission => {
 
             <td class="<%- clazz; -%>"><%- toShow; -%></td>
             <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
+        <% } %>
+        <% if(isResults || isAdmin){ %>
+            <td><%- chosenSubmission.recordedFormat; -%></td>
         <% } %>
     </tr>
     <% } %>

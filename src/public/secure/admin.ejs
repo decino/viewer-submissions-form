@@ -552,11 +552,14 @@
             return false;
         }
 
-        function showSubmissionInfoModel(id, wadName, wadLevel, submitterName, wadEngine, gzDoomAction, author, distributable, info, email, downloadUrl) {
+        function showSubmissionInfoModel(id, wadName, wadLevel, submitterName, wadEngine, gzDoomAction, author, distributable, info, email, downloadUrl, format) {
             const modalContentWrapper = document.getElementById("submissionInfoContent");
             const modalTitle = document.getElementById("submissionInfoModalLabel");
 
             const title = `Info for submission ${id}`;
+            const template = document.createElement('template');
+            template.innerHTML = downloadUrl.trim();
+            const anchor = template.content.firstChild;
             const body = `
                 <p>Id: ${id}</p>
                 <p>Wad Name: ${wadName}</p>
@@ -565,10 +568,11 @@
                 ${gzDoomAction ? `<p>GZDoom actions: ${gzDoomAction}</p>` : ""}
                 ${submitterName ? `<p>Submitter name: ${submitterName}</p>` : ""}
                 <p>Submitter created this map: ${author}</p>
-                <p>distributable: ${distributable}</p>
+                <p>Distributable: ${distributable}</p>
                 ${info ? `Info: <pre style="white-space: pre-wrap; max-height: 200px;">${info}</pre>` : ""}
-                <p>email: ${email}</p>
-                <p>download: ${downloadUrl}</p>
+                <p>Email: ${email}</p>
+                <p>Record format: ${format}</p>
+                <p>Download: <a href="${anchor.href}" target=_blank">${anchor.href}</a></p>
             `;
             modalTitle.innerHTML = title;
             modalContentWrapper.innerHTML = body;
@@ -1355,7 +1359,7 @@
                                 alert(e.message);
                                 return;
                             }
-                            showSubmissionInfoModel(entry.id, entry.WADName, entry.level, entry.authorName, selectedRow[5], selectedRow[6], entry.author, entry.distributable, entry.info, entry.email, selectedRow[10]);
+                            showSubmissionInfoModel(entry.id, entry.WADName, entry.level, entry.authorName, selectedRow[5], selectedRow[6], entry.author, entry.distributable, entry.info, entry.email, selectedRow[10], entry.recordedFormat);
                         }
                     },
                     {

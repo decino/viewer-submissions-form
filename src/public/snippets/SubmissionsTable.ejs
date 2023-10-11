@@ -25,6 +25,7 @@ submissions = submissions.filter(submission => {
             <th scope="col">Submitter is author</th>
             <th scope="col">Distributable</th>
             <th scope="col">Info</th>
+            <th scope="col">Format</th>
         <% } %>
 
         <% if(isPReviousResults){ %>
@@ -62,6 +63,7 @@ submissions = submissions.filter(submission => {
             <td><%- chosenSubmission.submitterAuthor; -%></td>
             <td><%- chosenSubmission.distributable; -%></td>
             <td><%- chosenSubmission.info; -%></td>
+            <td><%- chosenSubmission.recordedFormat; -%></td>
         <% } %>
         <% if(isPReviousResults){ %>
             <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>

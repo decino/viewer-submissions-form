@@ -15,6 +15,8 @@ function mapEngine(value) {
             return "MBF";
         case "MBF21":
             return "MBF 21";
+        case "DOOM_64":
+            return "Doom 64";
     }
 }
 
@@ -55,7 +57,7 @@ function mapGzActions(value) {
                 <label for="wadFile" class="form-label">Upload WAD
                     <span title="required" class="text-danger">*</span></label>
                 <input name="file" class="form-control" type="file" id="wadFile"
-                       accept="<%- process.env.ALLOWED_FILES.split(",").map(fileExt => `.${fileExt}`).join(","); -%>">
+                       accept="<%- model.allowedUploadExtensions; -%>">
                 <div class="alert alert-danger mt-3 hidden" role="alert" id="fileSizeError">
                     File is too big
                 </div>
@@ -152,6 +154,18 @@ function mapGzActions(value) {
             <input name="email" type="email" class="form-control" id="email" placeholder="name@example.com" required>
         </div>
     <% } %>
+    <div class="mb-3">
+        <label class="d-block mb-2">What recording format would you like?
+            <span title="required" class="text-danger">*</span></label>
+        <div class="form-check form-check-inline">
+            <input name="recordedFormat" class="form-check-input" type="radio" id="formatBlind" value="Blind">
+            <label class="form-check-label" for="formatBlind">Blind</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input name="recordedFormat" class="form-check-input" type="radio" id="formatPractised" value="Practised" checked>
+            <label class="form-check-label" for="formatPractised">Practised</label>
+        </div>
+    </div>
     <div class="mb-3 text-center">
         <div class="g-recaptcha" data-theme="dark" data-sitekey="<%- process.env.RECAPTCHA_SITE_KEY; -%>" data-expired-callback="abortUpload"></div>
     </div>

@@ -10,6 +10,7 @@ import xss from "xss";
 import {SubmissionStatusModel} from "./SubmissionStatus.model";
 import STATUS from "../constants/STATUS";
 import {AfterDeserialize} from "@tsed/json-mapper";
+import RECORDED_FORMAT from "../constants/RecordedFormat";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -219,6 +220,15 @@ export class SubmissionModel extends AbstractModel {
     @Name("verified")
     @Description("If submission is verified")
     public verified: boolean;
+
+    @Column({
+        nullable: false,
+        type: "text",
+        default: RECORDED_FORMAT.PRACTISED
+    })
+    @Name("recordedFormat")
+    @Description("if it should be played blind or practised")
+    public recordedFormat: RECORDED_FORMAT;
 
     public downloadable(admin = false): boolean {
         if (admin) {

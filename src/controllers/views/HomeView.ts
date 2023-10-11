@@ -44,7 +44,7 @@ export class HomeView {
 
     @Get("/processSubmission")
     @View("submissionSuccessful.ejs")
-    public async processSubmission(@QueryParams("uid") uid: UUID): Promise<unknown> {
+    public async processSubmission(@QueryParams("uid") uid: string): Promise<unknown> {
         const retStre = {
             message: "Your submission has been submitted and is awaiting manual verification. It will show as soon as it is verified.",
             success: true
@@ -53,7 +53,7 @@ export class HomeView {
             if (!uid) {
                 throw new NotFound("No UID supplied.");
             }
-            await this.submissionConfirmationService.processConfirmation(uid);
+            await this.submissionConfirmationService.processConfirmation(uid as UUID);
         } catch (e) {
             retStre.message = e.message;
             retStre.success = false;

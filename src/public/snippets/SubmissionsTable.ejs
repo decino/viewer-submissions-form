@@ -25,7 +25,6 @@ submissions = submissions.filter(submission => {
             <th scope="col">Submitter is author</th>
             <th scope="col">Distributable</th>
             <th scope="col">Info</th>
-            <th scope="col">Format</th>
         <% } %>
 
         <% if(isPReviousResults){ %>
@@ -34,6 +33,10 @@ submissions = submissions.filter(submission => {
         <% if(isResults){ %>
             <th scope="col">Status</th>
             <th scope="col">Comments</th>
+        <% } %>
+
+        <% if (isAdmin || isPReviousResults){ %>
+            <th scope="col">Format</th>
         <% } %>
     </tr>
     </thead>
@@ -63,7 +66,6 @@ submissions = submissions.filter(submission => {
             <td><%- chosenSubmission.submitterAuthor; -%></td>
             <td><%- chosenSubmission.distributable; -%></td>
             <td><%- chosenSubmission.info; -%></td>
-            <td><%- chosenSubmission.recordedFormat; -%></td>
         <% } %>
         <% if(isPReviousResults){ %>
             <% if(chosenSubmission.getDownloadUrl(isAdmin ?? false) !== null){ %>
@@ -98,6 +100,9 @@ submissions = submissions.filter(submission => {
 
             <td class="<%- clazz; -%>"><%- toShow; -%></td>
             <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
+        <% } %>
+        <% if(isResults || isAdmin){ %>
+            <td><%- chosenSubmission.recordedFormat; -%></td>
         <% } %>
     </tr>
     <% } %>

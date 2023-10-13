@@ -13,7 +13,11 @@ submissions = submissions.filter(submission => {
         <% if(isAdmin){ %>
             <th scope="col">ID.</th>
         <% } %>
-        <th scope="col">Play order</th>
+        <% if(isResults){ %>
+            <th scope="col">Play order</th>
+        <% } else { %>
+            <th scope="col">No.</th>
+        <% } %>
         <th scope="col">WAD</th>
         <th scope="col">Level</th>
         <% if(isAdmin || (isPReviousResults && isResults) ){ %>
@@ -26,7 +30,6 @@ submissions = submissions.filter(submission => {
             <th scope="col">Distributable</th>
             <th scope="col">Info</th>
         <% } %>
-
         <% if(isPReviousResults){ %>
             <th scope="col">Download</th>
         <% } %>
@@ -35,7 +38,7 @@ submissions = submissions.filter(submission => {
             <th scope="col">Comments</th>
         <% } %>
 
-        <% if (isAdmin || isPReviousResults){ %>
+        <% if (isAdmin || isResults){ %>
             <th scope="col">Format</th>
         <% } %>
     </tr>
@@ -49,7 +52,11 @@ submissions = submissions.filter(submission => {
         <% if(isAdmin){ %>
             <td><%- chosenSubmission.id; -%></td>
         <% } %>
-        <td><%- i + 1; -%></td>
+        <% if(isResults || isAdmin || !isPReviousResults){ %>
+            <td><%- i + 1; -%></td>
+        <% } else{ %>
+            <td><%- chosenSubmission.id; -%></td>
+        <% } %>
         <td>
             <%- `<u>
                     <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">
@@ -101,7 +108,7 @@ submissions = submissions.filter(submission => {
             <td class="<%- clazz; -%>"><%- toShow; -%></td>
             <td class="normal"><%- chosenSubmission.status.additionalInfo ?? ""; -%></td>
         <% } %>
-        <% if(isResults || isAdmin){ %>
+        <% if(isAdmin || isResults){ %>
             <td><%- chosenSubmission.recordedFormat; -%></td>
         <% } %>
     </tr>

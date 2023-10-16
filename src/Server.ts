@@ -70,7 +70,7 @@ const opts: Partial<TsED.Configuration> = {
             {
                 root: `${__dirname}/public/tos.html`
             }
-        ],
+        ]
     },
     socketIO: {
         cors: {

@@ -556,7 +556,7 @@
             const modalContentWrapper = document.getElementById("submissionInfoContent");
             const modalTitle = document.getElementById("submissionInfoModalLabel");
 
-            const title = `Info for submission ${id}`;
+            const title = `Info for submission ${wadName}`;
             const template = document.createElement('template');
             template.innerHTML = downloadUrl.trim();
             const anchor = template.content.firstChild;
@@ -570,7 +570,7 @@
                 <p>Submitter created this map: ${author}</p>
                 <p>Distributable: ${distributable}</p>
                 ${info ? `Info: <pre style="white-space: pre-wrap; max-height: 200px;">${info}</pre>` : ""}
-                <p>Email: ${email}</p>
+                <p>Email: <span class="spoiler">${email}</span></p>
                 <p>Record format: ${format}</p>
                 <p>Download: <a href="${anchor.href}" target=_blank">${anchor.href}</a></p>
             `;

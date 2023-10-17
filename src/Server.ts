@@ -4,7 +4,7 @@ import "@tsed/platform-express";
 import "@tsed/ajv";
 import "@tsed/socketio";
 import "@tsed/swagger";
-import {LRUCache} from "lru-cache";
+import LRUCache from "lru-cache";
 // custom index imports
 import "./protocols";
 import "./filters";

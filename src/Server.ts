@@ -4,6 +4,7 @@ import "@tsed/platform-express";
 import "@tsed/ajv";
 import "@tsed/socketio";
 import "@tsed/swagger";
+import {LRUCache} from "lru-cache";
 // custom index imports
 import "./protocols";
 import "./filters";
@@ -104,7 +105,8 @@ const opts: Partial<TsED.Configuration> = {
         },
         options: {
             ejs: {
-                rmWhitespace: isProduction
+                rmWhitespace: isProduction,
+                cache: isProduction ? LRUCache : null
             }
         }
     },
@@ -112,7 +114,6 @@ const opts: Partial<TsED.Configuration> = {
         "**/*.spec.ts"
     ]
 };
-
 if (!isProduction) {
     opts["swagger"] = [
         {

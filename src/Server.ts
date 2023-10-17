@@ -4,7 +4,6 @@ import "@tsed/platform-express";
 import "@tsed/ajv";
 import "@tsed/socketio";
 import "@tsed/swagger";
-import {LRUCache} from 'lru-cache';
 // custom index imports
 import "./protocols";
 import "./filters";
@@ -29,6 +28,7 @@ import {DataSource} from "typeorm";
 import {SessionModel} from "./model/db/Session.model";
 import compression from "compression";
 import GlobalEnv from "./model/constants/GlobalEnv";
+import LRUCache = require("lru-cache");
 
 const opts: Partial<TsED.Configuration> = {
     ...config,

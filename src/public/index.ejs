@@ -16,66 +16,68 @@
         <% } else if(model.currentActiveRound !== null) { %>
             <% const isPaused = model.currentActiveRound.paused; %>
             <div class="row">
-                <div class="col-md-12">
-                    <div class="card-group">
-                        <div class="card border-primary mb-3">
-                            <div class="card-header"><%- model.currentActiveRound.name; -%></div>
-                            <div class="card-body">
-                                <% if(isPaused){ %>
-                                    <div id="overlay">
-                                        <h2 class="text-white">Submissions are paused.</h2>
-                                    </div>
-                                <% } %>
-                                <%- include('snippets/submitForm.ejs', {
-                                model: model,
-                                isAdmin: false
-                                }); %>
-                                <div class="mt-3">
-                                    <div class="hidden" id="error">
-                                        <div class="alert alert-danger d-flex align-items-center" role="alert">
-                                            <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
-                                            <div id="errorContent"></div>
-                                        </div>
-                                    </div>
-                                    <div class="hidden" id="success">
-                                        <div class="alert alert-success d-flex align-items-center" role="alert"
-                                             id="success">
-                                            <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
-                                            <div id="successContent">
-                                                An email has been sent to the address provided. Please click the
-                                                link in
-                                                your email to confirm your entry.
-                                                <strong>NOTE:</strong> this link will expire in 20 minutes.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <p>Please contact <a href="mailto:submissions@decino.nl">submissions@decino.nl</a> if you have any issues.</p>
-                            </div>
-                        </div>
-                        <div class="card border-primary mb-3 ml-3">
-                            <div class="card-header">Current submissions
-                                <span class="badge text-bg-success float-end hidden"
-                                      id="WSConnectedLabel">Live results</span>
-                                <span class="badge text-bg-danger float-end"
-                                      id="WSNotConnectedLabel">Not live results</span>
-                            </div>
-                            <div class="card-body" style="max-height: 1065px; overflow-y: auto;">
-                                <%- include('snippets/SubmissionsTable.ejs', {
-                                submissions: model.currentActiveRound.submissions,
-                                isPReviousResults: false,
-                                isAdmin: false,
-                                isResults: false
-                                }); %>
-                            </div>
-                            <% if (model.currentActiveRound.endDate){ %>
-                                <div class="card-footer">
-                                    <span class="badge text-bg-info">Submission deadline:</span> <%- `${model.getEndDate(model.currentActiveRound)}`; -%>
+                <div class="col-md-6">
+                    <div class="card border-primary mb-3">
+                        <div class="card-header"><%- model.currentActiveRound.name; -%></div>
+                        <div class="card-body" id="formCardBody">
+                            <% if(isPaused){ %>
+                                <div id="overlay">
+                                    <h2 class="text-white">Submissions are paused.</h2>
                                 </div>
                             <% } %>
+                            <%- include('snippets/submitForm.ejs', {
+                            model: model,
+                            isAdmin: false
+                            }); %>
+                            <div class="mt-3">
+                                <div class="hidden" id="error">
+                                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                        <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
+                                        <div id="errorContent"></div>
+                                    </div>
+                                </div>
+                                <div class="hidden" id="success">
+                                    <div class="alert alert-success d-flex align-items-center" role="alert"
+                                         id="success">
+                                        <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
+                                        <div id="successContent">
+                                            An email has been sent to the address provided. Please click the
+                                            link in
+                                            your email to confirm your entry.
+                                            <strong>NOTE:</strong> this link will expire in 20 minutes.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="card-footer">
+                            <p>Please contact <a href="mailto:submissions@decino.nl">submissions@decino.nl</a> if you have any issues.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-primary mb-3 ml-3">
+                        <div class="card-header">Current submissions
+                            <span class="badge text-bg-success float-end hidden"
+                                  id="WSConnectedLabel">Live results</span>
+                            <span class="badge text-bg-danger float-end"
+                                  id="WSNotConnectedLabel">Not live results</span>
+                        </div>
+                        <div class="card-body" style="overflow-y: auto;" id="resultsCardBody">
+                            <%- include('snippets/SubmissionsTable.ejs', {
+                            submissions: model.currentActiveRound.submissions,
+                            isPReviousResults: false,
+                            isAdmin: false,
+                            isResults: false
+                            }); %>
+                        </div>
+                        <% if (model.currentActiveRound.endDate){ %>
+                            <div class="card-footer">
+                                <p>
+                                    <span class="badge text-bg-info">Submission deadline:</span> <%- `${model.getEndDate(model.currentActiveRound)}`; -%>
+                                </p>
+                            </div>
+                        <% } %>
                     </div>
                 </div>
             </div>

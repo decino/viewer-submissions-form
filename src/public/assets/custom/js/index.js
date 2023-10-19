@@ -173,7 +173,16 @@ Site.loadPage(async function (site) {
                 site.display(true, gzActionsContainer);
             }
         });
-
+        ((() => {
+            const cardBody = document.getElementById("resultsCardBody");
+            const formCardBody = document.getElementById("formCardBody");
+            ['load', 'resize'].forEach(evt =>
+                window.addEventListener(evt, () => {
+                    const cardFormBodyHeight = formCardBody.offsetHeight;
+                    cardBody.style.maxHeight = `${cardFormBodyHeight}px`;
+                }, true)
+            );
+        })());
         const distributableRadios = document.querySelectorAll("#authorYes,#authorNo");
         if (distributableRadios) {
             for (const distributableRadio of distributableRadios) {

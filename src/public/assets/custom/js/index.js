@@ -175,13 +175,13 @@ Site.loadPage(async function (site) {
         });
         ((() => {
             const cardBody = document.getElementById("resultsCardBody");
+            const resizeListener = new ResizeObserver(entries => {
+                const formCardBodyObserver = entries[0];
+                const formCardBodyOffsetHeight = formCardBodyObserver.target.offsetHeight;
+                cardBody.style.maxHeight = `${formCardBodyOffsetHeight}px`;
+            });
             const formCardBody = document.getElementById("formCardBody");
-            ['load', 'resize'].forEach(evt =>
-                window.addEventListener(evt, () => {
-                    const cardFormBodyHeight = formCardBody.offsetHeight;
-                    cardBody.style.maxHeight = `${cardFormBodyHeight}px`;
-                }, true)
-            );
+            resizeListener.observe(formCardBody);
         })());
         const distributableRadios = document.querySelectorAll("#authorYes,#authorNo");
         if (distributableRadios) {

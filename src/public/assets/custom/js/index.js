@@ -178,7 +178,7 @@ Site.loadPage(async function (site) {
             const resizeListener = new ResizeObserver(entries => {
                 const formCardBodyObserver = entries[0];
                 const formCardBodyOffsetHeight = formCardBodyObserver.target.offsetHeight;
-                cardBody.style.maxHeight = `${formCardBodyOffsetHeight}px`;
+                cardBody.style.height = `${formCardBodyOffsetHeight}px`;
             });
             const formCardBody = document.getElementById("formCardBody");
             resizeListener.observe(formCardBody);

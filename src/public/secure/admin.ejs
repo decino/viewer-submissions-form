@@ -1429,11 +1429,14 @@
                                 const wadURL = submissionObj.WAD ?? null;
                                 const isAuthor = submissionObj.author;
                                 const distributable = isAuthor && submissionObj.distributable;
+                                const format = submissionObj.recordedFormat;
                                 const changeEv = new Event('change');
                                 const authorYes = document.getElementById("authorYes");
                                 const authorNo = document.getElementById("authorNo");
                                 const distributableYes = document.getElementById("distributableYes");
                                 const distributableNo = document.getElementById("distributableNo");
+                                const formatPractised = document.getElementById("formatPractised");
+                                const formatBlind = document.getElementById("formatBlind");
                                 if (isAuthor) {
                                     authorYes.checked = true;
                                     authorYes.dispatchEvent(changeEv);
@@ -1446,7 +1449,11 @@
                                 } else {
                                     distributableNo.checked = true;
                                 }
-
+                                if (format === "Blind") {
+                                    formatBlind.checked = true;
+                                } else {
+                                    formatPractised.checked = true;
+                                }
                                 const wadUrlInput = document.getElementById("wadDownloadUrlSection");
                                 if (!wadURL) {
                                     wadUrlInput.classList.add("hidden");
@@ -1548,7 +1555,7 @@
                                 window.location.reload();
                             }
                         }
-                    )
+                    );
                 }
                 dtOpts["buttons"] = buttons;
                 const table = new DataTable(el, dtOpts);

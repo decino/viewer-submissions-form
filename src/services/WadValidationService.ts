@@ -6,7 +6,7 @@ import {AfterInit, Logger, PlatformMulterFile} from "@tsed/common";
 import fs from "fs";
 import {BadRequest} from "@tsed/exceptions";
 import AdmZip, {IZipEntry} from "adm-zip";
-import {SettingsTuple} from "../utils/typeings";
+import {SettingsMap} from "../utils/typeings";
 
 @Service()
 export class WadValidationService implements AfterInit {
@@ -39,14 +39,13 @@ export class WadValidationService implements AfterInit {
         const allowedZipHeaders = allowedHeadersZip.join(",");
         const allowedZipExtensions = allowedExtensionsZip.join(",");
 
-        const settingsTuple: SettingsTuple = [
-            [SETTING.ALLOWED_FILES, allowedExtensionsStr],
-            [SETTING.ALLOWED_HEADERS, allowedHeadersStr],
-            [SETTING.ALLOWED_FILES_ZIP, allowedZipExtensions],
-            [SETTING.ALLOWED_HEADERS_ZIP, allowedZipHeaders],
-        ];
+        const settingsMap: SettingsMap = new Map();
+        settingsMap.set(SETTING.ALLOWED_FILES, allowedExtensionsStr);
+        settingsMap.set(SETTING.ALLOWED_HEADERS, allowedHeadersStr);
+        settingsMap.set(SETTING.ALLOWED_FILES_ZIP, allowedZipExtensions);
+        settingsMap.set(SETTING.ALLOWED_HEADERS_ZIP, allowedZipHeaders);
 
-        await this.settingsService.saveOrUpdateSettings(settingsTuple);
+        await this.settingsService.saveOrUpdateSettings(settingsMap);
         await this.loadMappings();
     }
 

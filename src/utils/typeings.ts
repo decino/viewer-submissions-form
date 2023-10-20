@@ -19,4 +19,4 @@ export type HttpErrorRenderObj = {
     internalError: Exception
 };
 
-export type SettingsTuple = [SETTING, string][];
+export type SettingsMap = Map<SETTING, string>;

@@ -3,7 +3,7 @@ import SETTING from "../model/constants/Settings";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {Logger} from "@tsed/common";
 import {SettingsRepo} from "../db/repo/SettingsRepo";
-import {SettingsTuple} from "../utils/typeings";
+import {SettingsMap} from "../utils/typeings";
 import {SettingsModel} from "../model/db/Settings.model";
 
 @Service()
@@ -50,8 +50,8 @@ export class SettingsService implements OnInit {
         return this.settingRepo.hasSetting(setting);
     }
 
-    public saveOrUpdateSettings(settingTuples: SettingsTuple): Promise<SettingsModel[]> {
-        return this.settingRepo.saveOrUpdateSettings(settingTuples);
+    public saveOrUpdateSettings(settingMap: SettingsMap): Promise<SettingsModel[]> {
+        return this.settingRepo.saveOrUpdateSettings(settingMap);
     }
 
     public saveOrUpdateSetting(setting: SETTING, value: string): Promise<SettingsModel> {
@@ -71,29 +71,29 @@ export class SettingsService implements OnInit {
         const hasAllowedFilesZip = await this.hasSetting(SETTING.ALLOWED_FILES_ZIP);
 
 
-        const updateSettingTuple: SettingsTuple = [];
+        const updateSettingMap: SettingsMap = new Map();
         if (!hasAllowedHeaders) {
             this.logger.info("Settings Allowed headers");
-            updateSettingTuple.push([SETTING.ALLOWED_HEADERS, this.defaultAllowedHeaders]);
+            updateSettingMap.set(SETTING.ALLOWED_HEADERS, this.defaultAllowedHeaders);
         }
 
         if (!hasAllowedHeadersZip) {
             this.logger.info("Settings Allowed headers zip");
-            updateSettingTuple.push([SETTING.ALLOWED_HEADERS_ZIP, this.defaultAllowedHeadersZip]);
+            updateSettingMap.set(SETTING.ALLOWED_HEADERS_ZIP, this.defaultAllowedHeadersZip);
         }
 
         if (!hasAllowedFiles) {
             this.logger.info("Settings Allowed files");
-            updateSettingTuple.push([SETTING.ALLOWED_FILES, this.defaultAllowedFiles]);
+            updateSettingMap.set(SETTING.ALLOWED_FILES, this.defaultAllowedFiles);
         }
 
         if (!hasAllowedFilesZip) {
             this.logger.info("Settings Allowed files zip");
-            updateSettingTuple.push([SETTING.ALLOWED_FILES_ZIP, this.defaultAllowedFilesZip]);
+            updateSettingMap.set(SETTING.ALLOWED_FILES_ZIP, this.defaultAllowedFilesZip);
         }
 
-        if (updateSettingTuple.length !== 0) {
-            await this.saveOrUpdateSettings(updateSettingTuple);
+        if (updateSettingMap.size !== 0) {
+            await this.saveOrUpdateSettings(updateSettingMap);
         }
     }
 }

@@ -3,7 +3,7 @@ import {SettingsDao} from "../dao/SettingsDao";
 import {SettingsModel} from "../../model/db/Settings.model";
 import SETTING from "../../model/constants/Settings";
 import {Builder} from "builder-pattern";
-import {SettingsTuple} from "../../utils/typeings";
+import {SettingsMap} from "../../utils/typeings";
 
 @Injectable({
     scope: ProviderScope.SINGLETON
@@ -13,11 +13,11 @@ export class SettingsRepo {
     @Inject()
     private settingsDao: SettingsDao;
 
-    public async saveOrUpdateSettings(settingTuples: SettingsTuple): Promise<SettingsModel[]> {
-        const settingsToUpdatePromises = settingTuples.map(settingTuple => {
-            const [setting, value] = settingTuple;
-            return this.getSettingToUpdate(setting, value);
-        });
+    public async saveOrUpdateSettings(settingMap: SettingsMap): Promise<SettingsModel[]> {
+        const settingsToUpdatePromises: Promise<SettingsModel>[] = [];
+        for (const [setting, value] of settingMap) {
+            settingsToUpdatePromises.push(this.getSettingToUpdate(setting, value));
+        }
         const settingsToUpdate = await Promise.all(settingsToUpdatePromises);
         return this.settingsDao.saveOrUpdateSettings(settingsToUpdate);
     }

@@ -1265,11 +1265,12 @@
             });
 
             document.getElementById("newRoundModalOk").addEventListener("click", async ev => {
-                const roundName = document.getElementById("roundName").value;
+                let roundName = document.getElementById("roundName").value;
                 if (!roundName) {
                     alert("Please supply a name");
                     return;
                 }
+                roundName = encodeURIComponent(roundName);
                 const endDate = document.getElementById("roundDeadline").valueAsNumber;
                 site.loading(true);
                 let newRound;

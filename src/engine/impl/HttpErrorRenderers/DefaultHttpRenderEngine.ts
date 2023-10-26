@@ -23,7 +23,6 @@ export class DefaultHttpRenderEngine implements IHttpErrorRenderEngine<DefaultRe
         return false;
     }
 
-
     public mapError(error: Exception): DefaultRenderObj {
         return {
             name: error.origin?.name ?? error.name,

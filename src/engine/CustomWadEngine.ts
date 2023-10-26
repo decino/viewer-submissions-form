@@ -1,7 +1,6 @@
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
+import {Injectable, ProviderScope} from "@tsed/di";
 import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
-import {SettingsService} from "../services/SettingsService";
 
 export type CustomWadEntry = {
     content: Buffer,
@@ -13,9 +12,6 @@ export type CustomWadEntry = {
 })
 export class CustomWadEngine {
     private readonly basePath = `${__dirname}/../../customWads`;
-
-    @Inject()
-    private readonly settingsService: SettingsService;
 
     public async getWad(round: number, entryId: number): Promise<CustomWadEntry | null> {
         const files = await fs.promises.readdir(`${this.basePath}/${round}/${entryId}`);

@@ -241,7 +241,7 @@ export class SubmissionModel extends AbstractModel {
         if (this.status?.status !== STATUS.COMPLETED) {
             return false;
         }
-
+        // if submission is the author, and it's not distributable return false. else return true
         return !(this.submitterAuthor && !this.distributable);
     }
 

@@ -10,6 +10,7 @@ import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
 import {SubmissionConfirmationRepo} from "../db/repo/SubmissionConfirmationRepo";
 import {SubmissionRepo} from "../db/repo/SubmissionRepo";
 import {UUID} from "crypto";
+import {Logger} from "@tsed/common";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -29,6 +30,9 @@ export class SubmissionConfirmationService implements OnInit {
     @Inject()
     private submissionRepo: SubmissionRepo;
 
+    @Inject()
+    private logger: Logger;
+
     @Constant(GlobalEnv.BASE_URL)
     private readonly baseUrl: string;
 
@@ -38,6 +42,7 @@ export class SubmissionConfirmationService implements OnInit {
             throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
         }
         const updatedSubmission = await this.submissionRepo.validateSubmission(confirmation.submission);
+        this.logger.info(`submission with uid ${confirmationUid} has been validated`);
         // ignore promise
         this.discordBotDispatcherService.sendPendingSubmission(updatedSubmission);
         return updatedSubmission;
@@ -75,11 +80,15 @@ export class SubmissionConfirmationService implements OnInit {
         }
     }
 
-    private sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<SentMessageInfo> {
+    private async sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<SentMessageInfo> {
         const baseUrl = this.baseUrl;
-        const confirmationUrl = `${baseUrl}/processSubmission?uid=${pendingEntry.confirmationUid}`;
+        const guid = pendingEntry.confirmationUid;
+        const confirmationUrl = `${baseUrl}/processSubmission?uid=${guid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;
-        return this.emailService.sendMail(body, pendingEntry.submission.submitterEmail);
+        const to = pendingEntry.submission.submitterEmail;
+        const messageInfo = await this.emailService.sendMail(body, to);
+        this.logger.info(`${to} email sent with guild ${guid}`);
+        return messageInfo;
     }
 
 }

@@ -13,6 +13,7 @@ import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 import GlobalEnv from "../model/constants/GlobalEnv";
 import {WadValidationService} from "./WadValidationService";
 import {SubmissionRepo} from "../db/repo/SubmissionRepo";
+import RECORDED_FORMAT from "../model/constants/RecordedFormat";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -129,6 +130,10 @@ export class SubmissionService implements OnInit {
 
         if (submission.submitterAuthor && entry.distributable) {
             submission.distributable = entry.distributable === "true";
+        }
+
+        if (entry.recordedFormat) {
+            submission.recordedFormat = entry.recordedFormat as RECORDED_FORMAT;
         }
 
         submission.submitterName = entry.authorName as string ?? null;

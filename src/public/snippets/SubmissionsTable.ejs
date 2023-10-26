@@ -59,7 +59,7 @@ submissions = submissions.filter(submission => {
         <% } %>
         <td>
             <%- `<u>
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName}">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName.replace("\"", "")}">
                         ${chosenSubmission.wadName}</span>
                 </u>`; -%>
         </td>

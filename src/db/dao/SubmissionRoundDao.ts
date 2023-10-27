@@ -53,6 +53,19 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
         return true;
     }
 
+    public async getMostSubmittedWadName(roundId?: number, transaction?: EntityManager): Promise<string | null> {
+        const entityMan = this.getEntityManager(transaction);
+        const submissionModel = await
+            entityMan.createQueryBuilder("submissionRound")
+                .where("active = true")
+                .leftJoinAndSelect("submissionRound.submissions", "submission")
+                .groupBy("submission.wadName")
+                .orderBy("count(*)", "DESC")
+                .limit(1)
+                .getOne();
+        return submissionModel?.submissions[0]?.wadName ?? null;
+    }
+
     public async getAllRounds(includeActive = true, transaction?: EntityManager): Promise<SubmissionRoundModel[]> {
         const manager = this.getEntityManager(transaction);
         let rounds: SubmissionRoundModel[];

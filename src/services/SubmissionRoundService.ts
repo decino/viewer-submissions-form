@@ -35,6 +35,10 @@ export class SubmissionRoundService implements OnInit {
         }
     }
 
+    public getMostSubmittedWadName(roundId?: number): Promise<string | null> {
+        return this.submissionRoundRepo.getMostSubmittedWadName(roundId);
+    }
+
     public async newSubmissionRound(name: string, endDate: number | null): Promise<SubmissionRoundModel> {
         const activeRound = await this.submissionRoundRepo.retrieveActiveRound();
         if (activeRound) {

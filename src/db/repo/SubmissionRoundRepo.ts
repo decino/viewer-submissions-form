@@ -24,6 +24,10 @@ export class SubmissionRoundRepo {
         return this.submissionRoundDao.createRound(model);
     }
 
+    public getMostSubmittedWadName(roundId?: number): Promise<string | null> {
+        return this.submissionRoundDao.getMostSubmittedWadName(roundId);
+    }
+
     public retrieveActiveRound(filterInvalidEntries = false): Promise<SubmissionRoundModel | null> {
         return this.submissionRoundDao.retrieveActiveRound(filterInvalidEntries);
     }

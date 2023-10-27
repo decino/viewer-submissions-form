@@ -30,9 +30,11 @@ export class AdminHome {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         const user = req.user as CustomUserInfoModel;
+        const mostSubmittedWad = await this.submissionRoundService.getMostSubmittedWadName();
         return {
             indexModel: new AdminDto(currentActiveRound, previousRounds, this.wadValidationService),
-            user
+            user,
+            mostSubmittedWad
         };
     }
 

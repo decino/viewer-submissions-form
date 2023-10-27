@@ -11,6 +11,7 @@ import {SubmissionConfirmationRepo} from "../db/repo/SubmissionConfirmationRepo"
 import {SubmissionRepo} from "../db/repo/SubmissionRepo";
 import {UUID} from "crypto";
 import {Logger} from "@tsed/common";
+import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
@@ -86,7 +87,7 @@ export class SubmissionConfirmationService implements OnInit {
         const confirmationUrl = `${baseUrl}/processSubmission?uid=${guid}`;
         const body = `Please click the link below to confirm your submission. This link will expire in 20 minutes.\n${confirmationUrl}`;
         const to = pendingEntry.submission.submitterEmail;
-        const messageInfo = await this.emailService.sendMail(body, to);
+        const messageInfo = await this.emailService.sendMail(to, EMAIL_TEMPLATE.NEW_SUBMISSION, body);
         this.logger.info(`${to} email sent with guild ${guid}`);
         return messageInfo;
     }

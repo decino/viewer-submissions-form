@@ -6,6 +6,7 @@ import GlobalEnv from "../model/constants/GlobalEnv";
 import {createTransport, Transporter} from "nodemailer";
 import {isProduction} from "../config/envs";
 import {BadRequest} from "@tsed/exceptions";
+import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
 
 @Service()
 export class EmailService implements BeforeInit {
@@ -36,6 +37,19 @@ export class EmailService implements BeforeInit {
     @Constant(GlobalEnv.REPLY_TO)
     private readonly smtpReplyTo: string;
 
+    private readonly emailTemplateMapping: Record<EMAIL_TEMPLATE, { subject: string, body?: string }> = {
+        [EMAIL_TEMPLATE.DELETED]: {
+            body: "Your submission has been rejected, please submit a different WAD or level",
+            subject: "Submission rejected"
+        },
+        [EMAIL_TEMPLATE.REJECTED]: {
+            subject: "Submission rejected"
+        },
+        [EMAIL_TEMPLATE.NEW_SUBMISSION]: {
+            subject: "Viewer-Submitted Levels Confirmation"
+        }
+    };
+
     public async $beforeInit(): Promise<void> {
         const transporter = createTransport({
             host: this.smtpHost,
@@ -63,17 +77,22 @@ export class EmailService implements BeforeInit {
         this.emailTransport = transporter;
     }
 
-    public async sendMail(body: string, to: string): Promise<SentMessageInfo> {
+    public async sendMail(to: string, template: EMAIL_TEMPLATE, body?: string): Promise<SentMessageInfo> {
         const env: Envelope = {
             from: this.smtpFrom,
             to
         };
+        const mapping = this.emailTemplateMapping[template];
+        if (!mapping.body && !body) {
+            throw new Error("Unable to send email with no body");
+        }
+
         const sentMail = await this.emailTransport.sendMail({
             ...env,
-            text: body,
+            text: body ?? mapping.body,
             replyTo: this.smtpReplyTo,
             sender: this.smtpFrom,
-            subject: "Viewer-Submitted Levels Confirmation"
+            subject: mapping.subject
         });
         this.logger.info(`send mail to: ${to}. mail transport id: ${sentMail.messageId}`);
         if (!this.wasAccepted(sentMail, to)) {

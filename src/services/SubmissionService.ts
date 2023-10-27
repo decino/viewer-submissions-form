@@ -14,6 +14,9 @@ import GlobalEnv from "../model/constants/GlobalEnv";
 import {WadValidationService} from "./WadValidationService";
 import {SubmissionRepo} from "../db/repo/SubmissionRepo";
 import RECORDED_FORMAT from "../model/constants/RecordedFormat";
+import {EmailService} from "./EmailService";
+import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
+import STATUS from "../model/constants/STATUS";
 
 @Service()
 export class SubmissionService implements OnInit {
@@ -40,6 +43,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private submissionRepo: SubmissionRepo;
+
+    @Inject()
+    private emailService: EmailService;
 
     @Constant(GlobalEnv.HELP_EMAIL)
     private readonly helpEmail: string;
@@ -94,10 +100,19 @@ export class SubmissionService implements OnInit {
 
     public async modifyStatus(status: SubmissionStatusModel): Promise<void> {
         try {
-            const foo = await this.submissionRepo.setSubmissionStatus(status);
-            console.log(foo);
+            await this.submissionRepo.setSubmissionStatus(status);
         } catch (e) {
             throw new BadRequest(e.message, e);
+        }
+        if (status.status === STATUS.REJECTED) {
+            const entry = await this.submissionRepo.retrieveSubmission(status.submissionId);
+            if (entry) {
+                let body = "Your submission has been rejected during play-though";
+                if (status.additionalInfo) {
+                    body += ` with comment "${status.additionalInfo}"`;
+                }
+                await this.emailService.sendMail(entry.submitterEmail, EMAIL_TEMPLATE.DELETED, body);
+            }
         }
     }
 
@@ -178,6 +193,13 @@ export class SubmissionService implements OnInit {
             return false;
         }
 
+        // email the submitter, but only if the submission was chosen, if it was deleted from an already finished round, do not email
+        const emailPromises = submissionsToDelete.map(entry => entry.isChosen ? Promise.resolve() : this.emailService.sendMail(entry.submitterEmail, EMAIL_TEMPLATE.DELETED));
+        try {
+            await Promise.all(emailPromises);
+        } catch (e) {
+            this.logger.error("Unable to send submission rejection email", e);
+        }
         this.submissionSocket.emitSubmissionDelete(ids);
         return true;
     }

@@ -1,0 +1,7 @@
+enum EMAIL_TEMPLATE {
+    REJECTED,
+    DELETED,
+    NEW_SUBMISSION
+}
+
+export default EMAIL_TEMPLATE;

@@ -32,7 +32,7 @@ export class HomeView {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         return {
-            model: new IndexDto(currentActiveRound, previousRounds, this.wadValidationService),
+            model: new IndexDto(currentActiveRound, previousRounds, this.wadValidationService)
         };
     }
 

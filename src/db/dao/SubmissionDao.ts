@@ -29,8 +29,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return this.getEntityManager(transaction).findOne({
             where: {
                 id
-            },
-            relations: ["submissionRound"]
+            }
         });
     }
 
@@ -41,8 +40,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return this.getEntityManager(transaction).find({
             where: {
                 id: In(ids)
-            },
-            relations: ["submissionRound"]
+            }
         });
     }
 

@@ -85,7 +85,7 @@ export class SubmissionRoundResultService {
                 throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
             if (append) {
-                const playOrders = activeRound.submissions.filter(submission => submission.isChosen).map(submission => submission.playOrder);
+                const playOrders = activeRound.submissions.filter(submission => submission.isChosen).map(submission => submission.playOrder!);
                 const max = Math.max(...playOrders);
                 entry.playOrder = max + 1;
             } else {
@@ -98,7 +98,9 @@ export class SubmissionRoundResultService {
             entries.push(entry);
         }
         await this.submissionRepo.saveOrUpdateSubmissions(entries);
-        await this.submissionRoundService.endActiveSubmissionRound();
+        if (!append) {
+            await this.submissionRoundService.endActiveSubmissionRound();
+        }
         this.entryCache.clear();
     }
 

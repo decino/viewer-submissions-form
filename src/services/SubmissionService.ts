@@ -59,8 +59,7 @@ export class SubmissionService implements OnInit {
             throw new BadRequest("Unable to add entry as the current round is paused.");
         }
         try {
-            this.validateSubmission(entry, currentActiveRound, customWad);
-            await this.hasBeenPreviouslyPlayed(entry);
+            await this.validateSubmission(entry, currentActiveRound, customWad);
         } catch (e) {
             if (customWad) {
                 try {
@@ -213,35 +212,37 @@ export class SubmissionService implements OnInit {
         this.scheduler.addSimpleIntervalJob(job);
     }
 
-    private async hasBeenPreviouslyPlayed(entry: SubmissionModel): Promise<void> {
-        const previousRounds = await this.submissionRoundService.getAllSubmissionRounds(false);
-        for (const previousRound of previousRounds) {
-            const chosenEntries = previousRound.submissions.filter(submission => submission.isChosen);
-            for (const chosenEntry of chosenEntries) {
-                if ((chosenEntry.wadURL === entry.wadURL || chosenEntry.wadName === entry.wadName) && this.getNumberPart(chosenEntry.wadLevel) === this.getNumberPart(entry.wadLevel)) {
-                    throw new Error("This map has been previously played and can not be submitted");
+    private async isAlreadySubmitted(entry: SubmissionModel): Promise<void> {
+        const allSubmissionRounds = await this.submissionRoundService.getAllSubmissionRounds();
+        for (const submissionRound of allSubmissionRounds) {
+            const allEntries = submissionRound.submissions;
+            for (const entryFromRound of allEntries) {
+                if (!entryFromRound.isChosen) {
+                    continue;
+                }
+                if ((entryFromRound.wadURL === entry.wadURL || entryFromRound.wadName === entry.wadName) && this.getNumberPart(entryFromRound.wadLevel) === this.getNumberPart(entry.wadLevel)) {
+                    let errorMsg = "this wad/map combination already been submitted. Please submit a different map.";
+                    if (!submissionRound.active) {
+                        errorMsg += ` The map was submitted in: "${submissionRound.name}" at position: ${entryFromRound.playOrder}`;
+                    }
+                    throw new Error(errorMsg);
                 }
             }
         }
     }
 
-    private validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel, customWad?: PlatformMulterFile): void {
+    private async validateSubmission(entry: SubmissionModel, round: SubmissionRoundModel, customWad?: PlatformMulterFile): Promise<void> {
         if (!customWad && !entry.wadURL) {
             throw new Error("Either WAD URL or a file must be uploaded.");
         }
-        const wadUrl = entry.wadURL;
         const submitterName = entry.submitterName;
-        const level = this.getNumberPart(entry.wadLevel);
         const email = entry.submitterEmail;
-        const wadName = entry.wadName;
         for (const submission of round.submissions) {
             if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${this.helpEmail ?? "decino"} to change your submission.`);
             }
-            if ((submission.wadURL === wadUrl || submission.wadName === wadName) && this.getNumberPart(submission.wadLevel) === level) {
-                throw new Error("This level for this WAD has already been submitted. Please submit a different map.");
-            }
         }
+        await this.isAlreadySubmitted(entry);
     }
 
     private getNumberPart(num: string): string {

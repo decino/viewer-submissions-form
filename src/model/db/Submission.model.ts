@@ -135,9 +135,10 @@ export class SubmissionModel extends AbstractModel {
     @Description("The order in what this submission was played")
     @Column({
         nullable: true,
-        default: null
+        default: null,
+        type: "integer"
     })
-    public playOrder: number;
+    public playOrder: number | null;
 
     @Column({
         nullable: true,

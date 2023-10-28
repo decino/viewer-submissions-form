@@ -1410,7 +1410,48 @@
                         {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10]}
                     ];
                 }
-                if (!isPreviousRoundCard) {
+
+                if (isPreviousRoundCard) {
+                    buttons.push({
+                            extend: 'selectedSingle',
+                            text: 'Change status',
+                            action: async (e, dt) => {
+                                const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                let submission;
+                                try {
+                                    submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const submissionObj = await submission.json();
+                                const statusObj = submissionObj.status;
+                                const dd = document.getElementById('statusSelect');
+                                const input = document.getElementById("statusComments");
+                                document.getElementById("statusSubmissionId").value = submissionObj.id;
+                                input.value = null;
+                                dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
+                                if (statusObj.additionalInfo) {
+                                    input.value = statusObj.additionalInfo;
+                                }
+                                document.getElementById("submissionStatusModalOk").dataset.entryid = submissionEntryId;
+                                submissionStatusModal.show();
+                            }
+                        },
+                        {
+                            extend: 'selectedSingle',
+                            text: 'Set YouTube link',
+                            action: async (e, dt) => {
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                document.getElementById("setYoutubeLinkSubmissionId").value = id;
+                                setYoutubeLinkModal.show();
+                            }
+                        });
+                }
+
+                if (!isValidationTable) {
                     buttons.push(
                         {
                             extend: 'selectedSingle',
@@ -1475,44 +1516,6 @@
                                 document.getElementById("authorName").value = submitterName;
                                 document.getElementById("submissionId").value = id;
                                 submissionModificationModal.show();
-                            }
-                        });
-                } else {
-                    buttons.push({
-                            extend: 'selectedSingle',
-                            text: 'Change status',
-                            action: async (e, dt) => {
-                                const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
-                                const selectedRow = dt.row({selected: true}).data();
-                                const id = selectedRow[0];
-                                let submission;
-                                try {
-                                    submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
-                                } finally {
-                                    site.loading(false);
-                                }
-                                const submissionObj = await submission.json();
-                                const statusObj = submissionObj.status;
-                                const dd = document.getElementById('statusSelect');
-                                const input = document.getElementById("statusComments");
-                                document.getElementById("statusSubmissionId").value = submissionObj.id;
-                                input.value = null;
-                                dd.selectedIndex = [...dd.options].findIndex(option => option.text === statusObj.status);
-                                if (statusObj.additionalInfo) {
-                                    input.value = statusObj.additionalInfo;
-                                }
-                                document.getElementById("submissionStatusModalOk").dataset.entryid = submissionEntryId;
-                                submissionStatusModal.show();
-                            }
-                        },
-                        {
-                            extend: 'selectedSingle',
-                            text: 'Set YouTube link',
-                            action: async (e, dt) => {
-                                const selectedRow = dt.row({selected: true}).data();
-                                const id = selectedRow[0];
-                                document.getElementById("setYoutubeLinkSubmissionId").value = id;
-                                setYoutubeLinkModal.show();
                             }
                         });
                 }

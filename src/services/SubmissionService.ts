@@ -171,7 +171,7 @@ export class SubmissionService implements OnInit {
     }
 
 
-    public async deleteEntries(ids: number[]): Promise<boolean> {
+    public async deleteEntries(ids: number[], notify = true): Promise<boolean> {
         const submissionsToDelete = await this.submissionRepo.getSubmissions(ids);
         const pArr: Promise<void>[] = [];
 
@@ -192,13 +192,17 @@ export class SubmissionService implements OnInit {
             return false;
         }
 
-        // email the submitter, but only if the submission was chosen, if it was deleted from an already finished round, do not email
-        const emailPromises = submissionsToDelete.map(entry => entry.isChosen ? Promise.resolve() : this.emailService.sendMail(entry.submitterEmail, EMAIL_TEMPLATE.DELETED));
-        try {
-            await Promise.all(emailPromises);
-        } catch (e) {
-            this.logger.error("Unable to send submission rejection email", e);
+
+        if (notify) {
+            // email the submitter, but only if the submission was chosen, if it was deleted from an already finished round, do not email
+            const emailPromises = submissionsToDelete.map(entry => entry.isChosen ? Promise.resolve() : this.emailService.sendMail(entry.submitterEmail, EMAIL_TEMPLATE.DELETED));
+            try {
+                await Promise.all(emailPromises);
+            } catch (e) {
+                this.logger.error("Unable to send submission rejection email", e);
+            }
         }
+
         this.submissionSocket.emitSubmissionDelete(ids);
         return true;
     }
@@ -276,6 +280,6 @@ export class SubmissionService implements OnInit {
         }
         this.logger.info(`Found ${entriesToDelete.length} pending submissions that have expired. Deleting...`);
         const entryIds = entriesToDelete.map(entry => entry.id);
-        return this.deleteEntries(entryIds);
+        return this.deleteEntries(entryIds, false);
     }
 }

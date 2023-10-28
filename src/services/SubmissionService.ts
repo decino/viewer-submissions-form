@@ -217,7 +217,7 @@ export class SubmissionService implements OnInit {
         for (const submissionRound of allSubmissionRounds) {
             const allEntries = submissionRound.submissions;
             for (const entryFromRound of allEntries) {
-                if (!entryFromRound.isChosen) {
+                if (!submissionRound.active && !entryFromRound.isChosen) {
                     continue;
                 }
                 if ((entryFromRound.wadURL === entry.wadURL || entryFromRound.wadName === entry.wadName) && this.getNumberPart(entryFromRound.wadLevel) === this.getNumberPart(entry.wadLevel)) {

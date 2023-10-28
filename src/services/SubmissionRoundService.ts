@@ -114,8 +114,8 @@ export class SubmissionRoundService implements OnInit {
         return this.submissionRoundRepo.saveOrUpdateRounds(submissionRounds);
     }
 
-    public async getCurrentActiveSubmissionRound(includeInvalidEntries = true): Promise<SubmissionRoundModel | null> {
-        const activeRound = await this.submissionRoundRepo.retrieveActiveRound(includeInvalidEntries);
+    public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {
+        const activeRound = await this.submissionRoundRepo.retrieveActiveRound(filterInvalidEntries);
         if (!activeRound) {
             return null;
         }

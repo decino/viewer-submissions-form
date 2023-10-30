@@ -53,12 +53,13 @@ export class DiscordBotDispatcherService implements OnInit {
     }
 
     public async sendNewSubmission(entry: SubmissionModel): Promise<void> {
+        const submissionRound = await entry.submissionRound;
         const payload: SubmissionPayload = {
             wadName: entry.wadName,
             info: entry.info,
             wadLevel: entry.wadLevel,
             timeStamp: entry.createdAt.getTime(),
-            submissionRound: entry.submissionRound!.name
+            submissionRound: submissionRound.name
         };
 
         try {

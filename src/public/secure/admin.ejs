@@ -1255,7 +1255,7 @@
 
             document.getElementById("submissionModifySaveButton")?.addEventListener("click", async ev => {
                 try {
-                    const result = await site.submitEntryForm(ev, "modifyEntry", true);
+                    const result = await site.submitEntryForm(ev, "modifyEntry", true, true);
                     if (result) {
                         window.location.reload();
                     }
@@ -1516,6 +1516,29 @@
                                 document.getElementById("authorName").value = submitterName;
                                 document.getElementById("submissionId").value = id;
                                 submissionModificationModal.show();
+                            }
+                        },
+                        {
+                            extend: 'selectedSingle',
+                            text: 'Set file',
+                            action: async (e, dt) => {
+                                const selectedRow = dt.row({selected: true}).data();
+                                const id = selectedRow[0];
+                                site.loading(true);
+                                let submission;
+                                try {
+                                    submission = await fetch(`${baseUrl}/submission/getSubmission/${id}`);
+                                } finally {
+                                    site.loading(false);
+                                }
+                                const submissionObj = await submission.json();
+                                if (submissionObj.WAD) {
+                                    const confirm = window.confirm("This submission contains a file URL, are you sure you want to replace this with an uploaded WAD?");
+                                    if (!confirm) {
+                                        return;
+                                    }
+                                }
+                                
                             }
                         });
                 }

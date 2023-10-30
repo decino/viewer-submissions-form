@@ -53,8 +53,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
                 id: In(ids),
                 submissionValid: true,
                 verified: false
-            },
-            relations: ["submissionRound"]
+            }
         });
     }
 
@@ -62,8 +61,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return this.getEntityManager(transaction).find({
             where: {
                 submissionRoundId: roundId,
-            },
-            relations: ["submissionRound"]
+            }
         });
     }
 

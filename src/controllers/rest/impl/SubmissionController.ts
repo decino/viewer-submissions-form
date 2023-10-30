@@ -36,12 +36,11 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Post("/modifyEntry")
-    @UseBefore(ReCAPTCHAMiddleWare)
     @Authorize("login")
     @Security("login")
     @Returns(StatusCodes.OK, SubmissionModel)
-    public modifyEntry(@BodyParams() submission: any): unknown {
-        return this.submissionService.modifyEntry(submission);
+    public modifyEntry(@BodyParams() submission: any, @MultipartFile("file") replacementWad?: PlatformMulterFile): unknown {
+        return this.submissionService.modifyEntry(submission, replacementWad);
     }
 
     @Post("/changeStatus")

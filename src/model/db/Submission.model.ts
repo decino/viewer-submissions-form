@@ -187,7 +187,7 @@ export class SubmissionModel extends AbstractModel {
         name: "submissionRoundId",
         referencedColumnName: "id"
     })
-    public submissionRound?: SubmissionRoundModel;
+    public submissionRound: Promise<SubmissionRoundModel>;
 
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
@@ -235,11 +235,8 @@ export class SubmissionModel extends AbstractModel {
         if (admin) {
             return true;
         }
-        if (this.submissionRound?.active || !this.isChosen) {
-            return false;
-        }
 
-        if (this.status?.status !== STATUS.COMPLETED) {
+        if (this.status?.status !== STATUS.COMPLETED || !this.isChosen) {
             return false;
         }
         // if submission is the author, and it's not distributable return false. else return true

@@ -77,6 +77,7 @@ export class SubmissionService implements OnInit {
                 await this.customWadEngine.deleteCustomWad(customWad);
                 throw e;
             }
+            entry.wadURL = null;
             entry.customWadFileName = customWad.originalname;
         }
         entry.submissionRoundId = currentActiveRound.id;
@@ -115,7 +116,7 @@ export class SubmissionService implements OnInit {
         }
     }
 
-    public async modifyEntry(entry: Record<string, unknown>): Promise<void> {
+    public async modifyEntry(entry: Record<string, unknown>, replacementWad?: PlatformMulterFile): Promise<void> {
         const submission = await this.submissionRepo.retrieveSubmission(Number.parseInt(entry.id as string));
 
         if (!submission) {
@@ -127,7 +128,18 @@ export class SubmissionService implements OnInit {
         }
 
         if (entry.WAD) {
+            if (submission.customWadFileName) {
+                await this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId);
+            }
+            submission.customWadFileName = null;
             submission.wadURL = entry.WAD as string;
+        }
+
+        if (replacementWad) {
+            submission.wadURL = null;
+            submission.customWadFileName = replacementWad.originalname;
+            const submissionRound = await submission.submissionRound;
+            await this.customWadEngine.moveWad(submission.id, replacementWad, submissionRound.id);
         }
 
         if (entry.level) {

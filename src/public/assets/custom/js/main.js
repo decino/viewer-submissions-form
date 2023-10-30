@@ -24,18 +24,13 @@ const Site = (function () {
         uploadAbortController.abort("Unable to upload file. reCAPTCHA has expired while upload was in progress. please email this submission directly");
     };
 
-    const submitEntryForm = async function submitEntryForm(ev, endpoint, urlEncoded = false) {
+    const submitEntryForm = async function submitEntryForm(ev, endpoint, urlEncoded = false, modify = false) {
         ev.preventDefault();
         ev.stopPropagation();
         showError(null);
         const form = document.getElementById("entryForm");
         const formValue = form.reportValidity();
         if (!formValue) {
-            return false;
-        }
-        const reCAPTCHAResponse = grecaptcha.getResponse();
-        if (reCAPTCHAResponse === '') {
-            showError("Please activate reCAPTCHA.");
             return false;
         }
         if (document?.getElementById("link")?.checked && !document?.getElementById("levelToPlay")?.value) {
@@ -45,7 +40,15 @@ const Site = (function () {
         }
 
         const formData = serialiseForm(urlEncoded);
-        formData.append("g-recaptcha-response", reCAPTCHAResponse);
+
+        if (!modify) {
+            const reCAPTCHAResponse = grecaptcha.getResponse();
+            if (reCAPTCHAResponse === '') {
+                showError("Please activate reCAPTCHA.");
+                return false;
+            }
+            formData.append("g-recaptcha-response", reCAPTCHAResponse);
+        }
 
         uploadAbortController = new AbortController();
         const signal = uploadAbortController.signal;
@@ -66,7 +69,9 @@ const Site = (function () {
             return false;
         } finally {
             Site.loading(false);
-            grecaptcha.reset();
+            if (!modify) {
+                grecaptcha.reset();
+            }
         }
 
         const responseStatus = response.status;

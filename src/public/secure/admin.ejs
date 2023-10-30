@@ -511,6 +511,26 @@
     </div>
 </div>
 
+<div class="modal fade" id="setFileModel" tabindex="-1" aria-labelledby="setFileModelLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="setFileModelLabel">Set file for submission</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="setFileModelInfoContent">
+                <label for="setWadFile" class="form-label">Upload WAD</label>
+                <input name="file" class="form-control" type="file" id="setWadFile" accept="<%- indexModel.allowedUploadExtensions; -%>"/>
+                <input type="hidden" name="id" id="setFileSubmissionId"/>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="setFileModelOk">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script type="text/javascript"
         src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
@@ -525,6 +545,8 @@
         const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
         const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
         const headerValidationModal = new bootstrap.Modal('#headerValidationModal');
+        const setFileModel = new bootstrap.Modal('#setFileModel');
+
         const dtMap = new Map();
         <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
@@ -879,6 +901,41 @@
                     }
                     alert("User details changed successfully.");
                     changeDetailsModal.hide();
+                });
+            })());
+
+            ((() => {
+                document.getElementById("setFileModelOk").addEventListener("click", async e => {
+                    const form = new FormData();
+                    const submissionId = document.getElementById("setFileSubmissionId").value;
+                    const file = document.getElementById("setWadFile").files[0];
+                    if (!file) {
+                        alert("no file selected");
+                        return;
+                    }
+                    form.set("id", submissionId);
+                    form.set("file", file);
+
+                    let response;
+                    try {
+                        response = await fetch(`${baseUrl}/submission/modifyEntry`, {
+                            method: 'POST',
+                            body: form
+                        });
+                    } catch (e) {
+                        alert(e.message);
+                        return false;
+                    } finally {
+                        Site.loading(false);
+                    }
+
+                    const responseStatus = response.status;
+                    if (responseStatus < 200 || responseStatus >= 400) {
+                        const responseJson = await response.json();
+                        alert(responseJson.message);
+                        return false;
+                    }
+                    alert("file has been set");
                 });
             })());
 
@@ -1538,7 +1595,8 @@
                                         return;
                                     }
                                 }
-                                
+                                document.getElementById("setFileSubmissionId").value = id;
+                                setFileModel.show();
                             }
                         });
                 }

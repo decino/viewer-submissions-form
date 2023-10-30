@@ -1,6 +1,7 @@
 import {Injectable, ProviderScope} from "@tsed/di";
 import fs from "fs";
 import {PlatformMulterFile} from "@tsed/common";
+import path from "path";
 
 export type CustomWadEntry = {
     content: Buffer,
@@ -28,6 +29,12 @@ export class CustomWadEngine {
     public async moveWad(entryId: number, customWad: PlatformMulterFile, round: number): Promise<void> {
         const newFolder = `${this.basePath}/${round}/${entryId}`;
         await fs.promises.mkdir(newFolder, {recursive: true});
+        const isEmpty = (await fs.promises.readdir(newFolder)).length === 0;
+        if (!isEmpty) {
+            for (const file of await fs.promises.readdir(newFolder)) {
+                await fs.promises.unlink(path.join(newFolder, file));
+            }
+        }
         return fs.promises.rename(customWad.path, `${newFolder}/${customWad.originalname}`);
     }
 

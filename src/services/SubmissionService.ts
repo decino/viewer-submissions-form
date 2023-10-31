@@ -254,7 +254,13 @@ export class SubmissionService implements OnInit {
         const submitterName = entry.submitterName;
         const email = entry.submitterEmail;
         for (const submission of round.submissions) {
-            if (submitterName && submission.submitterName === submitterName || email && submission.submitterEmail === email) {
+            if (submitterName != null && submission.submitterName === submitterName || submission.submitterEmail === email) {
+                let info = `duplicate submission submitted. email: "${email} matches submission with ID ${submission.id}"`;
+                if (submitterName) {
+                    info += ` with submission name ${submitterName}`;
+                }
+                this.logger.info(info);
+                this.logger.info(submission, entry);
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${this.helpEmail ?? "decino"} to change your submission.`);
             }
         }

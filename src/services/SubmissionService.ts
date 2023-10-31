@@ -260,7 +260,8 @@ export class SubmissionService implements OnInit {
                     info += ` with submission name ${submitterName}`;
                 }
                 this.logger.info(info);
-                this.logger.info(submission, entry);
+                this.logger.info(submission);
+                this.logger.info(entry);
                 throw new Error(`You have already submitted a level. You are only allowed one submission per round. Contact ${this.helpEmail ?? "decino"} to change your submission.`);
             }
         }

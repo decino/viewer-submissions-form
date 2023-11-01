@@ -21,5 +21,6 @@ if (isProduction) {
 
 export default <PlatformLoggerSettings>{
     disableRoutesSummary: isProduction,
-    logRequest: !isProduction
+    logRequest: !isProduction,
+    ignoreUrlPatterns: ["\\/apple-touch-icon"]
 };

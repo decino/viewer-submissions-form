@@ -77,6 +77,11 @@ const opts: Partial<TsED.Configuration> = {
                 // for safari...
                 root: `${__dirname}/public/assets/custom/images/favicon.ico`
             }
+        ],
+        "/robots.txt": [
+            {
+                root: `${__dirname}/public/robots.txt`
+            }
         ]
     },
     socketIO: {

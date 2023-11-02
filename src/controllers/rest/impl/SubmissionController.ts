@@ -112,8 +112,8 @@ export class SubmissionController extends BaseRestController {
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
-    public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
-        const result = await this.submissionService.deleteEntries(ids);
+    public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[], @QueryParams("notify") notify?: boolean): Promise<unknown> {
+        const result = await this.submissionService.deleteEntries(ids, notify);
         if (!result) {
             throw new NotFound(`No entry with IDs ${ids.join(", ")} found.`);
         }

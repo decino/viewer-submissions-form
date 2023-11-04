@@ -111,7 +111,7 @@ export class SubmissionService implements OnInit {
                 if (status.additionalInfo) {
                     body += ` with comment "${status.additionalInfo}"`;
                 }
-                await this.emailService.sendMail(entry.submitterEmail, EMAIL_TEMPLATE.DELETED, body);
+                await this.emailService.sendMail(entry.submitterEmail, EMAIL_TEMPLATE.REJECTED, body);
             }
         }
     }

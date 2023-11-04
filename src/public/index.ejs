@@ -50,7 +50,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer">
+                        <div class="card-footer text-center">
                             <p>Please contact <a href="mailto:submissions@decino.nl">submissions@decino.nl</a> if you have any issues.</p>
                         </div>
                     </div>
@@ -72,9 +72,9 @@
                             }); %>
                         </div>
                         <% if (model.currentActiveRound.endDate){ %>
-                            <div class="card-footer">
+                            <div class="card-footer text-center">
                                 <p>
-                                    <span class="badge text-bg-info">Submission deadline:</span> <%- `${model.getEndDate(model.currentActiveRound)}`; -%>
+                                    <span class="badge text-bg-info">Submission deadline: <%- `${model.getEndDate(model.currentActiveRound)}`; -%></span>
                                 </p>
                             </div>
                         <% } %>

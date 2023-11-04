@@ -25,7 +25,7 @@
                             <% } %>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <h5 class="card-title text-primary">Number of submissions</h5>
+                                    <h5 class="card-title text-primary">Submissions</h5>
                                     <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.length ?? 0; -%></h5>
                                 </div>
                                 <div class="col-md-4">
@@ -33,7 +33,7 @@
                                     <h5 class="card-text"><%- mostSubmittedWad ?? "N/A"; -%></h5>
                                 </div>
                                 <div class="col-md-4">
-                                    <h5 class="card-title text-primary">Number of map authors</h5>
+                                    <h5 class="card-title text-primary">Map authors</h5>
                                     <h5 class="card-text"><%- indexModel.currentActiveRound.submissions?.filter(submission => submission.submitterAuthor)?.length ?? 0; -%></h5>
                                 </div>
                             </div>
@@ -1237,7 +1237,7 @@
                                         },
                                         {
                                             extend: 'selected',
-                                            text: 'Delete',
+                                            text: 'Remove',
                                             action: async (e, dt) => {
                                                 dt.rows({selected: true}).remove().draw(false);
                                                 highlightDupes();

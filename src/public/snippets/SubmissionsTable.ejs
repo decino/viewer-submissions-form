@@ -58,10 +58,7 @@ submissions = submissions.filter(submission => {
             <td><%- chosenSubmission.id; -%></td>
         <% } %>
         <td>
-            <%- `<u>
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${chosenSubmission.wadName.replace("\"", "")}">
-                        ${chosenSubmission.wadName}</span>
-                </u>`; -%>
+            <%- chosenSubmission.wadName; -%>
         </td>
         <td><%- chosenSubmission.wadLevel; -%></td>
         <% if(isAdmin || (isPReviousResults && isResults)){ %>

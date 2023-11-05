@@ -6,7 +6,6 @@ import {Logger, PlatformMulterFile} from "@tsed/common";
 import {CustomWadEngine} from "../engine/CustomWadEngine";
 import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
 import {SubmissionConfirmationService} from "./SubmissionConfirmationService";
-import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 import DOOM_ENGINE from "../model/constants/DoomEngine";
 import {SubmissionSocket} from "./socket/SubmissionSocket";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
@@ -17,11 +16,10 @@ import RECORDED_FORMAT from "../model/constants/RecordedFormat";
 import {EmailService} from "./EmailService";
 import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
 import STATUS from "../model/constants/STATUS";
+import {ScheduleService} from "./ScheduleService";
 
 @Service()
 export class SubmissionService implements OnInit {
-
-    private readonly scheduler = new ToadScheduler();
 
     @Inject()
     private submissionRoundService: SubmissionRoundService;
@@ -46,6 +44,9 @@ export class SubmissionService implements OnInit {
 
     @Inject()
     private emailService: EmailService;
+
+    @Inject()
+    private scheduleService: ScheduleService;
 
     @Constant(GlobalEnv.HELP_EMAIL)
     private readonly helpEmail: string;
@@ -220,12 +221,10 @@ export class SubmissionService implements OnInit {
     }
 
     public $onInit(): void {
-        const task = new AsyncTask(
-            'cleanOldEntries',
-            () => this.scanDb() as Promise<void>
-        );
-        const job = new SimpleIntervalJob({minutes: 1}, task);
-        this.scheduler.addSimpleIntervalJob(job);
+        this.scheduleService.scheduleJob({
+            minutes: 1,
+            runImmediately: true
+        }, this.scanDb, 'removeExpiredSubmissions', this);
     }
 
     private async isAlreadySubmitted(entry: SubmissionModel): Promise<void> {
@@ -277,7 +276,7 @@ export class SubmissionService implements OnInit {
         return parsedInt.toString();
     }
 
-    private async scanDb(): Promise<unknown> {
+    private async scanDb(): Promise<void> {
         const invalidEntries = await this.submissionRepo.getInvalidSubmissions();
         if (!invalidEntries || invalidEntries.length === 0) {
             return;
@@ -297,8 +296,8 @@ export class SubmissionService implements OnInit {
         if (entriesToDelete.length === 0) {
             return;
         }
-        this.logger.info(`Found ${entriesToDelete.length} pending submissions that have expired. Deleting...`);
+        this.logger.info(`Deleting ${entriesToDelete.length} submissions with conformations ${entriesToDelete.map(s => s.confirmation!.confirmationUid).join(", ")} as they have expired...`);
         const entryIds = entriesToDelete.map(entry => entry.id);
-        return this.deleteEntries(entryIds, false);
+        await this.deleteEntries(entryIds, false);
     }
 }

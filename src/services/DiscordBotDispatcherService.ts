@@ -9,7 +9,7 @@ type SubmissionPayload = {
     wadLevel: string,
     submissionRound: string,
     timeStamp: number,
-    info: string | null,
+    info: string | null
 }
 
 type PendingValidationPayload = {
@@ -17,7 +17,8 @@ type PendingValidationPayload = {
     email: string,
     submitterName: string | null,
     info: string | null,
-    id: number
+    id: number,
+    map: string
 }
 
 @Service()
@@ -41,7 +42,8 @@ export class DiscordBotDispatcherService implements OnInit {
             email: submission.submitterEmail,
             submitterName: submission.submitterName,
             info: submission.info,
-            id: submission.id
+            id: submission.id,
+            map: submission.wadLevel
         };
 
         try {

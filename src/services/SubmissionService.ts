@@ -224,7 +224,7 @@ export class SubmissionService implements OnInit {
         this.scheduleService.scheduleJob({
             minutes: 1,
             runImmediately: true
-        }, this.scanDb, 'removeExpiredSubmissions', this);
+        }, this.detectAndRemoveExpiredSubmissions, 'removeExpiredSubmissions', this);
     }
 
     private async isAlreadySubmitted(entry: SubmissionModel): Promise<void> {
@@ -276,7 +276,7 @@ export class SubmissionService implements OnInit {
         return parsedInt.toString();
     }
 
-    private async scanDb(): Promise<void> {
+    private async detectAndRemoveExpiredSubmissions(): Promise<void> {
         const invalidEntries = await this.submissionRepo.getInvalidSubmissions();
         if (!invalidEntries || invalidEntries.length === 0) {
             return;

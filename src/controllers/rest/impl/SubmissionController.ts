@@ -4,9 +4,9 @@ import {StatusCodes} from "http-status-codes";
 import {SubmissionModel} from "../../../model/db/Submission.model";
 import {SubmissionService} from "../../../services/SubmissionService";
 import {BodyParams, PathParams} from "@tsed/platform-params";
-import {BadRequest, InternalServerError, NotFound} from "@tsed/exceptions";
+import {BadRequest, InternalServerError, NotFound, Unauthorized} from "@tsed/exceptions";
 import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Res, UseBefore} from "@tsed/common";
+import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Req, Res, UseBefore} from "@tsed/common";
 import {BaseRestController} from "../BaseRestController";
 import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
 import {Authorize} from "@tsed/passport";
@@ -63,36 +63,22 @@ export class SubmissionController extends BaseRestController {
         return super.doSuccess(res, `Submission YouTube link has been assigned.`);
     }
 
-    @Get("/downloadWadSecure/:roundId/:id")
-    @Authorize("login")
-    @Returns(StatusCodes.CREATED, Buffer)
-    @Returns(StatusCodes.NOT_FOUND, NotFound)
-    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    @Security("login")
-    public async downloadWadSecure(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
-        const [entry, wad] = await this.getWad(roundId, id, true);
-        res.attachment(entry.customWadFileName as string);
-        res.contentType("application/octet-stream");
-        return wad.content;
-    }
-
-
     @Get("/getSubmission/:id")
     @Authorize("login")
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.OK, SubmissionModel)
     @Security("login")
-    public getSubmission(@Res() res: PlatformResponse, @PathParams("id") id: number): Promise<unknown> {
+    public getSubmission(@PathParams("id") id: number): Promise<unknown> {
         return this.submissionService.getEntry(id);
     }
 
-    @Get("/downloadWad/:roundId/:id")
+    @Get("/download/:roundId/:id")
     @Returns(StatusCodes.OK, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public async downloadWad(@Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
-        const [entry, wad] = await this.getWad(roundId, id);
+    public async downloadWad(@Req() req: Req, @Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
+        const [entry, wad] = await this.getWad(roundId, id, req.user !== undefined);
         res.attachment(entry.customWadFileName as string);
         res.contentType("application/octet-stream");
         return wad.content;
@@ -135,7 +121,7 @@ export class SubmissionController extends BaseRestController {
             throw new InternalServerError("An error has occurred when trying to find this WAD's associated entry.");
         }
         if (!entry.downloadable(secure)) {
-            throw new BadRequest("Unable to download file.");
+            throw new Unauthorized("Unable to download file.");
         }
         return [entry, wad];
     }

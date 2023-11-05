@@ -247,10 +247,7 @@ export class SubmissionModel extends AbstractModel {
         if (!this.downloadable(admin)) {
             return null;
         }
-        if (admin) {
-            return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWadSecure/${this.submissionRoundId}/${this.id}` : this.wadURL;
-        }
-        return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/downloadWad/${this.submissionRoundId}/${this.id}` : this.wadURL;
+        return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/download/${this.submissionRoundId}/${this.id}` : this.wadURL;
     }
 
     public getEngineAsString(): string {

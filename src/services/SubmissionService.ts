@@ -221,7 +221,7 @@ export class SubmissionService implements OnInit {
     }
 
     public $onInit(): void {
-        this.scheduleService.scheduleJob({
+        this.scheduleService.scheduleJobInterval({
             minutes: 1,
             runImmediately: true
         }, this.detectAndRemoveExpiredSubmissions, 'removeExpiredSubmissions', this);

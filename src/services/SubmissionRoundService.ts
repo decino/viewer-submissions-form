@@ -10,6 +10,7 @@ import STATUS from "../model/constants/STATUS";
 import {Logger} from "@tsed/logger";
 import {SubmissionRoundRepo} from "../db/repo/SubmissionRoundRepo";
 import {Builder} from "builder-pattern";
+import {ScheduleService} from "./ScheduleService";
 
 @Service()
 export class SubmissionRoundService implements OnInit {
@@ -26,12 +27,22 @@ export class SubmissionRoundService implements OnInit {
     @Inject()
     private submissionRoundRepo: SubmissionRoundRepo;
 
+    @Inject()
+    private scheduleService: ScheduleService;
+
     public async $onInit(): Promise<void> {
         const allRounds = await this.getAllSubmissionRounds(true);
         if (allRounds.length === 0) {
             this.logger.info("First start detected, loading all previous submission rounds from decino.nl...");
             const result = await this.syncRound();
             this.logger.info(`Added ${result.length} submission rounds to the database`);
+        }
+        const activeRound = await this.getCurrentActiveSubmissionRound();
+        if (activeRound) {
+            const {endDate} = activeRound;
+            if (endDate) {
+                this.scheduleDeadline(endDate);
+            }
         }
     }
 
@@ -52,7 +63,11 @@ export class SubmissionRoundService implements OnInit {
                 throw new BadRequest("Unable to set end date before today");
             }
         }
-        return this.submissionRoundRepo.createRound(name, endateObj);
+        const newRound = await this.submissionRoundRepo.createRound(name, endateObj);
+        if (endateObj) {
+            this.scheduleDeadline(endateObj);
+        }
+        return newRound;
     }
 
     public async syncRound(): Promise<SubmissionRoundModel[]> {
@@ -159,6 +174,13 @@ export class SubmissionRoundService implements OnInit {
         } catch (e) {
             throw new BadRequest(e.message, e);
         }
+    }
+
+    private scheduleDeadline(date: Date): void {
+        this.scheduleService.scheduleJobAtDate("submission-deadline-scheduler", date, async () => {
+            this.logger.info("Submission round deadline hit");
+            await this.pauseRound(true);
+        }, this);
     }
 
 }

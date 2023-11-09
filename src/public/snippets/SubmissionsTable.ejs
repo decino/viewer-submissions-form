@@ -52,7 +52,7 @@ submissions = submissions.filter(submission => {
         <% if(isAdmin){ %>
             <td><%- chosenSubmission.id; -%></td>
         <% } %>
-        <% if(isResults || isAdmin || !isPReviousResults){ %>
+        <% if(isResults || isAdmin || isPReviousResults || isActiveResults){ %>
             <td><%- i + 1; -%></td>
         <% } else{ %>
             <td><%- chosenSubmission.id; -%></td>

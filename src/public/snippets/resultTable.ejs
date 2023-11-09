@@ -27,9 +27,9 @@
                     <label class="form-check-label" for="showAllSubmissionSwitch<%- i; -%>">All submissions</label>
                 </div>
                 <p class="mb-3 mt-3">Start: <%- model.getRoundDateAsString(round); -%></p>
-                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: true}); %>
+                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: true, isActiveResults: false}); %>
                 <div class="hidden allSubmissionsToggleWrapper">
-                    <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: false}); %>
+                    <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: false, isActiveResults: false}); %>
                 </div>
             </div>
             <% } %>

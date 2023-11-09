@@ -253,7 +253,7 @@ export class SubmissionService implements OnInit {
         const submitterName = entry.submitterName;
         const email = entry.submitterEmail;
         for (const submission of round.submissions) {
-            if (submitterName != null && submission.submitterName?.toLowerCase() === submitterName.toLowerCase().trim() || submission.submitterEmail.toLowerCase() === email.toLowerCase()) {
+            if (submitterName != null && submission.submitterName?.toLowerCase() === submitterName.toLowerCase() || submission.submitterEmail.toLowerCase() === email.toLowerCase()) {
                 let info = `duplicate submission submitted. email: "${email} matches submission with ID ${submission.id}"`;
                 if (submitterName) {
                     info += ` with submission name ${submitterName}`;

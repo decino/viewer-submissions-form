@@ -41,7 +41,7 @@ export class SubmissionRoundResultService {
             }
 
             // get the WAD name from the entry
-            const wadIdentifier = entry.wadName;
+            const wadIdentifier = entry.wadName.toLowerCase();
 
             // group all the wads by wad name. so multiple entries of the same wad are grouped in to an array
             if (this.entryCache.has(wadIdentifier)) {

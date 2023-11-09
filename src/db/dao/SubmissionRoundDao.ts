@@ -57,7 +57,7 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
         const entityMan = this.getEntityManager(transaction);
         const queryBuilder = entityMan.createQueryBuilder("submissionRound")
             .leftJoinAndSelect("submissionRound.submissions", "submission")
-            .groupBy("submission.wadName")
+            .groupBy("LOWER(submission.wadName)")
             .orderBy("count(*)", "DESC")
             .limit(1);
         if (typeof roundId === "number") {

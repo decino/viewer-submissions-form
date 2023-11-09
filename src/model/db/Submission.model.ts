@@ -21,6 +21,8 @@ import RECORDED_FORMAT from "../constants/RecordedFormat";
     if (data.info) {
         data.info = data.info.slice(0, 4096);
     }
+    data.wadLevel = data.wadLevel.trim();
+    data.wadName = data.wadName.trim();
     return data;
 })
 export class SubmissionModel extends AbstractModel {

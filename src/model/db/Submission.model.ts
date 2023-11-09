@@ -23,6 +23,13 @@ import RECORDED_FORMAT from "../constants/RecordedFormat";
     }
     data.wadLevel = data.wadLevel.trim();
     data.wadName = data.wadName.trim();
+    data.submitterEmail = data.submitterEmail.trim();
+    if (data.submitterName) {
+        data.submitterName = data.submitterName.trim();
+    }
+    if (data.wadURL) {
+        data.wadURL = data.wadURL.trim();
+    }
     return data;
 })
 export class SubmissionModel extends AbstractModel {

@@ -3,7 +3,7 @@ import {BeforeInit, Logger} from "@tsed/common";
 import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
 import {Envelope} from "nodemailer/lib/mailer";
 import GlobalEnv from "../model/constants/GlobalEnv";
-import {createTransport, Transporter} from "nodemailer";
+import {createTestAccount, createTransport, Transporter} from "nodemailer";
 import {isProduction} from "../config/envs";
 import {BadRequest} from "@tsed/exceptions";
 import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
@@ -51,30 +51,7 @@ export class EmailService implements BeforeInit {
     };
 
     public async $beforeInit(): Promise<void> {
-        const transporter = createTransport({
-            host: this.smtpHost,
-            port: Number.parseInt(this.smtpPort),
-            secure: this.smtpSecure === "true",
-            auth: {
-                user: this.smtpUser,
-                pass: this.smtpPass
-            },
-            debug: !isProduction,
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
-        if (!this.smtpHost) {
-            throw new Error("No SMTP server has been defined.");
-        }
-        try {
-            await transporter.verify();
-        } catch (e) {
-            this.logger.error(`Unable to connect to SMTP server: ${this.smtpHost}`);
-            throw new Error(e);
-        }
-        this.logger.info(`Connected to SMTP server: ${this.smtpHost}:${this.smtpPort}`);
-        this.emailTransport = transporter;
+        this.emailTransport = await this.getTransport();
     }
 
     public async sendMail(to: string, template: EMAIL_TEMPLATE, body?: string): Promise<SentMessageInfo> {
@@ -99,6 +76,54 @@ export class EmailService implements BeforeInit {
             throw new BadRequest(`Unable to send an email to ${to}`);
         }
         return sentMail;
+    }
+
+    private async getTransport(): Promise<Transporter<SentMessageInfo>> {
+        if (isProduction) {
+            const transporter = createTransport({
+                host: this.smtpHost,
+                port: Number.parseInt(this.smtpPort),
+                secure: this.smtpSecure === "true",
+                auth: {
+                    user: this.smtpUser,
+                    pass: this.smtpPass
+                },
+                debug: !isProduction,
+                tls: {
+                    rejectUnauthorized: false
+                }
+            });
+            if (!this.smtpHost) {
+                throw new Error("No SMTP server has been defined.");
+            }
+            try {
+                await transporter.verify();
+            } catch (e) {
+                this.logger.error(`Unable to connect to SMTP server: ${this.smtpHost}`);
+                throw new Error(e);
+            }
+            this.logger.info(`Connected to SMTP server: ${this.smtpHost}:${this.smtpPort}`);
+            return transporter;
+        }
+        return new Promise((resolve, reject) => {
+            createTestAccount((err, account) => {
+                if (err) {
+                    reject(err);
+                }
+                const transporter = createTransport({
+                    host: 'smtp.ethereal.email',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: account.user,
+                        pass: account.pass
+                    }
+                });
+                this.logger.info(`Connected to fake SMTP server: smtp.ethereal.email:587`);
+                this.logger.info(`email credentials for https://ethereal.email/login username: "${account.user}" password: "${account.pass}" `);
+                resolve(transporter);
+            });
+        });
     }
 
     private wasAccepted(sentMail: SentMessageInfo, emailSentTo: string): boolean {

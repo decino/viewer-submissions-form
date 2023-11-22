@@ -6,7 +6,6 @@ import {SubmissionRoundService} from "./SubmissionRoundService";
 import {BadRequest, InternalServerError} from "@tsed/exceptions";
 import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
 import {SubmissionRepo} from "../db/repo/SubmissionRepo";
-import {ObjectUtils} from "../utils/Utils";
 
 @Service()
 export class SubmissionRoundResultService {
@@ -67,16 +66,9 @@ export class SubmissionRoundResultService {
         // get a unique random array of the maps from above
         const results = this.getMultipleRandom(chosenEntries, count);
 
-        // remove the results from the cache so they can't be picked again until it's rebuilt (prevent dupes)
-        for (const result of results) {
-            const wadName = result.wadName;
-            const maps = this.entryCache.get(wadName);
-            if (maps) {
-                ObjectUtils.removeObjectFromArray(maps, map => map === result);
-                if (maps.length === 0) {
-                    this.entryCache.delete(wadName);
-                }
-            }
+        // remove that wad from the result set, only one wad is allowed
+        for (const wadName of wadNames) {
+            this.entryCache.delete(wadName);
         }
         return results;
     }

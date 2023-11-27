@@ -1,8 +1,7 @@
 const Site = (function () {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let isInit = false;
-    const socket = io(`${mainRul}/submission`, {path: '/socket.io/submission/'});
-
+    const socket = io(`${socketUri}`, {path: '/socket.io/submission/'});
     let uploadAbortController = null;
 
     const loading = function loading(show) {

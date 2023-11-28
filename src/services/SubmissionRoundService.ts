@@ -177,6 +177,8 @@ export class SubmissionRoundService implements OnInit {
     }
 
     private scheduleDeadline(date: Date): void {
+        // ensure that it's the END of the day
+        date.setHours(23, 59, 59);
         this.scheduleService.scheduleJobAtDate("submission-deadline-scheduler", date, async () => {
             this.logger.info("Submission round deadline hit");
             await this.pauseRound(true);

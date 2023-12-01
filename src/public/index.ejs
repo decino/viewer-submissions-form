@@ -73,9 +73,10 @@
                             }); %>
                         </div>
                         <% if (model.currentActiveRound.endDate){ %>
+                            <% const clazz = model.hasDateElapsed(model.currentActiveRound) ? "danger" : "info" %>
                             <div class="card-footer text-center">
                                 <p>
-                                    <span class="badge text-bg-info">Submission deadline: <%- `${model.getEndDate(model.currentActiveRound)}`; -%></span>
+                                    <span class="badge text-bg-<%- clazz -%>">Submission deadline: <%- `${model.getEndDate(model.currentActiveRound)}`; -%>
                                 </p>
                             </div>
                         <% } %>

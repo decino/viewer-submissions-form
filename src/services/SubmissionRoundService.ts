@@ -62,6 +62,7 @@ export class SubmissionRoundService implements OnInit {
             if (endateObj.getTime() < Date.now()) {
                 throw new BadRequest("Unable to set end date before today");
             }
+            endateObj.setHours(23, 59, 59);
         }
         const newRound = await this.submissionRoundRepo.createRound(name, endateObj);
         if (endateObj) {

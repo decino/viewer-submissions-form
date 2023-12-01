@@ -47,6 +47,16 @@ export class IndexDto {
         return `${date}<sup>${this.nth(date)}</sup> of ${this.months[month]} ${year} UTC`;
     }
 
+    public hasDateElapsed(round: SubmissionRoundModel): boolean {
+        const endDate = round.endDate;
+        if (!endDate) {
+            return false;
+        }
+        const dateClone = new Date(endDate);
+        dateClone.setHours(23, 59, 59);
+        return Date.now() >= dateClone.getTime();
+    }
+
     private nth(d: number): string {
         if (d > 3 && d < 21) {
             return 'th';

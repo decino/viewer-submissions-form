@@ -175,6 +175,9 @@ Site.loadPage(async function (site) {
         });
         ((() => {
             const cardBody = document.getElementById("resultsCardBody");
+            if (!cardBody) {
+                return;
+            }
             const resizeListener = new ResizeObserver(entries => {
                 const formCardBodyObserver = entries[0];
                 const formCardBodyOffsetHeight = formCardBodyObserver.target.offsetHeight;

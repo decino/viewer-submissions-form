@@ -1508,7 +1508,8 @@
                                 document.getElementById("setYoutubeLinkSubmissionId").value = id;
                                 setYoutubeLinkModal.show();
                             }
-                        });
+                        }
+                    );
                 }
 
                 if (!isValidationTable) {
@@ -1644,6 +1645,34 @@
                             }
                         }
                     );
+                }
+                if (isPreviousRoundCard) {
+                    buttons.push({
+                        text: 'Add Random Entry',
+                        action: async (e, dt) => {
+                            const roundId = e.target.closest(".tab-pane").dataset.entryid;
+                            console.log(roundId);
+                            const confirm = window.confirm("Are you sure you wish to add a random entry?");
+                            if (!confirm) {
+                                return;
+                            }
+                            site.loading(true);
+                            let response;
+                            try {
+                                response = await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId}`,{
+                                    method: "POST"
+                                });
+                            } finally {
+                                site.loading(false);
+                            }
+                            const responseStatus = response.status;
+                            const responseJson = await response.json();
+                            if (responseStatus !== 200) {
+                                return alert(responseJson.message);
+                            }
+                            window.location.reload();
+                        }
+                    });
                 }
                 dtOpts["buttons"] = buttons;
                 const table = new DataTable(el, dtOpts);

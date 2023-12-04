@@ -255,7 +255,7 @@ export class SubmissionService implements OnInit {
         const submitterName = entry.submitterName;
         const email = entry.submitterEmail;
         for (const detector of furryDetectors) {
-            if (submitterName?.toLowerCase().includes(detector) || email.toLowerCase().includes(detector) || entry.wadName.toLowerCase().includes(detector) {
+            if (submitterName?.toLowerCase().includes(detector) || email.toLowerCase().includes(detector) || entry.wadName.toLowerCase().includes(detector)) {
                 throw new Error("Yiff in hell!");
             }
         }

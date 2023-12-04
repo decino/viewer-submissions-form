@@ -1657,13 +1657,18 @@
                                 return;
                             }
                             site.loading(true);
-                            let submission;
+                            let response;
                             try {
-                                submission = await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId}`,{
+                                response = await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId}`,{
                                     method: "POST"
                                 });
                             } finally {
                                 site.loading(false);
+                            }
+                            const responseStatus = response.status;
+                            const responseJson = await response.json();
+                            if (responseStatus !== 200) {
+                                return alert(responseJson.message);
                             }
                             window.location.reload();
                         }

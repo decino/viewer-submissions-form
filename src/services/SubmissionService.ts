@@ -250,8 +250,15 @@ export class SubmissionService implements OnInit {
         if (!customWad && !entry.wadURL) {
             throw new Error("Either WAD URL or a file must be uploaded.");
         }
+
+        const furryDetectors = ["furry", "yiff", "yarf", "yerf", "yowl", "uwu"];
         const submitterName = entry.submitterName;
         const email = entry.submitterEmail;
+        for (const detector of furryDetectors) {
+            if (submitterName.toLowerCase().includes(dector) || email.toLowerCase().includes(detector) || entry.wadName.toLowerCase().includes(detector) {
+                throw new Error("Yiff in hell!");
+            }
+        }
         for (const submission of round.submissions) {
             if (submitterName != null && submission.submitterName?.toLowerCase() === submitterName.toLowerCase() || submission.submitterEmail.toLowerCase() === email.toLowerCase()) {
                 let info = `duplicate submission submitted. email: "${email} matches submission with ID ${submission.id}"`;

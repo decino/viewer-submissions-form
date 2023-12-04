@@ -1648,13 +1648,24 @@
                 }
                 if (isPreviousRoundCard) {
                     buttons.push({
-                        text: 'add random entry',
+                        text: 'Add Random Entry',
                         action: async (e, dt) => {
                             const roundId = e.target.closest(".tab-pane").dataset.entryid;
                             console.log(roundId);
-                            // display an window.confirm to ensure this action is required
-                            // call ${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId} (see Change status button, for example of fetching)
-                            // it would be nice to just add it to the table using DT.add, but the format is rendered html and I don't have a generic parser, so just do `window.location.reload();`
+                            const confirm = window.confirm("Are you sure you wish to add a random entry?");
+                            if (!confirm) {
+                                return;
+                            }
+                            site.loading(true);
+                            let submission;
+                            try {
+                                submission = await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId}`,{
+                                    method: "POST"
+                                });
+                            } finally {
+                                site.loading(false);
+                            }
+                            window.location.reload();
                         }
                     });
                 }

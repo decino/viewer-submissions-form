@@ -123,7 +123,14 @@ export class SubmissionRoundResultService {
         if (round.submissions.length === 0) {
             return null;
         }
-        await this.buildResultSet(round.submissions.filter(submission => !submission.isChosen));
+
+        const chosenWadNames = round.submissions
+            .filter(submission => submission.isChosen)
+            .map(submission => submission.wadName.toLowerCase());
+
+        const filteredSubmissions = round.submissions.filter(submission => !submission.isChosen && !chosenWadNames.includes(submission.wadName.toLowerCase()));
+        
+        await this.buildResultSet(filteredSubmissions);
         const entry = this.generateEntries(1)[0];
         await this.submitEntries([entry.id], round, true);
         return entry;

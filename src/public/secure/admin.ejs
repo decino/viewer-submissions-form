@@ -267,47 +267,47 @@
             </div>
         </div>
     </div>
+<% } %>
 
-    <div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modifySubmissionModalLabel">Modify submission</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <%- include('../snippets/submitForm.ejs', {
-                    model: indexModel,
-                    isAdmin: true
-                    }); %>
-                </div>
-                <div class="mt-3">
-                    <div class="hidden" id="error">
-                        <div class="alert alert-danger d-flex align-items-center" role="alert">
-                            <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
-                            <div id="errorContent"></div>
-                        </div>
-                    </div>
-                    <div class="hidden" id="success">
-                        <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
-                            <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
-                            <div id="successContent">
-                                Entry modified successfully.
-                            </div>
-                        </div>
+<div class="modal fade" id="modifySubmissionModal" tabindex="-1" aria-labelledby="modifySubmissionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modifySubmissionModalLabel">Modify submission</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <%- include('../snippets/submitForm.ejs', {
+                model: indexModel,
+                isAdmin: true
+                }); %>
+            </div>
+            <div class="mt-3">
+                <div class="hidden" id="error">
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="flex-shrink-0 me-2 bi bi-exclamation-triangle-fill"></i>
+                        <div id="errorContent"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary" id="submissionModifySaveButton">Save changes
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <div class="hidden" id="success">
+                    <div class="alert alert-success d-flex align-items-center" role="alert" id="success">
+                        <i class="flex-shrink-0 me-2 bi bi-check-circle-fill"></i>
+                        <div id="successContent">
+                            Entry modified successfully.
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="submissionModifySaveButton">Save changes
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-<% } %>
 <div class="modal fade" id="submissionInfoModal" tabindex="-1" aria-labelledby="submissionInfoModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
@@ -551,9 +551,8 @@
         const setFileModel = new bootstrap.Modal('#setFileModel');
 
         const dtMap = new Map();
-        <% if(indexModel.currentActiveRound){ %>
         const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
-        <% } %>
+
         loadEventListeners();
         initDt();
 
@@ -1659,7 +1658,7 @@
                             site.loading(true);
                             let response;
                             try {
-                                response = await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId}`,{
+                                response = await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${roundId}`, {
                                     method: "POST"
                                 });
                             } finally {

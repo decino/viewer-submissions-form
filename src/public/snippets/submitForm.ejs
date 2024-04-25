@@ -1,4 +1,4 @@
-<% const isPaused = model.currentActiveRound.paused;
+<% const isPaused = model?.currentActiveRound?.paused ?? false;
 function mapEngine(value) {
     switch (value) {
         case "GZDoom":

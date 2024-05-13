@@ -7,7 +7,7 @@
     "build": "npm run tsc && npm run barrels && babel src --out-dir dist --extensions \".ts,.tsx,.js\" --copy-files",
     "barrels": "barrelsby --config .barrelsby.json",
     "start_js": "node dist/index.js",
-    "start": "ts-node-esm src/index.ts",
+    "start": "ts-node src/index.ts",
     "start:prod": "cross-env NODE_ENV=production nodemon dist/index.js",
     "update_deps": "npx npm-check-updates"
   },
@@ -100,7 +100,7 @@
     "barrelsby": "^2.8.1",
     "eslint": "^8.55.0",
     "nodemon": "^3.0.2",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "tslib": "^2.6.2",

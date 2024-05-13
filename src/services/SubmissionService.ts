@@ -124,46 +124,46 @@ export class SubmissionService implements OnInit {
             throw new BadRequest(`Unable to find submission of id ${entry.id}.`);
         }
 
-        if (entry.WADName) {
-            submission.wadName = entry.WADName as string;
-        }
-
-        if (entry.WAD) {
-            if (submission.customWadFileName) {
-                await this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId);
-            }
-            submission.customWadFileName = null;
-            submission.wadURL = entry.WAD as string;
-        }
-
         if (replacementWad) {
             submission.wadURL = null;
             submission.customWadFileName = replacementWad.originalname;
             const submissionRound = await submission.submissionRound;
             await this.customWadEngine.moveWad(submission.id, replacementWad, submissionRound.id);
-        }
+        } else {
+            if (entry.WADName) {
+                submission.wadName = entry.WADName as string;
+            }
 
-        if (entry.level) {
-            submission.wadLevel = entry.level as string;
-        }
+            if (entry.WAD) {
+                if (submission.customWadFileName) {
+                    await this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId);
+                }
+                submission.customWadFileName = null;
+                submission.wadURL = entry.WAD as string;
+            }
 
-        if (entry.engine) {
-            submission.wadEngine = entry.engine as DOOM_ENGINE;
-        }
+            if (entry.level) {
+                submission.wadLevel = entry.level as string;
+            }
 
-        if (entry.author) {
-            submission.submitterAuthor = entry.author === "true";
-        }
+            if (entry.engine) {
+                submission.wadEngine = entry.engine as DOOM_ENGINE;
+            }
 
-        if (submission.submitterAuthor && entry.distributable) {
-            submission.distributable = entry.distributable === "true";
-        }
+            if (entry.author) {
+                submission.submitterAuthor = entry.author === "true";
+            }
 
-        if (entry.recordedFormat) {
-            submission.recordedFormat = entry.recordedFormat as RECORDED_FORMAT;
-        }
+            if (submission.submitterAuthor && entry.distributable) {
+                submission.distributable = entry.distributable === "true";
+            }
 
-        submission.submitterName = entry.authorName as string ?? null;
+            if (entry.recordedFormat) {
+                submission.recordedFormat = entry.recordedFormat as RECORDED_FORMAT;
+            }
+
+            submission.submitterName = entry.authorName as string ?? null;
+        }
 
         await this.submissionRepo.saveOrUpdateSubmission(submission);
     }

@@ -1,9 +1,9 @@
-import {CollectionOf, Default, Property, Required} from "@tsed/schema";
-import {AfterDeserialize} from "@tsed/json-mapper";
-import {BadRequest} from "@tsed/exceptions";
+import { CollectionOf, Default, Property, Required } from "@tsed/schema";
+import { AfterDeserialize } from "@tsed/json-mapper";
+import { BadRequest } from "@tsed/exceptions";
 
 @AfterDeserialize((data: WadValidationModel) => {
-    const {allowedExtensionsZip, allowedHeadersZip, allowedHeaders, allowedExtensions} = data;
+    const { allowedExtensionsZip, allowedHeadersZip, allowedHeaders, allowedExtensions } = data;
     if (allowedExtensions.length !== allowedHeaders.length) {
         throw new BadRequest("Extensions and headers must contain equal entries");
     }
@@ -15,7 +15,6 @@ import {BadRequest} from "@tsed/exceptions";
     return data;
 })
 export class WadValidationModel {
-
     @Required()
     @Property()
     @CollectionOf(String)

@@ -1,18 +1,21 @@
-ARG NODE_VERSION=16.20.1
+FROM node:lts as base
 
-FROM node:${NODE_VERSION}-alpine as runtime
-ENV WORKDIR /opt
-WORKDIR $WORKDIR
+WORKDIR /home/node/app
+
+COPY package*.json ./
+
+RUN npm i
+
 COPY . .
-COPY processes.config.js .
 
-RUN apk update && apk add build-base git curl
-RUN npm install -g pm2
+FROM base as production
 
-RUN npm install
+ENV NODE_PATH=./dist
+
 RUN npm run build
 
 EXPOSE 8081
 ENV PORT 8081
 ENV NODE_ENV production
-CMD ["pm2-runtime", "start", "processes.config.js", "--env", "production"]
+
+CMD [ "npm", "run" ,"start:prod" ]

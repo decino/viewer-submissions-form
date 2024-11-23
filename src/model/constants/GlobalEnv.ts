@@ -25,7 +25,10 @@ enum GlobalEnv {
     SMTP_USER = `${prefix}SMTP_USER`,
     SMTP_PASS = `${prefix}SMTP_PASS`,
     SMTP_FROM = `${prefix}SMTP_FROM`,
-    REPLY_TO = `${prefix}REPLY_TO`
+    REPLY_TO = `${prefix}REPLY_TO`,
+    RATE_LIMIT = `${prefix}RATE_LIMIT`,
+    RATE_LIMIT_MS = `${prefix}RATE_LIMIT_MS`,
+    REDIS_URI = `${prefix}REDIS_URI`,
 }
 
 export default GlobalEnv;

@@ -1,0 +1,16 @@
+{
+  "directory": [
+    "./src/controllers/rest",
+    "./src/controllers/views",
+    "./src/controllers/secure",
+    "./src/protocols",
+    "./src/engine/impl",
+    "./src/filters"
+  ],
+  "exclude": [
+    "**/__mock__",
+    "**/__mocks__",
+    "**/*.spec.ts"
+  ],
+  "delete": true
+}

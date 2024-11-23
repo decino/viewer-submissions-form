@@ -1,26 +1,24 @@
-import {Inject, Service} from "@tsed/di";
-import {UserModel} from "../model/db/User.model";
+import { Inject, Service } from "@tsed/di";
+import { UserModel } from "../model/db/User.model.js";
 import argon2 from "argon2";
-import {CustomUserInfoModel} from "../model/auth/CustomUserInfoModel";
-import {Logger} from "@tsed/logger";
-import {AfterInit} from "@tsed/common";
-import * as crypto from "crypto";
-import {Unauthorized} from "@tsed/exceptions";
-import {UserRepo} from "../db/repo/UserRepo";
+import { CustomUserInfoModel } from "../model/auth/CustomUserInfoModel.js";
+import { Unauthorized } from "@tsed/exceptions";
+import { UserRepo } from "../db/repo/UserRepo.js";
+import { AfterInit } from "@tsed/common";
+import crypto from "node:crypto";
+import { Logger } from "@tsed/logger";
 
 @Service()
-export class UsersService implements AfterInit {
-
-    @Inject()
-    private userRepo: UserRepo;
-
-    @Inject()
-    private logger: Logger;
+export class UserService implements AfterInit {
+    public constructor(
+        @Inject() private userRepo: UserRepo,
+        @Inject() private logger: Logger,
+    ) {}
 
     public async getUser(email: string, password: string): Promise<UserModel | null> {
         const userObject = await this.userRepo.getUser(email);
         // use safe timings compare to verify the hash matches
-        if (!userObject || !await argon2.verify(userObject.password, password)) {
+        if (!userObject || !(await argon2.verify(userObject.password, password))) {
             return null;
         }
         return userObject;
@@ -43,7 +41,9 @@ export class UsersService implements AfterInit {
             const newPassword = this.generatePassword();
             const hashedPassword = await argon2.hash(newPassword);
             await this.userRepo.createUser(email, hashedPassword);
-            this.logger.info(`New user created: email: "${email}" password: "${newPassword}" Please change this upon logging in!`);
+            this.logger.info(
+                `New user created: email: "${email}" password: "${newPassword}" Please change this upon logging in!`,
+            );
             return;
         }
         const entry = allUsers[0];

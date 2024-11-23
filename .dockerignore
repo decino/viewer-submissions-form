@@ -1,8 +1,2 @@
 node_modules
-Dockerfile
-.env.local
-.env.development
-dist
-README.md
-*.sqlite
-git
+dist/

@@ -8,7 +8,7 @@ import { UserModel } from "../model/db/User.model.js";
 import { UserService } from "../services/UserService.js";
 
 @Protocol<IStrategyOptions>({
-    name: "loginAuthProvider",
+    name: "login",
     useStrategy: Strategy,
     settings: {
         session: true,

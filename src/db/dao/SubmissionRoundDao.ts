@@ -1,15 +1,14 @@
-import {DataSource, EntityManager} from "typeorm";
-import {SubmissionRoundModel} from "../../model/db/SubmissionRound.model";
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
-import {SQLITE_DATA_SOURCE} from "../../model/di/tokens";
-import {Logger} from "@tsed/logger";
-import {AbstractDao} from "./AbstractDao";
+import { SubmissionRoundModel } from "../../model/db/SubmissionRound.model.js";
+import { AbstractDao } from "./AbstractDao.js";
+import { Inject, Injectable, ProviderScope } from "@tsed/di";
+import { Logger } from "@tsed/logger";
+import { SQLITE_DATA_SOURCE } from "../../model/di/tokens.js";
+import { DataSource, EntityManager } from "typeorm";
 
 @Injectable({
-    scope: ProviderScope.SINGLETON
+    scope: ProviderScope.SINGLETON,
 })
 export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
-
     @Inject()
     private logger: Logger;
 
@@ -22,23 +21,31 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
         return manager.save(model);
     }
 
-    public retrieveActiveRound(filterInvalidEntries = false, transaction?: EntityManager): Promise<SubmissionRoundModel | null> {
+    public retrieveActiveRound(
+        filterInvalidEntries = false,
+        transaction?: EntityManager,
+    ): Promise<SubmissionRoundModel | null> {
         const manager = this.getEntityManager(transaction);
         if (filterInvalidEntries) {
-            return manager.createQueryBuilder("submissionRound")
-                .leftJoinAndSelect("submissionRound.submissions", "submission", "submission.submissionValid = true AND submission.verified = true")
+            return manager
+                .createQueryBuilder("submissionRound")
+                .leftJoinAndSelect(
+                    "submissionRound.submissions",
+                    "submission",
+                    "submission.submissionValid = true AND submission.verified = true",
+                )
                 .where("submissionRound.active = true")
                 .getOne();
         }
         return manager.findOneBy({
-            active: true
+            active: true,
         });
     }
 
     public retrieveRound(roundId: number, transaction?: EntityManager): Promise<SubmissionRoundModel | null> {
         const manager = this.getEntityManager(transaction);
         return manager.findOneBy({
-            id: roundId
+            id: roundId,
         });
     }
 
@@ -55,13 +62,14 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
 
     public async getMostSubmittedWadName(roundId?: number, transaction?: EntityManager): Promise<string | null> {
         const entityMan = this.getEntityManager(transaction);
-        const queryBuilder = entityMan.createQueryBuilder("submissionRound")
+        const queryBuilder = entityMan
+            .createQueryBuilder("submissionRound")
             .leftJoinAndSelect("submissionRound.submissions", "submission")
             .groupBy("LOWER(submission.wadName)")
             .orderBy("count(*)", "DESC")
             .limit(1);
         if (typeof roundId === "number") {
-            queryBuilder.where("submissionRound.id = :roundId", {roundId});
+            queryBuilder.where("submissionRound.id = :roundId", { roundId });
         } else {
             queryBuilder.where("submissionRound.active = true");
         }
@@ -76,23 +84,28 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
             rounds = await manager.find();
         } else {
             rounds = await manager.findBy({
-                active: false
+                active: false,
             });
         }
         return rounds ?? [];
     }
 
-    public saveOrUpdateRounds(models: SubmissionRoundModel | SubmissionRoundModel[], transaction?: EntityManager): Promise<SubmissionRoundModel | SubmissionRoundModel[]> {
+    public saveOrUpdateRounds(
+        models: SubmissionRoundModel | SubmissionRoundModel[],
+        transaction?: EntityManager,
+    ): Promise<SubmissionRoundModel | SubmissionRoundModel[]> {
         const manager = this.getEntityManager(transaction);
-        // @ts-ignore
-        return manager.save(models);
+        return manager.save(models as SubmissionRoundModel);
     }
 
     public async setActive(round: SubmissionRoundModel, active: boolean, transaction?: EntityManager): Promise<void> {
-        await this.getEntityManager(transaction).update({
-            id: round.id
-        }, {
-            active
-        });
+        await this.getEntityManager(transaction).update(
+            {
+                id: round.id,
+            },
+            {
+                active,
+            },
+        );
     }
 }

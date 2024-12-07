@@ -1,8 +1,8 @@
 {
   "directory": [
     "./src/controllers/rest",
+    "./src/controllers/secureViews",
     "./src/controllers/views",
-    "./src/controllers/secure",
     "./src/protocols",
     "./src/engine/impl",
     "./src/filters"

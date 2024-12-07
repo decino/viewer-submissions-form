@@ -1,12 +1,10 @@
-import {CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
-import {RelationOptions} from "typeorm/decorator/options/RelationOptions";
-import {Description, Ignore, Name} from "@tsed/schema";
+import { CreateDateColumn, PrimaryGeneratedColumn, RelationOptions, UpdateDateColumn } from "typeorm";
+import { Description, Ignore, Name } from "@tsed/schema";
 
 export abstract class AbstractModel {
-
     protected static readonly cascadeOps: RelationOptions = {
         onDelete: "CASCADE",
-        onUpdate: "CASCADE"
+        onUpdate: "CASCADE",
     };
 
     @PrimaryGeneratedColumn("increment")

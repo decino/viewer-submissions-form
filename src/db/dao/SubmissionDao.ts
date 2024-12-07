@@ -1,15 +1,14 @@
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
-import {AbstractDao} from "./AbstractDao";
-import {SubmissionModel} from "../../model/db/Submission.model";
-import {Logger} from "@tsed/logger";
-import {SQLITE_DATA_SOURCE} from "../../model/di/tokens";
-import {DataSource, EntityManager, In} from "typeorm";
+import { Inject, Injectable, ProviderScope } from "@tsed/di";
+import { AbstractDao } from "./AbstractDao.js";
+import { SubmissionModel } from "../../model/db/Submission.model.js";
+import { Logger } from "@tsed/logger";
+import { SQLITE_DATA_SOURCE } from "../../model/di/tokens.js";
+import { DataSource, EntityManager, In } from "typeorm";
 
 @Injectable({
-    scope: ProviderScope.SINGLETON
+    scope: ProviderScope.SINGLETON,
 })
 export class SubmissionDao extends AbstractDao<SubmissionModel> {
-
     @Inject()
     private logger: Logger;
 
@@ -21,15 +20,18 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return this.getEntityManager(transaction).save(entry);
     }
 
-    public saveOrUpdateSubmissions(entries: SubmissionModel[], transaction?: EntityManager): Promise<SubmissionModel[]> {
+    public saveOrUpdateSubmissions(
+        entries: SubmissionModel[],
+        transaction?: EntityManager,
+    ): Promise<SubmissionModel[]> {
         return this.getEntityManager(transaction).save(entries);
     }
 
     public getSubmission(id: number, transaction?: EntityManager): Promise<SubmissionModel | null> {
         return this.getEntityManager(transaction).findOne({
             where: {
-                id
-            }
+                id,
+            },
         });
     }
 
@@ -39,8 +41,8 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         }
         return this.getEntityManager(transaction).find({
             where: {
-                id: In(ids)
-            }
+                id: In(ids),
+            },
         });
     }
 
@@ -52,8 +54,8 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
             where: {
                 id: In(ids),
                 submissionValid: true,
-                verified: false
-            }
+                verified: false,
+            },
         });
     }
 
@@ -61,7 +63,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return this.getEntityManager(transaction).find({
             where: {
                 submissionRoundId: roundId,
-            }
+            },
         });
     }
 
@@ -78,8 +80,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getInvalidSubmissions(transaction?: EntityManager): Promise<SubmissionModel[]> {
         return this.getEntityManager(transaction).findBy({
-            submissionValid: false
+            submissionValid: false,
         });
     }
-
 }

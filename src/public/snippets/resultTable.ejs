@@ -1,0 +1,43 @@
+<div class="card card border-primary mb-3 preRoundCard">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" id="resultTabs">
+            <% for(let i = 0; i < model.previousRounds.length; i++){
+                const round = model.previousRounds[i];
+            %>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>"
+                        data-bs-toggle="tab" data-bs-target="#entry<%- round.id; -%>-pane" type="button" role="tab"
+                        aria-controls="entry<%- round.id; -%>-pane" aria-selected="true"
+                        data-entryid="<%- round.id; -%>"><%- round.name; -%></button>
+            </li>
+            <% } %>
+        </ul>
+    </div>
+    <div class="card-body" style="overflow: auto;">
+        <div class="tab-content" id="myTabContent">
+            <% for(let i = 0; i < model.previousRounds.length; i++){
+                const round = model.previousRounds[i];
+            %>
+            <div class="tab-pane fade show <% if(i === 0){ %>active<% } %>" id="entry<%- round.id; -%>-pane"
+                 role="tabpanel" aria-labelledby="entry<%- round.id; -%>-tab" tabindex="0"
+                 data-entryid="<%- round.id; -%>">
+                <div class="form-check form-switch float-end mb-3 allSubmissionSwitchWrapper">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           id="showAllSubmissionSwitch<%- i; -%>">
+                    <label class="form-check-label" for="showAllSubmissionSwitch<%- i; -%>">All submissions</label>
+                </div>
+                <p class="mb-3 mt-3">Start: <%- model.getRoundDateAsString(round); -%></p>
+                <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: true, isActiveResults: false}); %>
+                <div class="hidden allSubmissionsToggleWrapper">
+                    <%- include('SubmissionsTable.ejs', {submissions: round.submissions, isPReviousResults: true, isAdmin: isAdmin, isResults: false, isActiveResults: false}); %>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+    <% if(isAdmin){ %>
+        <div class="card-footer text-body-secondary">
+            <button class="btn btn-outline-danger" id="prevRoundDeleteButton" data-roundid="<%- model.previousRounds[0].id; -%>">Delete round</button>
+        </div>
+    <% } %>
+</div>

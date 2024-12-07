@@ -5,15 +5,16 @@ import "@tsed/platform-express";
 import "@tsed/ajv";
 import "@tsed/swagger";
 import "@tsed/socketio";
+import "@tsed/platform-log-request";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { createClient } from "redis";
 // custom index imports
 import "./protocols/index.js";
 import "./filters/index.js";
 import "./engine/impl/index.js";
-import * as rest from "./controllers/rest";
-import * as views from "./controllers/views";
-import * as secureViews from "./controllers/secureViews";
+import * as rest from "./controllers/rest/index.js";
+import * as views from "./controllers/views/index.js";
+import * as secureViews from "./controllers/secureViews/index.js";
 // import * as secureViews from "./controllers/secureViews";
 // custom index imports end
 import { config } from "./config/index.js";
@@ -133,18 +134,6 @@ const opts: Partial<TsED.Configuration> = {
     },
     exclude: ["**/*.spec.ts"],
 };
-
-if (!isProduction) {
-    opts["swagger"] = [
-        {
-            path: "/api-docs",
-            specVersion: "3.1.0",
-            options: {
-                withCredentials: true,
-            },
-        },
-    ];
-}
 
 await initRedis();
 

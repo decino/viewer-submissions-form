@@ -1,13 +1,12 @@
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
-import {UserDao} from "../dao/UserDao";
-import {UserModel} from "../../model/db/User.model";
-import {Builder} from "builder-pattern";
+import { Inject, Injectable, ProviderScope } from "@tsed/di";
+import { UserDao } from "../dao/UserDao.js";
+import { UserModel } from "../../model/db/User.model.js";
+import { Builder } from "builder-pattern";
 
 @Injectable({
-    scope: ProviderScope.SINGLETON
+    scope: ProviderScope.SINGLETON,
 })
 export class UserRepo {
-
     @Inject()
     private userDao: UserDao;
 
@@ -20,10 +19,7 @@ export class UserRepo {
     }
 
     public createUser(email: string, password: string): Promise<UserModel> {
-        const model = Builder(UserModel)
-            .email(email)
-            .password(password)
-            .build();
+        const model = Builder(UserModel).email(email).password(password).build();
         return this.userDao.saveOrUpdateUser(model);
     }
 

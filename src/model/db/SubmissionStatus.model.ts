@@ -1,16 +1,15 @@
-import {Column, Entity, JoinColumn, OneToOne} from "typeorm";
-import {AbstractModel} from "./AbstractModel";
-import STATUS from "../constants/STATUS";
-import {Description, Enum, Example, Name, Nullable, Optional, Required} from "@tsed/schema";
-import {SubmissionModel} from "./Submission.model";
+import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { AbstractModel } from "./AbstractModel.js";
+import STATUS from "../constants/STATUS.js";
+import { Description, Enum, Example, Name, Nullable, Optional, Required } from "@tsed/schema";
+import { SubmissionModel } from "./Submission.model.js";
 
 @Entity()
 export class SubmissionStatusModel extends AbstractModel {
-
     @Column({
         type: "text",
         nullable: false,
-        default: STATUS.QUEUED
+        default: STATUS.QUEUED,
     })
     @Name("status")
     @Description("The current status of the submission")
@@ -29,15 +28,14 @@ export class SubmissionStatusModel extends AbstractModel {
     @Example("2")
     @Column({
         nullable: false,
-        unique: true
+        unique: true,
     })
     public submissionId: number;
-
 
     @Column({
         type: "text",
         nullable: true,
-        default: null
+        default: null,
     })
     @Name("additionalInfo")
     @Description("Any additional info added by decino")
@@ -46,12 +44,11 @@ export class SubmissionStatusModel extends AbstractModel {
     public additionalInfo?: string | null;
 
     @OneToOne("SubmissionModel", "status", {
-        ...AbstractModel.cascadeOps
+        ...AbstractModel.cascadeOps,
     })
     @JoinColumn({
         name: "submissionId",
-        referencedColumnName: "id"
+        referencedColumnName: "id",
     })
     public submission: SubmissionModel;
-
 }

@@ -1,14 +1,13 @@
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
-import {SubmissionRoundModel} from "../../model/db/SubmissionRound.model";
-import {SubmissionRoundDao} from "../dao/SubmissionRoundDao";
-import {Builder} from "builder-pattern";
-import {SubmissionDao} from "../dao/SubmissionDao";
+import { Inject, Injectable, ProviderScope } from "@tsed/di";
+import { SubmissionRoundDao } from "../dao/SubmissionRoundDao.js";
+import { SubmissionDao } from "../dao/SubmissionDao.js";
+import { SubmissionRoundModel } from "../../model/db/SubmissionRound.model.js";
+import { Builder } from "builder-pattern";
 
 @Injectable({
-    scope: ProviderScope.SINGLETON
+    scope: ProviderScope.SINGLETON,
 })
 export class SubmissionRoundRepo {
-
     @Inject()
     private submissionRoundDao: SubmissionRoundDao;
 
@@ -16,11 +15,7 @@ export class SubmissionRoundRepo {
     private submissionDao: SubmissionDao;
 
     public createRound(name: string, endDate: Date | null): Promise<SubmissionRoundModel> {
-        const model = Builder(SubmissionRoundModel)
-            .active(true)
-            .name(name)
-            .endDate(endDate)
-            .build();
+        const model = Builder(SubmissionRoundModel).active(true).name(name).endDate(endDate).build();
         return this.submissionRoundDao.createRound(model);
     }
 
@@ -57,7 +52,9 @@ export class SubmissionRoundRepo {
             if (!currentActiveRound) {
                 return false;
             }
-            const invalidEntries = currentActiveRound.submissions.filter(submission => !submission.isSubmissionValidAndVerified());
+            const invalidEntries = currentActiveRound.submissions.filter(
+                submission => !submission.isSubmissionValidAndVerified(),
+            );
             await this.submissionDao.deleteSubmissions(invalidEntries, entityManager);
             await this.submissionRoundDao.setActive(currentActiveRound, false, entityManager);
             return true;
@@ -76,7 +73,9 @@ export class SubmissionRoundRepo {
 
     public saveOrUpdateRounds(models: SubmissionRoundModel): Promise<SubmissionRoundModel>;
     public saveOrUpdateRounds(models: SubmissionRoundModel[]): Promise<SubmissionRoundModel[]>;
-    public saveOrUpdateRounds(models: SubmissionRoundModel | SubmissionRoundModel[]): Promise<SubmissionRoundModel | SubmissionRoundModel[]> {
+    public saveOrUpdateRounds(
+        models: SubmissionRoundModel | SubmissionRoundModel[],
+    ): Promise<SubmissionRoundModel | SubmissionRoundModel[]> {
         return this.submissionRoundDao.saveOrUpdateRounds(models);
     }
 }

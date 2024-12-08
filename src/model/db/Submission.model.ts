@@ -1,21 +1,21 @@
-import {AbstractModel} from "./AbstractModel";
-import {BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne} from "typeorm";
-import {Any, Description, Enum, Example, Format, Ignore, Name, Nullable, Required} from "@tsed/schema";
-import GZDOOM_ACTIONS from "../constants/GZDoomActions";
-import type {SubmissionRoundModel} from "./SubmissionRound.model";
-import DOOM_ENGINE from "../constants/DoomEngine";
-import type {PendingEntryConfirmationModel} from "./PendingEntryConfirmation.model";
+import { AbstractModel } from "./AbstractModel.js";
+import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from "typeorm";
+import { Any, Description, Enum, Example, Format, Name, Nullable, Required } from "@tsed/schema";
+import GZDOOM_ACTIONS from "../constants/GZDoomActions.js";
+import type { SubmissionRoundModel } from "./SubmissionRound.model.js";
+import DOOM_ENGINE from "../constants/DoomEngine.js";
+import type { PendingEntryConfirmationModel } from "./PendingEntryConfirmation.model.js";
 import process from "process";
 import xss from "xss";
-import {SubmissionStatusModel} from "./SubmissionStatus.model";
-import STATUS from "../constants/STATUS";
-import {AfterDeserialize} from "@tsed/json-mapper";
-import RECORDED_FORMAT from "../constants/RecordedFormat";
+import { SubmissionStatusModel } from "./SubmissionStatus.model.js";
+import STATUS from "../constants/STATUS.js";
+import { AfterDeserialize } from "@tsed/json-mapper";
+import RECORDED_FORMAT from "../constants/RecordedFormat.js";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
 @Index(["submissionRoundId", "submitterEmail"], {
-    unique: true
+    unique: true,
 })
 @AfterDeserialize((data: SubmissionModel) => {
     if (data.info) {
@@ -33,7 +33,6 @@ import RECORDED_FORMAT from "../constants/RecordedFormat";
     return data;
 })
 export class SubmissionModel extends AbstractModel {
-
     @Column({
         nullable: false,
     })
@@ -46,7 +45,17 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         nullable: true,
-        type: "text"
+        type: "text",
+    })
+    @Name("playTestEngine")
+    @Description("The type of engine to use for the play test")
+    @Required()
+    @Any(String)
+    public playTestEngine: string | null;
+
+    @Column({
+        nullable: true,
+        type: "text",
     })
     @Name("WAD")
     @Description("The URL of the wad")
@@ -55,7 +64,7 @@ export class SubmissionModel extends AbstractModel {
     public wadURL: string | null;
 
     @Column({
-        nullable: false
+        nullable: false,
     })
     @Name("level")
     @Description("The level of the wad to play")
@@ -66,7 +75,7 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         type: "integer",
-        nullable: false
+        nullable: false,
     })
     @Name("engine")
     @Description("What game engine to use")
@@ -80,7 +89,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         type: "simple-array",
         nullable: true,
-        default: null
+        default: null,
     })
     @Name("gzDoomAction")
     @Description("GZDoom parameters")
@@ -93,7 +102,7 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         nullable: true,
-        type: "text"
+        type: "text",
     })
     @Name("authorName")
     @Description("Submitter name")
@@ -103,7 +112,7 @@ export class SubmissionModel extends AbstractModel {
     public submitterName: string | null;
 
     @Column({
-        default: false
+        default: false,
     })
     @Name("author")
     @Description("Did you make this map?")
@@ -112,7 +121,7 @@ export class SubmissionModel extends AbstractModel {
     public submitterAuthor: boolean;
 
     @Column({
-        default: false
+        default: false,
     })
     @Name("distributable")
     @Description("If you made this, am I allowed to distribute it to the public?")
@@ -122,7 +131,7 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         nullable: true,
-        type: "text"
+        type: "text",
     })
     @Name("info")
     @Description("Additional info")
@@ -136,7 +145,7 @@ export class SubmissionModel extends AbstractModel {
     @Example("1")
     @Example("2")
     @Column({
-        nullable: false
+        nullable: false,
     })
     public submissionRoundId: number;
 
@@ -145,23 +154,22 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         nullable: true,
         default: null,
-        type: "integer"
+        type: "integer",
     })
     public playOrder: number | null;
 
     @Column({
         nullable: true,
-        type: "text"
+        type: "text",
     })
     @Name("customWad")
     @Description("The custom wad to play")
     @Nullable(String)
-    @Ignore()
     public customWadFileName: string | null;
 
     @Column({
         nullable: true,
-        type: "text"
+        type: "text",
     })
     @Name("youtubeLink")
     @Description("The link to the YouTube play of this entry")
@@ -169,7 +177,7 @@ export class SubmissionModel extends AbstractModel {
     public youtubeLink: string | null;
 
     @Column({
-        nullable: false
+        nullable: false,
     })
     @Name("email")
     @Description("Email of the submitter")
@@ -180,28 +188,27 @@ export class SubmissionModel extends AbstractModel {
 
     @Column({
         nullable: false,
-        default: false
+        default: false,
     })
     @Name("submissionValid")
     @Description("Valid if the user clicks the confirmation URL")
     public submissionValid: boolean;
 
-
     @Name("submissionRound")
     @Description("The submission round this entry belongs to")
     @ManyToOne("SubmissionRoundModel", "submissions", {
-        ...AbstractModel.cascadeOps
+        ...AbstractModel.cascadeOps,
     })
     @JoinColumn({
         name: "submissionRoundId",
-        referencedColumnName: "id"
+        referencedColumnName: "id",
     })
     public submissionRound: Promise<SubmissionRoundModel>;
 
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
     @OneToOne("PendingEntryConfirmationModel", "submission", {
-        eager: true
+        eager: true,
     })
     public confirmation: PendingEntryConfirmationModel | null;
 
@@ -209,14 +216,14 @@ export class SubmissionModel extends AbstractModel {
     @Description("The current status of this submission")
     @OneToOne("SubmissionStatusModel", "submission", {
         cascade: true,
-        eager: true
+        eager: true,
     })
     public status: SubmissionStatusModel | null;
 
     @Column({
         nullable: false,
         type: "boolean",
-        default: false
+        default: false,
     })
     @Name("chosen")
     @Description("If this submission was picked for this round")
@@ -225,7 +232,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         nullable: false,
         type: "boolean",
-        default: false
+        default: false,
     })
     @Name("verified")
     @Description("If submission is verified")
@@ -234,7 +241,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         nullable: false,
         type: "text",
-        default: RECORDED_FORMAT.PRACTISED
+        default: RECORDED_FORMAT.PRACTISED,
     })
     @Name("recordedFormat")
     @Description("if it should be played blind or practised")
@@ -256,7 +263,9 @@ export class SubmissionModel extends AbstractModel {
         if (!this.downloadable(admin)) {
             return null;
         }
-        return this.customWadFileName ? `${process.env.BASE_URL}/rest/submission/download/${this.submissionRoundId}/${this.id}` : this.wadURL;
+        return this.customWadFileName
+            ? `${process.env.BASE_URL}/rest/submission/download/${this.submissionRoundId}/${this.id}`
+            : this.wadURL;
     }
 
     public getEngineAsString(): string {
@@ -289,5 +298,4 @@ export class SubmissionModel extends AbstractModel {
             this.info = xss(this.info);
         }
     }
-
 }

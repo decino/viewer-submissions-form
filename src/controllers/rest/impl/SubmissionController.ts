@@ -1,22 +1,21 @@
-import {Controller, Inject} from "@tsed/di";
-import {Delete, Get, Post, Returns, Security} from "@tsed/schema";
-import {StatusCodes} from "http-status-codes";
-import {SubmissionModel} from "../../../model/db/Submission.model";
-import {SubmissionService} from "../../../services/SubmissionService";
-import {BodyParams, PathParams} from "@tsed/platform-params";
-import {BadRequest, InternalServerError, NotFound, Unauthorized} from "@tsed/exceptions";
-import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Req, Res, UseBefore} from "@tsed/common";
-import {BaseRestController} from "../BaseRestController";
-import {CustomWadEngine, CustomWadEntry} from "../../../engine/CustomWadEngine";
-import {Authorize} from "@tsed/passport";
-import {ReCAPTCHAMiddleWare} from "../../../middleware/endpoint/ReCAPTCHAMiddleWare";
-import {SubmissionStatusModel} from "../../../model/db/SubmissionStatus.model";
-import {SubmissionConfirmationService} from "../../../services/SubmissionConfirmationService";
+import { Controller, Inject } from "@tsed/di";
+import { Delete, Get, Post, Returns, Security } from "@tsed/schema";
+import { StatusCodes } from "http-status-codes";
+import { SubmissionModel } from "../../../model/db/Submission.model.js";
+import { SubmissionService } from "../../../services/SubmissionService.js";
+import { BodyParams, PathParams } from "@tsed/platform-params";
+import { BadRequest, InternalServerError, NotFound, Unauthorized } from "@tsed/exceptions";
+import { SuccessModel } from "../../../model/rest/SuccessModel.js";
+import { MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Req, Res, UseBefore } from "@tsed/common";
+import { BaseRestController } from "../BaseRestController.js";
+import { CustomWadEngine, CustomWadEntry } from "../../../engine/CustomWadEngine.js";
+import { Authorize } from "@tsed/passport";
+import { SubmissionStatusModel } from "../../../model/db/SubmissionStatus.model.js";
+import { SubmissionConfirmationService } from "../../../services/SubmissionConfirmationService.js";
+import { CaptchaMiddleWare } from "../../../middleware/endpoint/CaptchaMiddleWare.js";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
-
     @Inject()
     private submissionService: SubmissionService;
 
@@ -27,11 +26,14 @@ export class SubmissionController extends BaseRestController {
     private submissionConfirmationService: SubmissionConfirmationService;
 
     @Post("/addEntry")
-    @UseBefore(ReCAPTCHAMiddleWare)
+    @UseBefore(CaptchaMiddleWare)
     @Returns(StatusCodes.CREATED, SubmissionModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public addEntry(@BodyParams() submission: SubmissionModel, @MultipartFile("file") customWad?: PlatformMulterFile): Promise<unknown> {
+    public addEntry(
+        @BodyParams() submission: SubmissionModel,
+        @MultipartFile("file") customWad?: PlatformMulterFile,
+    ): Promise<unknown> {
         return this.submissionService.addEntry(submission, customWad);
     }
 
@@ -39,7 +41,10 @@ export class SubmissionController extends BaseRestController {
     @Authorize("login")
     @Security("login")
     @Returns(StatusCodes.OK, SubmissionModel)
-    public modifyEntry(@BodyParams() submission: any, @MultipartFile("file") replacementWad?: PlatformMulterFile): unknown {
+    public modifyEntry(
+        @BodyParams() submission: Record<string, string>,
+        @MultipartFile("file") replacementWad?: PlatformMulterFile,
+    ): unknown {
         return this.submissionService.modifyEntry(submission, replacementWad);
     }
 
@@ -47,7 +52,10 @@ export class SubmissionController extends BaseRestController {
     @Authorize("login")
     @Security("login")
     @Returns(StatusCodes.OK)
-    public async changeStatus(@Res() res: PlatformResponse, @BodyParams() status: SubmissionStatusModel): Promise<unknown> {
+    public async changeStatus(
+        @Res() res: PlatformResponse,
+        @BodyParams() status: SubmissionStatusModel,
+    ): Promise<unknown> {
         await this.submissionService.modifyStatus(status);
         return super.doSuccess(res, `Submission status has been changed.`);
     }
@@ -56,9 +64,11 @@ export class SubmissionController extends BaseRestController {
     @Authorize("login")
     @Security("login")
     @Returns(StatusCodes.OK)
-    public async setYoutubeLink(@Res() res: PlatformResponse,
-                                @PathParams("id") submissionId: number,
-                                @QueryParams("link") youtubeLink?: string): Promise<unknown> {
+    public async setYoutubeLink(
+        @Res() res: PlatformResponse,
+        @PathParams("id") submissionId: number,
+        @QueryParams("link") youtubeLink?: string,
+    ): Promise<unknown> {
         await this.submissionService.addYoutubeToSubmission(submissionId, youtubeLink ?? null);
         return super.doSuccess(res, `Submission YouTube link has been assigned.`);
     }
@@ -77,7 +87,12 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.OK, Buffer)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public async downloadWad(@Req() req: Req, @Res() res: PlatformResponse, @PathParams("id") id: number, @PathParams("roundId") roundId: number): Promise<unknown> {
+    public async downloadWad(
+        @Req() req: Req,
+        @Res() res: PlatformResponse,
+        @PathParams("id") id: number,
+        @PathParams("roundId") roundId: number,
+    ): Promise<unknown> {
         const [entry, wad] = await this.getWad(roundId, id, req.user !== undefined);
         res.attachment(entry.customWadFileName as string);
         res.contentType("application/octet-stream");
@@ -98,7 +113,11 @@ export class SubmissionController extends BaseRestController {
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
-    public async deleteEntry(@Res() res: PlatformResponse, @BodyParams() ids: number[], @QueryParams("notify") notify?: boolean): Promise<unknown> {
+    public async deleteEntry(
+        @Res() res: PlatformResponse,
+        @BodyParams() ids: number[],
+        @QueryParams("notify") notify?: boolean,
+    ): Promise<unknown> {
         const result = await this.submissionService.deleteEntries(ids, notify);
         if (!result) {
             throw new NotFound(`No entry with IDs ${ids.join(", ")} found.`);
@@ -110,7 +129,7 @@ export class SubmissionController extends BaseRestController {
         let wad: CustomWadEntry | null;
         try {
             wad = await this.customWadEngine.getWad(roundId, entryId);
-        } catch (e) {
+        } catch {
             throw new NotFound(`Unable to find WAD with ID: ${entryId} from round ${roundId}.`);
         }
         if (!wad) {

@@ -1,16 +1,15 @@
-import {Inject, Service} from "@tsed/di";
-import {WadValidationModel} from "../model/rest/wadValidationModel";
-import SETTING from "../model/constants/Settings";
-import {SettingsService} from "./SettingsService";
-import {AfterInit, Logger, PlatformMulterFile} from "@tsed/common";
+import { Inject, Service } from "@tsed/di";
+import { WadValidationModel } from "../model/rest/wadValidationModel.js";
+import SETTING from "../model/constants/Settings.js";
+import { SettingsService } from "./SettingsService.js";
+import { AfterInit, Logger, PlatformMulterFile } from "@tsed/common";
 import fs from "fs";
-import {BadRequest} from "@tsed/exceptions";
-import AdmZip, {IZipEntry} from "adm-zip";
-import {SettingsMap} from "../utils/typeings";
+import { BadRequest } from "@tsed/exceptions";
+import AdmZip, { IZipEntry } from "adm-zip";
+import { SettingsMap } from "../utils/typeings.js";
 
 @Service()
 export class WadValidationService implements AfterInit {
-
     @Inject()
     private settingsService: SettingsService;
 
@@ -33,7 +32,7 @@ export class WadValidationService implements AfterInit {
     }
 
     public async setValidation(model: WadValidationModel): Promise<void> {
-        const {allowedExtensionsZip, allowedHeadersZip, allowedHeaders, allowedExtensions} = model;
+        const { allowedExtensionsZip, allowedHeadersZip, allowedHeaders, allowedExtensions } = model;
         const allowedHeadersStr = allowedHeaders.join(",");
         const allowedExtensionsStr = allowedExtensions.join(",");
         const allowedZipHeaders = allowedHeadersZip.join(",");
@@ -52,17 +51,19 @@ export class WadValidationService implements AfterInit {
     public async getValidationMappings(): Promise<WadValidationModel> {
         const retVal = new WadValidationModel();
 
-        const [allowedHeaders, allowedFiles, allowedFilesZip, allowedHeadersZip] = await this.settingsService.getSettings([
-            SETTING.ALLOWED_HEADERS,
-            SETTING.ALLOWED_FILES,
-            SETTING.ALLOWED_FILES_ZIP,
-            SETTING.ALLOWED_HEADERS_ZIP,
-        ]);
+        const [allowedHeaders, allowedFiles, allowedFilesZip, allowedHeadersZip] =
+            await this.settingsService.getSettings([
+                SETTING.ALLOWED_HEADERS,
+                SETTING.ALLOWED_FILES,
+                SETTING.ALLOWED_FILES_ZIP,
+                SETTING.ALLOWED_HEADERS_ZIP,
+            ]);
 
         if (allowedHeaders) {
-            retVal.allowedHeaders = allowedHeaders.split(",")
+            retVal.allowedHeaders = allowedHeaders
+                .split(",")
                 .map(header => encodeURIComponent(header))
-                .map(ext => ext === "null" ? null : ext);
+                .map(ext => (ext === "null" ? null : ext));
         }
         if (allowedFiles) {
             retVal.allowedExtensions = allowedFiles.split(",");
@@ -71,15 +72,15 @@ export class WadValidationService implements AfterInit {
             retVal.allowedExtensionsZip = allowedFilesZip.split(",");
         }
         if (allowedHeadersZip) {
-            retVal.allowedHeadersZip = allowedHeadersZip.split(",")
+            retVal.allowedHeadersZip = allowedHeadersZip
+                .split(",")
                 .map(header => encodeURIComponent(header))
-                .map(ext => ext === "null" ? null : ext);
+                .map(ext => (ext === "null" ? null : ext));
         }
         return retVal;
     }
 
     public async validateWad(customWad: PlatformMulterFile): Promise<void> {
-
         // no validation defined
         if (this.allowedFilesMap.size === 0 && this.allowedFilesZipMap.size === 0) {
             return;
@@ -162,7 +163,9 @@ export class WadValidationService implements AfterInit {
         const header = buffer.toString("ascii", 0, 4);
         const allowedHeadersArr = allowedHeaders.split(",");
         if (!allowedHeadersArr.includes(header)) {
-            this.logger.error(`validation failure: File uploaded declares itself as a ${ext}, but the header of the file is ${header}`);
+            this.logger.error(
+                `validation failure: File uploaded declares itself as a ${ext}, but the header of the file is ${header}`,
+            );
             if (isZip) {
                 throw new BadRequest("Invalid file inside of ZIP: header mismatch.");
             }
@@ -180,7 +183,9 @@ export class WadValidationService implements AfterInit {
         if (!allowedFilesArr) {
             const allowedAllFiles = [...map.keys()];
             if (isZip) {
-                throw new BadRequest(`Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedAllFiles.join(", ")}`);
+                throw new BadRequest(
+                    `Invalid file found inside of ZIP: got ${fileExt}, expected: ${allowedAllFiles.join(", ")}`,
+                );
             }
             throw new BadRequest(`Invalid file: got ${fileExt}, expected: ${allowedAllFiles.join(", ")}`);
         }

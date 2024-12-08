@@ -1,11 +1,10 @@
-import {Service} from "@tsed/di";
-import fetch from 'node-fetch';
+import { Service } from "@tsed/di";
 
 @Service()
 export class CorsProxyService {
     public async getHtml(url: string): Promise<string> {
         const response = await fetch(url, {
-            method: "GET"
+            method: "GET",
         });
         if (!response.ok) {
             throw new Error(`Unable to get response ${response.statusText}`);

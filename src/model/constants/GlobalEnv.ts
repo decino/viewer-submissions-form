@@ -16,8 +16,8 @@ enum GlobalEnv {
     BASE_URL = `${prefix}BASE_URL`,
     HELP_EMAIL = `${prefix}HELP_EMAIL`,
     BOT_URI = `${prefix}BOT_URI`,
-    RECAPTCHA_SITE_KEY = `${prefix}RECAPTCHA_SITE_KEY`,
-    RECAPTCHA_SECRET_KEY = `${prefix}RECAPTCHA_SECRET_KEY`,
+    CAPTCHA_SITE_KEY = `${prefix}CAPTCHA_SITE_KEY`,
+    CAPTCHA_SECRET_KEY = `${prefix}CAPTCHA_SECRET_KEY`,
     FILE_SIZE_UPLOAD_LIMIT_MB = `${prefix}FILE_SIZE_UPLOAD_LIMIT_MB`,
     SMTP_HOST = `${prefix}SMTP_HOST`,
     SMTP_PORT = `${prefix}SMTP_PORT`,
@@ -25,7 +25,10 @@ enum GlobalEnv {
     SMTP_USER = `${prefix}SMTP_USER`,
     SMTP_PASS = `${prefix}SMTP_PASS`,
     SMTP_FROM = `${prefix}SMTP_FROM`,
-    REPLY_TO = `${prefix}REPLY_TO`
+    REPLY_TO = `${prefix}REPLY_TO`,
+    RATE_LIMIT = `${prefix}RATE_LIMIT`,
+    RATE_LIMIT_MS = `${prefix}RATE_LIMIT_MS`,
+    REDIS_URI = `${prefix}REDIS_URI`,
 }
 
 export default GlobalEnv;

@@ -1,15 +1,14 @@
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
-import {SettingsDao} from "../dao/SettingsDao";
-import {SettingsModel} from "../../model/db/Settings.model";
-import SETTING from "../../model/constants/Settings";
-import {Builder} from "builder-pattern";
-import {SettingsMap} from "../../utils/typeings";
+import { Inject, Injectable, ProviderScope } from "@tsed/di";
+import { SettingsDao } from "../dao/SettingsDao.js";
+import { SettingsMap } from "../../utils/typeings.js";
+import { SettingsModel } from "../../model/db/Settings.model.js";
+import SETTING from "../../model/constants/Settings.js";
+import { Builder } from "builder-pattern";
 
 @Injectable({
-    scope: ProviderScope.SINGLETON
+    scope: ProviderScope.SINGLETON,
 })
 export class SettingsRepo {
-
     @Inject()
     private settingsDao: SettingsDao;
 
@@ -50,14 +49,10 @@ export class SettingsRepo {
     private async getSettingToUpdate(setting: SETTING, value: string): Promise<SettingsModel> {
         let settingToSave = await this.settingsDao.getSetting(setting);
         if (!settingToSave) {
-            settingToSave = Builder(SettingsModel)
-                .setting(setting)
-                .value(value)
-                .build();
+            settingToSave = Builder(SettingsModel).setting(setting).value(value).build();
         } else {
             settingToSave.value = value;
         }
         return settingToSave;
     }
-
 }

@@ -1,21 +1,19 @@
-import {Controller, Inject} from "@tsed/di";
-import {Delete, Get, Post, Returns, Security} from "@tsed/schema";
-import {StatusCodes} from "http-status-codes";
-import {PlatformResponse, QueryParams, Res} from "@tsed/common";
-import {SubmissionRoundModel} from "../../../model/db/SubmissionRound.model";
-import {SubmissionRoundService} from "../../../services/SubmissionRoundService";
-import {BaseRestController} from "../BaseRestController";
-import {SuccessModel} from "../../../model/rest/SuccessModel";
-import {BadRequest, NotFound} from "@tsed/exceptions";
-import {Authorize} from "@tsed/passport";
-import {PathParams} from "@tsed/platform-params";
+import { Controller, Inject } from "@tsed/di";
+import { Delete, Get, Post, Returns, Security } from "@tsed/schema";
+import { StatusCodes } from "http-status-codes";
+import { PlatformResponse, QueryParams, Res } from "@tsed/common";
+import { SubmissionRoundModel } from "../../../model/db/SubmissionRound.model.js";
+import { SubmissionRoundService } from "../../../services/SubmissionRoundService.js";
+import { BaseRestController } from "../BaseRestController.js";
+import { SuccessModel } from "../../../model/rest/SuccessModel.js";
+import { BadRequest, NotFound } from "@tsed/exceptions";
+import { Authorize } from "@tsed/passport";
+import { PathParams } from "@tsed/platform-params";
 
 @Controller("/submissionRound")
 export class SubmissionRoundController extends BaseRestController {
-
     @Inject()
     private submissionRoundService: SubmissionRoundService;
-
 
     @Post("/newRound")
     @Authorize("login")
@@ -24,7 +22,6 @@ export class SubmissionRoundController extends BaseRestController {
     public createRound(@QueryParams("name") name: string, @QueryParams("endDate") endDate?: number): unknown {
         return this.submissionRoundService.newSubmissionRound(name, endDate ?? null);
     }
-
 
     @Post("/pauseRound")
     @Authorize("login")
@@ -52,7 +49,7 @@ export class SubmissionRoundController extends BaseRestController {
     @Get("/getAllRounds")
     @Authorize("login")
     @Security("login")
-    @Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel)
+    @(Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel))
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
         return this.submissionRoundService.getAllSubmissionRounds(includeActive);
     }

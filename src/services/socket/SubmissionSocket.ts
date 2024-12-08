@@ -1,15 +1,9 @@
-import {Nsp, SocketService} from "@tsed/socketio";
-import {SubmissionModel} from "../../model/db/Submission.model";
-import SocketIO from "socket.io";
-import {Logger} from "@tsed/logger";
-import {Inject} from "@tsed/di";
+import { Nsp, SocketService } from "@tsed/socketio";
+import { SubmissionModel } from "../../model/db/Submission.model.js";
+import * as SocketIO from "socket.io";
 
 @SocketService("/submission")
 export class SubmissionSocket {
-
-    @Inject()
-    private logger: Logger;
-
     @Nsp
     private nsp: SocketIO.Namespace;
 
@@ -17,12 +11,11 @@ export class SubmissionSocket {
         return this.nsp.emit("newSubmission", {
             id: payload.id,
             wadName: payload.wadName,
-            wadLevel: payload.wadLevel
+            wadLevel: payload.wadLevel,
         });
     }
 
     public emitSubmissionDelete(ids: number[]): boolean {
         return this.nsp.emit("deleteSubmission", ids);
     }
-
 }

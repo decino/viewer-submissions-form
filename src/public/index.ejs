@@ -1,3 +1,17 @@
+<%
+function getCaptcha() {
+    switch (captchaType) {
+        case "turnstile":
+            return "https://challenges.cloudflare.com/turnstile/v0/api.js";
+        case "reCAPTCHA":
+            return "https://www.google.com/recaptcha/api.js";
+        case "hCaptcha":
+            return "https://js.hcaptcha.com/1/api.js";
+        default:
+            return "";
+    }
+}
+%>
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
 <head>
@@ -97,6 +111,10 @@
         <% } %>
     </main>
 </div>
+<% const captchaJsUrl = getCaptcha(); %>
+<% if(captchaJsUrl){ %>
+    <script src="<%- getCaptcha() -%>" async defer></script>
+<% } %>
 <script src="assets/custom/js/wad.js"></script>
 <%- include('snippets/scripts.ejs'); %>
 <script src="assets/custom/js/index.js"></script>

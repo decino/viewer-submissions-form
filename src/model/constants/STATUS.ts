@@ -2,7 +2,7 @@ enum STATUS {
     COMPLETED = "Completed",
     REJECTED = "Rejected",
     IN_PROGRESS = "In Progress",
-    QUEUED = "Queued"
+    QUEUED = "Queued",
 }
 
 export default STATUS;

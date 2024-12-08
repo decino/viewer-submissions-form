@@ -1,7 +1,17 @@
-const Site = (function () {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Site = (function() {
+    function getCap() {
+        switch (capType) {
+            case "turnstile":
+                return turnstile;
+            case "reCAPTCHA":
+                return grecaptcha;
+            case "hCaptcha":
+                return hcaptcha;
+        }
+    }
+
     let isInit = false;
-    const socket = io(`${mainRul}/submission`, {path: '/socket.io/submission/'});
+    const socket = io(`${mainRul}/submission`, { path: "/socket.io/submission/" });
     let uploadAbortController = null;
 
     const loading = function loading(show) {
@@ -40,13 +50,28 @@ const Site = (function () {
 
         const formData = serialiseForm(urlEncoded);
 
-        if (!modify) {
-            const reCAPTCHAResponse = grecaptcha.getResponse();
-            if (reCAPTCHAResponse === '') {
-                showError("Please activate reCAPTCHA.");
+        if (!modify && capType) {
+            let response;
+            let key;
+            switch (capType) {
+                case "turnstile":
+                    response = turnstile.getResponse();
+                    key = "cf-turnstile-response";
+                    break;
+                case "reCAPTCHA":
+                    response = grecaptcha.getResponse();
+                    key = "g-recaptcha-response";
+                    break;
+                case "hCaptcha":
+                    key = "h-captcha-response";
+                    response = hcaptcha.getResponse();
+                    break;
+            }
+            if (response === "") {
+                showError("Please activate CAPTCHA.");
                 return false;
             }
-            formData.append("g-recaptcha-response", reCAPTCHAResponse);
+            formData.append(key, response);
         }
 
         uploadAbortController = new AbortController();
@@ -55,7 +80,7 @@ const Site = (function () {
         let response;
         try {
             response = await fetch(`${baseUrl}/submission/${endpoint}`, {
-                method: 'POST',
+                method: "POST",
                 body: formData,
                 signal
             });
@@ -69,7 +94,7 @@ const Site = (function () {
         } finally {
             Site.loading(false);
             if (!modify) {
-                grecaptcha.reset();
+                getCap().reset();
             }
         }
 
@@ -134,7 +159,7 @@ const Site = (function () {
                 return false;
             }
             const style = window.getComputedStyle(el);
-            return ((style.display === 'none') || (style.visibility === 'hidden') || el.offsetParent === null);
+            return ((style.display === "none") || (style.visibility === "hidden") || el.offsetParent === null);
         }
 
         const form = document.getElementById("entryForm");
@@ -150,7 +175,7 @@ const Site = (function () {
                 }
             }
             if (item.type === "file") {
-                formData.append('file', item.files[0]);
+                formData.append("file", item.files[0]);
             } else if (item.value) {
                 if (item.dataset.array) {
                     formData.append(`${item.name}[]`, item.value);
@@ -195,17 +220,17 @@ const Site = (function () {
     };
 
     const loadPage = function loadPage(anon) {
-        // eslint-disable-next-line require-await
+
         anon.call(this, Site).then(async () => {
             function initTooltips() {
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+                document.querySelectorAll("[data-bs-toggle=\"tooltip\"]").forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
             }
 
             function initTabs() {
-                const triggerTabList = document.querySelectorAll('#resultTabs button');
+                const triggerTabList = document.querySelectorAll("#resultTabs button");
                 triggerTabList.forEach(triggerEl => {
                     const tabTrigger = new bootstrap.Tab(triggerEl);
-                    triggerEl.addEventListener('click', event => {
+                    triggerEl.addEventListener("click", event => {
                         event.preventDefault();
                         tabTrigger.show();
                     });
@@ -213,7 +238,7 @@ const Site = (function () {
             }
 
             function selectLastTab() {
-                const lastTab = document.querySelector('#resultTabs li:last-child button');
+                const lastTab = document.querySelector("#resultTabs li:last-child button");
                 if (lastTab) {
                     bootstrap.Tab.getInstance(lastTab).show();
                 }
@@ -236,6 +261,6 @@ const Site = (function () {
         showError,
         onEntry,
         onDelete,
-        initPRevSubmissionToggle,
+        initPRevSubmissionToggle
     };
 }());

@@ -1,16 +1,15 @@
-import {Constant, Inject, Service} from "@tsed/di";
-import {BeforeInit, Logger} from "@tsed/common";
-import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
-import {Envelope} from "nodemailer/lib/mailer";
-import GlobalEnv from "../model/constants/GlobalEnv";
-import {createTestAccount, createTransport, Transporter} from "nodemailer";
-import {isProduction} from "../config/envs";
-import {BadRequest} from "@tsed/exceptions";
-import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
+import { Constant, Inject, Service } from "@tsed/di";
+import { AfterInit, Logger } from "@tsed/common";
+import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
+import { Envelope } from "nodemailer/lib/mailer";
+import GlobalEnv from "../model/constants/GlobalEnv.js";
+import { createTestAccount, createTransport, Transporter } from "nodemailer";
+import { isProduction } from "../config/envs/index.js";
+import { BadRequest } from "@tsed/exceptions";
+import EMAIL_TEMPLATE from "../model/constants/EmailTemplate.js";
 
 @Service()
-export class EmailService implements BeforeInit {
-
+export class EmailService implements AfterInit {
     @Inject()
     private logger: Logger;
 
@@ -37,27 +36,27 @@ export class EmailService implements BeforeInit {
     @Constant(GlobalEnv.REPLY_TO)
     private readonly smtpReplyTo: string;
 
-    private readonly emailTemplateMapping: Record<EMAIL_TEMPLATE, { subject: string, body?: string }> = {
+    private readonly emailTemplateMapping: Record<EMAIL_TEMPLATE, { subject: string; body?: string }> = {
         [EMAIL_TEMPLATE.DELETED]: {
             body: "Your submission has been rejected, please submit a different WAD or level",
-            subject: "Submission rejected"
+            subject: "Submission rejected",
         },
         [EMAIL_TEMPLATE.REJECTED]: {
-            subject: "Submission rejected"
+            subject: "Submission rejected",
         },
         [EMAIL_TEMPLATE.NEW_SUBMISSION]: {
-            subject: "Viewer-Submitted Levels Confirmation"
-        }
+            subject: "Viewer-Submitted Levels Confirmation",
+        },
     };
 
-    public async $beforeInit(): Promise<void> {
+    public async $afterInit(): Promise<void> {
         this.emailTransport = await this.getTransport();
     }
 
     public async sendMail(to: string, template: EMAIL_TEMPLATE, body?: string): Promise<SentMessageInfo> {
         const env: Envelope = {
             from: this.smtpFrom,
-            to
+            to,
         };
         const mapping = this.emailTemplateMapping[template];
         if (!mapping.body && !body) {
@@ -69,7 +68,7 @@ export class EmailService implements BeforeInit {
             text: body ?? mapping.body,
             replyTo: this.smtpReplyTo,
             sender: this.smtpFrom,
-            subject: mapping.subject
+            subject: mapping.subject,
         });
         this.logger.info(`send mail to: ${to}. mail transport id: ${sentMail.messageId}`);
         if (!this.wasAccepted(sentMail, to)) {
@@ -86,12 +85,12 @@ export class EmailService implements BeforeInit {
                 secure: this.smtpSecure === "true",
                 auth: {
                     user: this.smtpUser,
-                    pass: this.smtpPass
+                    pass: this.smtpPass,
                 },
                 debug: !isProduction,
                 tls: {
-                    rejectUnauthorized: false
-                }
+                    rejectUnauthorized: false,
+                },
             });
             if (!this.smtpHost) {
                 throw new Error("No SMTP server has been defined.");
@@ -111,16 +110,18 @@ export class EmailService implements BeforeInit {
                     reject(err);
                 }
                 const transporter = createTransport({
-                    host: 'smtp.ethereal.email',
+                    host: "smtp.ethereal.email",
                     port: 587,
                     secure: false,
                     auth: {
                         user: account.user,
-                        pass: account.pass
-                    }
+                        pass: account.pass,
+                    },
                 });
                 this.logger.info(`Connected to fake SMTP server: smtp.ethereal.email:587`);
-                this.logger.info(`email credentials for https://ethereal.email/login username: "${account.user}" password: "${account.pass}" `);
+                this.logger.info(
+                    `email credentials for https://ethereal.email/login username: "${account.user}" password: "${account.pass}" `,
+                );
                 resolve(transporter);
             });
         });

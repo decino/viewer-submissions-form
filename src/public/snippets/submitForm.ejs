@@ -1,6 +1,10 @@
 <% const isPaused = model?.currentActiveRound?.paused ?? false;
 function mapEngine(value) {
     switch (value) {
+        case "UNKNOWN":
+            return "I don't know";
+        case "NA":
+            return "N/A";
         case "GZDoom":
             return "GZDoom";
         case "Doom":
@@ -30,10 +34,24 @@ function mapGzActions(value) {
             return "Mouse look";
     }
 }
+function getHtml() {
+    switch (captchaType) {
+        case "turnstile":
+            return `<div class="cf-turnstile" data-theme="dark" data-sitekey="${process.env.CAPTCHA_SITE_KEY}" data-expired-callback="abortUpload"></div>`;
+        case "reCAPTCHA":
+            return `<div class="g-recaptcha" data-theme="dark" data-sitekey="${process.env.CAPTCHA_SITE_KEY}" data-expired-callback="abortUpload"></div>`;
+        case "hCaptcha":
+            return `<div class="h-captcha" data-theme="dark" data-sitekey="${process.env.CAPTCHA_SITE_KEY}" data-expired-callback="abortUpload"></div>`;
+        default:
+            return "";
+    }
+}
 %>
+
+
 <form id="entryForm">
     <% if(isAdmin){ %>
-        <input type="hidden" name="id" id="submissionId"/>
+        <input type="hidden" name="id" id="submissionId" />
     <% } %>
     <div class="mb-3">
         <% if(!isAdmin){ %>
@@ -80,9 +98,14 @@ function mapGzActions(value) {
         <input name="level" type="text" class="form-control" id="levelToPlay">
     </div>
     <div class="mb-3">
-        <label for="gameEngine" class="form-label">Which engine is this level designed for?
+        <label for="playTestEngine" class="form-label">What source port did you play or test this map on?
             <span title="required" class="text-danger">*</span></label>
-        <select name="engine" id="gameEngine" class="form-select"
+        <input type="text" class="form-control" required id="playTestEngine" name="playTestEngine">
+    </div>
+    <div class="mb-3">
+        <label for="gameEngine" class="form-label">Map compatibility
+            <span title="required" class="text-danger">*</span></label>
+        <select name="engine" id="gameEngine" class="form-select input-group"
                 aria-label="Which engine is this level designed for?">
             <% for(const key in model.doomEngines) {
                 const value = model.doomEngines[key];
@@ -168,7 +191,7 @@ function mapGzActions(value) {
     </div>
     <% if(!isAdmin){ %>
         <div class="mb-3 text-center">
-            <div class="g-recaptcha" data-theme="dark" data-sitekey="<%- process.env.RECAPTCHA_SITE_KEY; -%>" data-expired-callback="abortUpload"></div>
+            <%- getHtml(); -%>
         </div>
         <div class="alert alert-light" role="alert">
             By submitting, you agree to our <a href="tos" target="_blank">Privacy Policy</a>

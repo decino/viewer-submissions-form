@@ -1,29 +1,27 @@
-import {Constant, Inject, OnInit, Service} from "@tsed/di";
-import {SubmissionModel} from "../model/db/Submission.model";
-import fetch, {Response} from 'node-fetch';
-import {Logger} from "@tsed/common";
-import GlobalEnv from "../model/constants/GlobalEnv";
+import { Constant, Inject, OnInit, Service } from "@tsed/di";
+import { SubmissionModel } from "../model/db/Submission.model.js";
+import { Logger } from "@tsed/common";
+import GlobalEnv from "../model/constants/GlobalEnv.js";
 
 type SubmissionPayload = {
-    wadName: string,
-    wadLevel: string,
-    submissionRound: string,
-    timeStamp: number,
-    info: string | null
-}
+    wadName: string;
+    wadLevel: string;
+    submissionRound: string;
+    timeStamp: number;
+    info: string | null;
+};
 
 type PendingValidationPayload = {
-    wadName: string,
-    email: string,
-    submitterName: string | null,
-    info: string | null,
-    id: number,
-    map: string
-}
+    wadName: string;
+    email: string;
+    submitterName: string | null;
+    info: string | null;
+    id: number;
+    map: string;
+};
 
 @Service()
 export class DiscordBotDispatcherService implements OnInit {
-
     @Constant(GlobalEnv.BOT_URI)
     private readonly botUri: string;
 
@@ -43,7 +41,7 @@ export class DiscordBotDispatcherService implements OnInit {
             submitterName: submission.submitterName,
             info: submission.info,
             id: submission.id,
-            map: submission.wadLevel
+            map: submission.wadLevel,
         };
 
         try {
@@ -51,7 +49,6 @@ export class DiscordBotDispatcherService implements OnInit {
         } catch (e) {
             this.logger.warn(`Unable to send entry to bot.`, e.message);
         }
-
     }
 
     public async sendNewSubmission(entry: SubmissionModel): Promise<void> {
@@ -61,7 +58,7 @@ export class DiscordBotDispatcherService implements OnInit {
             info: entry.info,
             wadLevel: entry.wadLevel,
             timeStamp: entry.createdAt.getTime(),
-            submissionRound: submissionRound.name
+            submissionRound: submissionRound.name,
         };
 
         try {
@@ -75,12 +72,12 @@ export class DiscordBotDispatcherService implements OnInit {
         let response: Response;
         try {
             response = await fetch(`${this.dispatchAddress}/${endpoint}`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
         } catch (e) {
             this.logger.warn(`Unable to send entry to bot.`, e);

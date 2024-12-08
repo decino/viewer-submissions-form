@@ -1,18 +1,17 @@
-import {Controller, Inject} from "@tsed/di";
-import {BaseRestController} from "../BaseRestController";
-import {Get, Post, Returns, Security} from "@tsed/schema";
-import {StatusCodes} from "http-status-codes";
-import {QueryParams} from "@tsed/common";
-import {CorsProxyService} from "../../../services/CorsProxyService";
-import {BadRequest} from "@tsed/exceptions";
-import {BodyParams} from "@tsed/platform-params";
-import {WadValidationModel} from "../../../model/rest/wadValidationModel";
-import {Authorize} from "@tsed/passport";
-import {WadValidationService} from "../../../services/WadValidationService";
+import { Controller, Inject } from "@tsed/di";
+import { BaseRestController } from "../BaseRestController.js";
+import { Get, Post, Returns, Security } from "@tsed/schema";
+import { StatusCodes } from "http-status-codes";
+import { QueryParams } from "@tsed/common";
+import { CorsProxyService } from "../../../services/CorsProxyService.js";
+import { BadRequest } from "@tsed/exceptions";
+import { BodyParams } from "@tsed/platform-params";
+import { WadValidationModel } from "../../../model/rest/wadValidationModel.js";
+import { Authorize } from "@tsed/passport";
+import { WadValidationService } from "../../../services/WadValidationService.js";
 
 @Controller("/utils")
 export class UtilsController extends BaseRestController {
-
     @Inject()
     private corsProxyService: CorsProxyService;
 
@@ -45,7 +44,7 @@ export class UtilsController extends BaseRestController {
     @Authorize("login")
     @Security("login")
     @Returns(StatusCodes.OK)
-    @Returns(StatusCodes.BAD_REQUEST, BadRequest).Description("If the payload fails validation")
+    @(Returns(StatusCodes.BAD_REQUEST, BadRequest).Description("If the payload fails validation"))
     public async postWadValidation(@BodyParams() payload: WadValidationModel): Promise<void> {
         try {
             await this.wadValidationService.setValidation(payload);

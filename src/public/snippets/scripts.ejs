@@ -3,8 +3,10 @@
     const mainRul = "<%- process.env.BASE_URL; -%>";
     const fileSizeLimit = <%- process.env.FILE_SIZE_UPLOAD_LIMIT_MB * 1048576; -%>;
     const socketUri = "<%- process.env.SOCKET_URI; -%>";
+    <% if (typeof captchaType !== "undefined"){ %>
+    const capType = "<%- captchaType; -%>";
+    <% } %>
 </script>
 <script src="<%- process.env.BASE_URL; -%>/socket.io/socket.io.min.js"></script>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/custom/js/main.js"></script>

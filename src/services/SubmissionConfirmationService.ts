@@ -1,21 +1,20 @@
-import {Constant, Inject, OnInit, Service} from "@tsed/di";
-import {PendingEntryConfirmationModel} from "../model/db/PendingEntryConfirmation.model";
-import {BadRequest, NotFound} from "@tsed/exceptions";
-import {SubmissionModel} from "../model/db/Submission.model";
-import {EmailService} from "./EmailService";
-import {DiscordBotDispatcherService} from "./DiscordBotDispatcherService";
-import {SubmissionSocket} from "./socket/SubmissionSocket";
-import GlobalEnv from "../model/constants/GlobalEnv";
-import {SentMessageInfo} from "nodemailer/lib/smtp-transport";
-import {SubmissionConfirmationRepo} from "../db/repo/SubmissionConfirmationRepo";
-import {SubmissionRepo} from "../db/repo/SubmissionRepo";
-import {UUID} from "crypto";
-import {Logger} from "@tsed/common";
-import EMAIL_TEMPLATE from "../model/constants/EmailTemplate";
+import { Constant, Inject, OnInit, Service } from "@tsed/di";
+import { PendingEntryConfirmationModel } from "../model/db/PendingEntryConfirmation.model.js";
+import { BadRequest, NotFound } from "@tsed/exceptions";
+import { SubmissionModel } from "../model/db/Submission.model.js";
+import { EmailService } from "./EmailService.js";
+import { DiscordBotDispatcherService } from "./DiscordBotDispatcherService.js";
+import { SubmissionSocket } from "./socket/SubmissionSocket.js";
+import GlobalEnv from "../model/constants/GlobalEnv.js";
+import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
+import { SubmissionConfirmationRepo } from "../db/repo/SubmissionConfirmationRepo.js";
+import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
+import { UUID } from "crypto";
+import { Logger } from "@tsed/common";
+import EMAIL_TEMPLATE from "../model/constants/EmailTemplate.js";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {
-
     @Inject()
     private emailService: EmailService;
 
@@ -64,7 +63,6 @@ export class SubmissionConfirmationService implements OnInit {
         }
     }
 
-
     public async generateConfirmationEntry(submissionId: number): Promise<PendingEntryConfirmationModel> {
         const savedEntry = await this.submissionConfirmationRepo.createConfirmation(submissionId);
         const entryWithSubmission = await this.submissionConfirmationRepo.getConfirmation(savedEntry.confirmationUid);
@@ -75,7 +73,7 @@ export class SubmissionConfirmationService implements OnInit {
         return savedEntry;
     }
 
-    public $onInit(): Promise<any> | void {
+    public $onInit(): void {
         if (!this.baseUrl) {
             throw new Error("Base URL has not been set.");
         }
@@ -91,5 +89,4 @@ export class SubmissionConfirmationService implements OnInit {
         this.logger.info(`${to} email sent with guild ${guid}`);
         return messageInfo;
     }
-
 }

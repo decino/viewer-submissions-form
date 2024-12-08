@@ -1,17 +1,16 @@
-import {AbstractModel} from "./AbstractModel";
-import {BeforeInsert, Column, Entity, JoinColumn, OneToOne} from "typeorm";
-import {randomUUID, UUID} from "crypto";
-import type {SubmissionModel} from "./Submission.model";
-import {Description, Example, Name} from "@tsed/schema";
+import { AbstractModel } from "./AbstractModel.js";
+import { BeforeInsert, Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { Description, Example, Name } from "@tsed/schema";
+import { randomUUID, UUID } from "crypto";
+import { SubmissionModel } from "./Submission.model.js";
 
 @Entity()
 export class PendingEntryConfirmationModel extends AbstractModel {
-
     @Name("confirmationUid")
     @Description("UID of the confirmation")
     @Column({
         nullable: false,
-        type: "text"
+        type: "text",
     })
     public confirmationUid: UUID;
 
@@ -20,16 +19,16 @@ export class PendingEntryConfirmationModel extends AbstractModel {
     @Example("1")
     @Example("2")
     @Column({
-        nullable: false
+        nullable: false,
     })
     public submissionId: number;
 
     @OneToOne("SubmissionModel", "confirmation", {
-        ...AbstractModel.cascadeOps
+        ...AbstractModel.cascadeOps,
     })
     @JoinColumn({
         name: "submissionId",
-        referencedColumnName: "id"
+        referencedColumnName: "id",
     })
     public submission: SubmissionModel;
 

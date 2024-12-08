@@ -1,6 +1,6 @@
 enum RECORDED_FORMAT {
     BLIND = "Blind",
-    PRACTISED = "Practised"
+    PRACTISED = "Practised",
 }
 
 export default RECORDED_FORMAT;

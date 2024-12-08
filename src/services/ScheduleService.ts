@@ -1,33 +1,17 @@
-import {Inject, Service} from "@tsed/di";
-import {Job, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
-import {SimpleIntervalSchedule} from "toad-scheduler/dist/lib/engines/simple-interval/SimpleIntervalSchedule";
-import {AsyncTask} from "toad-scheduler/dist/lib/common/AsyncTask";
-import schedule, {Job as DateJob, JobCallback} from "node-schedule";
-import {Logger} from "@tsed/logger";
-import {ObjectUtils} from "../utils/Utils";
+import { Inject, Service } from "@tsed/di";
+import { Job, ToadScheduler } from "toad-scheduler";
+import schedule, { Job as DateJob, JobCallback } from "node-schedule";
+import { Logger } from "@tsed/logger";
+import { ObjectUtils } from "../utils/Utils.js";
 
 @Service()
 export class ScheduleService {
-
     private static readonly scheduler = new ToadScheduler();
 
     private static readonly dateSchedules: DateJob[] = [];
 
     @Inject()
     private logger: Logger;
-
-    public scheduleJobInterval<T>(schedule: SimpleIntervalSchedule, jobHandler: (this: T) => Promise<void>, jobName: string, context: T): void {
-        jobHandler = jobHandler.bind(context);
-        const task = new AsyncTask(
-            jobName,
-            jobHandler
-        );
-        const job = new SimpleIntervalJob(schedule, task, {
-            id: jobName
-        });
-        ScheduleService.scheduler.addSimpleIntervalJob(job);
-        this.logger.info(`Registered interval job ${jobName}`);
-    }
 
     public scheduleJobAtDate<T>(name: string, when: Date, jobHandler: JobCallback, context: T): void {
         if (when.getTime() < Date.now()) {

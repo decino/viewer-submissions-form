@@ -1,21 +1,20 @@
-import {BeforeInsert, Column, Entity, OneToMany} from "typeorm";
-import {AbstractModel} from "./AbstractModel";
-import {SubmissionModel} from "./Submission.model";
-import {Description, Name} from "@tsed/schema";
 import xss from "xss";
+import { AbstractModel } from "./AbstractModel.js";
+import { BeforeInsert, Column, Entity, OneToMany } from "typeorm";
+import { Description, Name } from "@tsed/schema";
+import { SubmissionModel } from "./Submission.model.js";
 
 @Entity()
 export class SubmissionRoundModel extends AbstractModel {
-
     @Column({
-        nullable: false
+        nullable: false,
     })
     @Name("active")
     @Description("If this round is active or not")
     public active: boolean;
 
     @Column({
-        nullable: false
+        nullable: false,
     })
     @Name("name")
     @Description("The name of this round")
@@ -23,7 +22,7 @@ export class SubmissionRoundModel extends AbstractModel {
 
     @Column({
         nullable: false,
-        default: false
+        default: false,
     })
     @Name("paused")
     @Description("If this round is currently paused or not")
@@ -32,7 +31,7 @@ export class SubmissionRoundModel extends AbstractModel {
     @Column({
         name: "end_date",
         nullable: true,
-        type: "datetime"
+        type: "datetime",
     })
     @Name("endDate")
     @Description("If this round is currently paused or not")
@@ -42,7 +41,7 @@ export class SubmissionRoundModel extends AbstractModel {
     @Description("List of submissions that belong to this round")
     @OneToMany(() => SubmissionModel, submissions => submissions.submissionRound, {
         cascade: true,
-        eager: true
+        eager: true,
     })
     public submissions: SubmissionModel[];
 

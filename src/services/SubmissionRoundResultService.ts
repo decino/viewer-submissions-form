@@ -1,15 +1,14 @@
-import {Inject, Service} from "@tsed/di";
-import {SubmissionModel} from "../model/db/Submission.model";
-import {SubmissionService} from "./SubmissionService";
-import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
-import {SubmissionRoundService} from "./SubmissionRoundService";
-import {BadRequest, InternalServerError} from "@tsed/exceptions";
-import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
-import {SubmissionRepo} from "../db/repo/SubmissionRepo";
+import { Inject, Service } from "@tsed/di";
+import { SubmissionModel } from "../model/db/Submission.model";
+import { SubmissionService } from "./SubmissionService.js";
+import { SubmissionRoundModel } from "../model/db/SubmissionRound.model.js";
+import { SubmissionRoundService } from "./SubmissionRoundService.js";
+import { BadRequest, InternalServerError } from "@tsed/exceptions";
+import { SubmissionStatusModel } from "../model/db/SubmissionStatus.model.js";
+import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
 
 @Service()
 export class SubmissionRoundResultService {
-
     @Inject()
     private submissionService: SubmissionService;
 
@@ -91,7 +90,9 @@ export class SubmissionRoundResultService {
                 throw new InternalServerError(`Entry of ID ${entryId} is not found in current active round.`);
             }
             if (append) {
-                const playOrders = activeRound.submissions.filter(submission => submission.isChosen).map(submission => submission.playOrder!);
+                const playOrders = activeRound.submissions
+                    .filter(submission => submission.isChosen)
+                    .map(submission => submission.playOrder!);
                 const max = Math.max(...playOrders);
                 entry.playOrder = max + 1;
             } else {
@@ -128,8 +129,10 @@ export class SubmissionRoundResultService {
             .filter(submission => submission.isChosen)
             .map(submission => submission.wadName.toLowerCase());
 
-        const filteredSubmissions = round.submissions.filter(submission => !submission.isChosen && !chosenWadNames.includes(submission.wadName.toLowerCase()));
-        
+        const filteredSubmissions = round.submissions.filter(
+            submission => !submission.isChosen && !chosenWadNames.includes(submission.wadName.toLowerCase()),
+        );
+
         await this.buildResultSet(filteredSubmissions);
         const entry = this.generateEntries(1)[0];
         await this.submitEntries([entry.id], round, true);

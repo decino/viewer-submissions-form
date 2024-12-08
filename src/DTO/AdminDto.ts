@@ -1,15 +1,19 @@
-import {IndexDto} from "./IndexDto";
-import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
-import {SubmissionModel} from "../model/db/Submission.model";
-import {WadValidationService} from "../services/WadValidationService";
+import { IndexDto } from "./IndexDto.js";
+import { SubmissionRoundModel } from "../model/db/SubmissionRound.model";
+import { SubmissionModel } from "../model/db/Submission.model.js";
+import { WadValidationService } from "../services/WadValidationService.js";
 
 export class AdminDto extends IndexDto {
-    public constructor(currentActiveRound: SubmissionRoundModel | null,
-                       previousRounds: SubmissionRoundModel[],
-                       wadValidationService: WadValidationService) {
+    public constructor(
+        currentActiveRound: SubmissionRoundModel | null,
+        previousRounds: SubmissionRoundModel[],
+        wadValidationService: WadValidationService,
+    ) {
         super(currentActiveRound, previousRounds, wadValidationService);
         if (this.currentActiveRound) {
-            this.currentActiveRound.submissions = this.currentActiveRound.submissions.filter(submission => submission.submissionValid);
+            this.currentActiveRound.submissions = this.currentActiveRound.submissions.filter(
+                submission => submission.submissionValid,
+            );
         }
     }
 
@@ -17,7 +21,9 @@ export class AdminDto extends IndexDto {
         if (!this.currentActiveRound) {
             return [];
         }
-        return this.currentActiveRound.submissions.filter(submission => submission.submissionValid && !submission.verified);
+        return this.currentActiveRound.submissions.filter(
+            submission => submission.submissionValid && !submission.verified,
+        );
     }
 
     public get submissions(): SubmissionModel[] {

@@ -1,25 +1,15 @@
-import {Inject, OnInit, Service} from "@tsed/di";
-import {SubmissionRoundModel} from "../model/db/SubmissionRound.model";
-import {CustomWadEngine} from "../engine/CustomWadEngine";
-import {BadRequest} from "@tsed/exceptions";
-import {SubmissionModel} from "../model/db/Submission.model";
-import {DecinoRoundHistoryImporterEngine} from "../engine/DecinoRoundHistoryImporterEngine";
-import DOOM_ENGINE from "../model/constants/DoomEngine";
-import {SubmissionStatusModel} from "../model/db/SubmissionStatus.model";
-import STATUS from "../model/constants/STATUS";
-import {Logger} from "@tsed/logger";
-import {SubmissionRoundRepo} from "../db/repo/SubmissionRoundRepo";
-import {Builder} from "builder-pattern";
-import {ScheduleService} from "./ScheduleService";
+import { Inject, OnInit, Service } from "@tsed/di";
+import { SubmissionRoundModel } from "../model/db/SubmissionRound.model";
+import { CustomWadEngine } from "../engine/CustomWadEngine.js";
+import { BadRequest } from "@tsed/exceptions";
+import { Logger } from "@tsed/logger";
+import { SubmissionRoundRepo } from "../db/repo/SubmissionRoundRepo.js";
+import { ScheduleService } from "./ScheduleService.js";
 
 @Service()
 export class SubmissionRoundService implements OnInit {
-
     @Inject()
     private customWadEngine: CustomWadEngine;
-
-    @Inject()
-    private decinoRoundHistoryImporterEngine: DecinoRoundHistoryImporterEngine;
 
     @Inject()
     private logger: Logger;
@@ -31,15 +21,9 @@ export class SubmissionRoundService implements OnInit {
     private scheduleService: ScheduleService;
 
     public async $onInit(): Promise<void> {
-        const allRounds = await this.getAllSubmissionRounds(true);
-        if (allRounds.length === 0) {
-            this.logger.info("First start detected, loading all previous submission rounds from decino.nl...");
-            const result = await this.syncRound();
-            this.logger.info(`Added ${result.length} submission rounds to the database`);
-        }
         const activeRound = await this.getCurrentActiveSubmissionRound();
         if (activeRound) {
-            const {endDate} = activeRound;
+            const { endDate } = activeRound;
             if (endDate) {
                 this.scheduleDeadline(endDate);
             }
@@ -71,65 +55,6 @@ export class SubmissionRoundService implements OnInit {
         return newRound;
     }
 
-    public async syncRound(): Promise<SubmissionRoundModel[]> {
-        const entries = await this.decinoRoundHistoryImporterEngine.getSubmissionRounds();
-        const submissionRounds = entries.map(entry => {
-            const {submissions, roundId} = entry;
-            const submissionsModels: SubmissionModel[] = submissions.map((submission, index) => {
-                const submissionModelTemplate: Partial<SubmissionModel> = {
-                    submissionRoundId: roundId,
-                    youtubeLink: submission.youTubeLink,
-                    wadLevel: submission.level,
-                    isChosen: submission.chosen,
-                    wadName: submission.wad,
-                    wadURL: submission.wadDownload,
-                    wadEngine: DOOM_ENGINE.GZDoom,
-                    submitterEmail: `foo@example${index}.com`,
-                    submitterName: submission.submitter,
-                    submissionValid: true,
-                    verified: true
-                };
-                if (submission.chosen) {
-                    const status = Builder(SubmissionStatusModel)
-                        .status(STATUS.COMPLETED)
-                        .build();
-                    submissionModelTemplate.playOrder = submission.no;
-                    submissionModelTemplate.status = status;
-                }
-                return Builder(SubmissionModel, submissionModelTemplate).build();
-            });
-            let date: Date;
-            // UTC time is 0 based so months need -1
-            switch (roundId) {
-                case 1:
-                    date = new Date(Date.UTC(2019, 7 - 1, 1, 18));
-                    break;
-                case 2:
-                    date = new Date(Date.UTC(2020, 9 - 1, 1, 18));
-                    break;
-                case 3:
-                    date = new Date(Date.UTC(2021, 5 - 1, 1));
-                    break;
-                case 4:
-                    date = new Date(Date.UTC(2021, 11 - 1, 1));
-                    break;
-                case 5:
-                    date = new Date(Date.UTC(2022, 12 - 1, 1));
-                    break;
-                default:
-                    date = new Date();
-            }
-            return Builder(SubmissionRoundModel, {
-                id: roundId,
-                active: false,
-                submissions: submissionsModels,
-                name: `Round #0${roundId}`,
-                createdAt: date
-            }).build();
-        });
-        return this.submissionRoundRepo.saveOrUpdateRounds(submissionRounds);
-    }
-
     public async getCurrentActiveSubmissionRound(filterInvalidEntries = true): Promise<SubmissionRoundModel | null> {
         const activeRound = await this.submissionRoundRepo.retrieveActiveRound(filterInvalidEntries);
         if (!activeRound) {
@@ -153,11 +78,7 @@ export class SubmissionRoundService implements OnInit {
                 pArr.push(this.customWadEngine.deleteCustomWad(submission.id, submission.submissionRoundId));
             }
         }
-        try {
-            await Promise.all(pArr);
-        } catch (e) {
-            throw e;
-        }
+        await Promise.all(pArr);
         return this.submissionRoundRepo.deleteRound(existingRound);
     }
 
@@ -180,10 +101,14 @@ export class SubmissionRoundService implements OnInit {
     private scheduleDeadline(date: Date): void {
         // ensure that it's the END of the day
         date.setHours(23, 59, 59);
-        this.scheduleService.scheduleJobAtDate("submission-deadline-scheduler", date, async () => {
-            this.logger.info("Submission round deadline hit");
-            await this.pauseRound(true);
-        }, this);
+        this.scheduleService.scheduleJobAtDate(
+            "submission-deadline-scheduler",
+            date,
+            async () => {
+                this.logger.info("Submission round deadline hit");
+                await this.pauseRound(true);
+            },
+            this,
+        );
     }
-
 }

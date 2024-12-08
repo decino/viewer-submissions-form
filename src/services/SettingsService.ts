@@ -1,14 +1,13 @@
-import {Constant, Inject, OnInit, Service} from "@tsed/di";
-import SETTING from "../model/constants/Settings";
-import GlobalEnv from "../model/constants/GlobalEnv";
-import {Logger} from "@tsed/common";
-import {SettingsRepo} from "../db/repo/SettingsRepo";
-import {SettingsMap} from "../utils/typeings";
-import {SettingsModel} from "../model/db/Settings.model";
+import { Constant, Inject, OnInit, Service } from "@tsed/di";
+import SETTING from "../model/constants/Settings.js";
+import GlobalEnv from "../model/constants/GlobalEnv.js";
+import { Logger } from "@tsed/common";
+import { SettingsRepo } from "../db/repo/SettingsRepo.js";
+import { SettingsMap } from "../utils/typeings.js";
+import { SettingsModel } from "../model/db/Settings.model.js";
 
 @Service()
 export class SettingsService implements OnInit {
-
     @Constant(GlobalEnv.ALLOWED_HEADERS)
     private readonly defaultAllowedHeaders: string;
 
@@ -40,7 +39,6 @@ export class SettingsService implements OnInit {
         return returnMapping;
     }
 
-
     public async getSetting(setting: SETTING): Promise<string | null> {
         const settingModel = await this.settingRepo.getSetting(setting);
         return settingModel?.value ?? null;
@@ -69,7 +67,6 @@ export class SettingsService implements OnInit {
         const hasAllowedHeadersZip = await this.hasSetting(SETTING.ALLOWED_HEADERS_ZIP);
         const hasAllowedFiles = await this.hasSetting(SETTING.ALLOWED_FILES);
         const hasAllowedFilesZip = await this.hasSetting(SETTING.ALLOWED_FILES_ZIP);
-
 
         const updateSettingMap: SettingsMap = new Map();
         if (!hasAllowedHeaders) {

@@ -1,14 +1,13 @@
-import {Inject, Injectable, ProviderScope} from "@tsed/di";
-import {SubmissionStatusModel} from "../../model/db/SubmissionStatus.model";
-import {SubmissionDao} from "../dao/SubmissionDao";
-import {SubmissionModel} from "../../model/db/Submission.model";
-import {SubmissionConfirmationDao} from "../dao/SubmissionConfirmationDao";
+import { Inject, Injectable, ProviderScope } from "@tsed/di";
+import { SubmissionDao } from "../dao/SubmissionDao.js";
+import { SubmissionConfirmationDao } from "../dao/SubmissionConfirmationDao.js";
+import { SubmissionModel } from "../../model/db/Submission.model.js";
+import { SubmissionStatusModel } from "../../model/db/SubmissionStatus.model.js";
 
 @Injectable({
-    scope: ProviderScope.SINGLETON
+    scope: ProviderScope.SINGLETON,
 })
 export class SubmissionRepo {
-
     @Inject()
     private submissionDao: SubmissionDao;
 
@@ -45,7 +44,6 @@ export class SubmissionRepo {
         }
         return this.saveOrUpdateSubmissions(submissions);
     }
-
 
     public retrieveSubmission(id: number): Promise<SubmissionModel | null> {
         return this.submissionDao.getSubmission(id);
@@ -86,7 +84,7 @@ export class SubmissionRepo {
 
         try {
             await this.submissionDao.deleteSubmissions(submissionsToDelete);
-        } catch (e) {
+        } catch {
             return false;
         }
 
@@ -96,5 +94,4 @@ export class SubmissionRepo {
     public getInvalidSubmissions(): Promise<SubmissionModel[]> {
         return this.submissionDao.getInvalidSubmissions();
     }
-
 }

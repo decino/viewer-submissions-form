@@ -2,7 +2,7 @@ import { Inject, Service } from "@tsed/di";
 import { WadValidationModel } from "../model/rest/wadValidationModel.js";
 import SETTING from "../model/constants/Settings.js";
 import { SettingsService } from "./SettingsService.js";
-import { AfterInit, Logger, PlatformMulterFile } from "@tsed/common";
+import { AfterInit, Logger, type PlatformMulterFile } from "@tsed/common";
 import fs from "fs";
 import { BadRequest } from "@tsed/exceptions";
 import AdmZip, { IZipEntry } from "adm-zip";

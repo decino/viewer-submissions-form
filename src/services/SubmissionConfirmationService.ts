@@ -9,9 +9,9 @@ import GlobalEnv from "../model/constants/GlobalEnv.js";
 import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
 import { SubmissionConfirmationRepo } from "../db/repo/SubmissionConfirmationRepo.js";
 import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
-import { UUID } from "crypto";
 import { Logger } from "@tsed/common";
 import EMAIL_TEMPLATE from "../model/constants/EmailTemplate.js";
+import type { UUID } from "crypto";
 
 @Service()
 export class SubmissionConfirmationService implements OnInit {

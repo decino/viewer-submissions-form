@@ -1,6 +1,6 @@
 import { Injectable, ProviderScope } from "@tsed/di";
 import fs from "fs";
-import { PlatformMulterFile } from "@tsed/common";
+import type { PlatformMulterFile } from "@tsed/common";
 import path from "path";
 import { fileURLToPath } from "node:url";
 

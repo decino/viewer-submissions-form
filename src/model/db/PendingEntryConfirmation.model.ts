@@ -1,7 +1,7 @@
 import { AbstractModel } from "./AbstractModel.js";
 import { BeforeInsert, Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import { Description, Example, Name } from "@tsed/schema";
-import { randomUUID, UUID } from "crypto";
+import { randomUUID, type UUID } from "crypto";
 import { SubmissionModel } from "./Submission.model.js";
 
 @Entity()

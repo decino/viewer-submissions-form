@@ -6,7 +6,15 @@ import { SubmissionService } from "../../../services/SubmissionService.js";
 import { BodyParams, PathParams } from "@tsed/platform-params";
 import { BadRequest, InternalServerError, NotFound, Unauthorized } from "@tsed/exceptions";
 import { SuccessModel } from "../../../model/rest/SuccessModel.js";
-import { MultipartFile, PlatformMulterFile, PlatformResponse, QueryParams, Req, Res, UseBefore } from "@tsed/common";
+import {
+    MultipartFile,
+    type PlatformMulterFile,
+    PlatformResponse,
+    QueryParams,
+    Req,
+    Res,
+    UseBefore,
+} from "@tsed/common";
 import { BaseRestController } from "../BaseRestController.js";
 import { CustomWadEngine, CustomWadEntry } from "../../../engine/CustomWadEngine.js";
 import { Authorize } from "@tsed/passport";

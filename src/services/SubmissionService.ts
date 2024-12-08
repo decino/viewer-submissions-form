@@ -2,7 +2,7 @@ import { Constant, Inject, Service } from "@tsed/di";
 import { SubmissionModel } from "../model/db/Submission.model";
 import { SubmissionRoundService } from "./SubmissionRoundService.js";
 import { BadRequest, NotFound } from "@tsed/exceptions";
-import { Logger, PlatformMulterFile } from "@tsed/common";
+import { Logger, type PlatformMulterFile } from "@tsed/common";
 import { CustomWadEngine } from "../engine/CustomWadEngine.js";
 import { SubmissionRoundModel } from "../model/db/SubmissionRound.model.js";
 import { SubmissionConfirmationService } from "./SubmissionConfirmationService.js";

@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 import { Inject, Injectable, ProviderScope } from "@tsed/di";
 import { AbstractDao } from "./AbstractDao.js";
 import { PendingEntryConfirmationModel } from "../../model/db/PendingEntryConfirmation.model.js";

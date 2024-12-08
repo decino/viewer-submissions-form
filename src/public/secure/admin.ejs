@@ -2,7 +2,7 @@
 <html lang="en" data-bs-theme="dark">
 <head>
     <%- include('../snippets/head.ejs'); %>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="../assets/custom/css/spinWheel.css">
 </head>
 <body>
@@ -366,7 +366,7 @@
             </div>
             <div class="modal-body" id="submissionStatusModalInfoContent">
                 <form id="statusForm">
-                    <input type="hidden" name="id" id="statusSubmissionId"/>
+                    <input type="hidden" name="id" id="statusSubmissionId" />
                     <div class="mb-3">
                         <label for="statusSelect" class="form-label">Status</label>
                         <select class="form-select" aria-label="Status Select" id="statusSelect" name="status">
@@ -438,7 +438,7 @@
                         <div class="col-md-12">
                             <div class="alert alert-primary" role="alert">
                                 <p>Use the control below to map file extensions to the header</p>
-                                <hr/>
+                                <hr />
                                 <p class="mb-0">You can leave the header mapping empty to skip header validation for that file type</p>
                             </div>
                         </div>
@@ -523,8 +523,8 @@
             </div>
             <div class="modal-body" id="setFileModelInfoContent">
                 <label for="setWadFile" class="form-label">Upload WAD</label>
-                <input name="file" class="form-control" type="file" id="setWadFile" accept="<%- indexModel.allowedUploadExtensions; -%>"/>
-                <input type="hidden" name="id" id="setFileSubmissionId"/>
+                <input name="file" class="form-control" type="file" id="setWadFile" accept="<%- indexModel.allowedUploadExtensions; -%>" />
+                <input type="hidden" name="id" id="setFileSubmissionId" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary" id="setFileModelOk">Ok</button>
@@ -576,7 +576,7 @@
             return false;
         }
 
-        function showSubmissionInfoModel(id, wadName, wadLevel, submitterName, wadEngine, gzDoomAction, author, distributable, info, email, downloadUrl, format) {
+        function showSubmissionInfoModel(id, wadName, wadLevel, submitterName, wadEngine, gzDoomAction, author, distributable, info, email, downloadUrl, format, playTestEngine) {
             const modalContentWrapper = document.getElementById("submissionInfoContent");
             const modalTitle = document.getElementById("submissionInfoModalLabel");
 
@@ -596,6 +596,7 @@
                 ${info ? `Info: <pre style="white-space: pre-wrap; max-height: 200px;">${info}</pre>` : ""}
                 <p>Email: <span class="spoiler">${email}</span></p>
                 <p>Record format: ${format}</p>
+                <p>Play tested on: ${playTestEngine ?? "N/A"}</p>
                 <p>Download: <a href="${anchor.href}" target=_blank">${anchor.href}</a></p>
             `;
             modalTitle.innerHTML = title;
@@ -676,7 +677,7 @@
                 function bindRemove() {
                     Array.from(document.getElementsByClassName("removeMapping")).forEach(value => {
                         value.addEventListener("click", ev => {
-                            const {target} = ev;
+                            const { target } = ev;
                             const container = target.closest(".input-group");
                             container.remove();
                         });
@@ -686,7 +687,7 @@
                 function bindCheckbox() {
                     Array.from(document.getElementsByClassName("isZipCheck")).forEach(value => {
                         value.addEventListener("change", ev => {
-                            const {target} = ev;
+                            const { target } = ev;
                             const checked = target.checked;
                             const input = target.closest(".input-group").querySelector(".headerInput");
                             if (!checked) {
@@ -783,7 +784,7 @@
                     try {
                         setValidationResp = await fetch(`${baseUrl}/utils/wadValidation`, {
                             method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(obj)
                         });
                     } finally {
@@ -1063,7 +1064,7 @@
                     });
                     const dupes = findDuplicates(idArr);
                     const dupeRows = [];
-                    step2Dt.rows().every(function () {
+                    step2Dt.rows().every(function() {
                         const data = this.data();
                         const id = data[0];
                         const htmlRow = this.node();
@@ -1116,7 +1117,7 @@
                             async function buildStep2() {
 
                                 function highlightDupes() {
-                                    step2Dt.rows().every(function () {
+                                    step2Dt.rows().every(function() {
                                         const htmlRow = this.node();
                                         htmlRow.classList.remove("table-danger");
                                     });
@@ -1206,7 +1207,7 @@
                                             extend: 'selected',
                                             text: 'Re-generate',
                                             action: async (e, dt) => {
-                                                const selected = dt.rows({selected: true}).count();
+                                                const selected = dt.rows({ selected: true }).count();
                                                 const generateEntryEndpoint = `${baseUrl}/submissionRoundResult/generateEntries?count=${selected}`;
                                                 site.loading(true);
                                                 let json;
@@ -1222,8 +1223,8 @@
                                                     alert("Failed to generate entry. See console for more info.");
                                                     return;
                                                 }
-                                                const selectedRows = dt.rows({selected: true});
-                                                selectedRows.every(function (rowIdx, tableLoop, rowLoop) {
+                                                const selectedRows = dt.rows({ selected: true });
+                                                selectedRows.every(function(rowIdx, tableLoop, rowLoop) {
                                                     const entry = json[rowLoop];
                                                     this.data([
                                                         entry.id,
@@ -1241,7 +1242,7 @@
                                             extend: 'selected',
                                             text: 'Remove',
                                             action: async (e, dt) => {
-                                                dt.rows({selected: true}).remove().draw(false);
+                                                dt.rows({ selected: true }).remove().draw(false);
                                                 highlightDupes();
                                             }
                                         }
@@ -1280,7 +1281,7 @@
                     },
                     onFinish: async () => {
                         const chosenIds = [];
-                        step2Dt.rows().every(function () {
+                        step2Dt.rows().every(function() {
                             const data = this.data();
                             const id = data[0];
                             chosenIds.push(Number.parseInt(id));
@@ -1378,7 +1379,7 @@
                 return json;
             }
 
-            $('.submissionsTable').each(function () {
+            $('.submissionsTable').each(function() {
                 const el = $(this);
                 const isValidationTable = el[0].closest("#validationSubmissionsPanel") !== null;
                 let ds = el[0].dataset.isresults === "true";
@@ -1411,7 +1412,7 @@
                         extend: 'selectedSingle',
                         text: 'Full info',
                         action: async (e, dt) => {
-                            const selectedRow = dt.row({selected: true}).data();
+                            const selectedRow = dt.row({ selected: true }).data();
                             let entry;
                             try {
                                 entry = await getEntry(selectedRow[0]);
@@ -1419,7 +1420,7 @@
                                 alert(e.message);
                                 return;
                             }
-                            showSubmissionInfoModel(entry.id, entry.WADName, entry.level, entry.authorName, selectedRow[5], selectedRow[6], entry.author, entry.distributable, entry.info, entry.email, selectedRow[10], entry.recordedFormat);
+                            showSubmissionInfoModel(entry.id, entry.WADName, entry.level, entry.authorName, selectedRow[5], selectedRow[6], entry.author, entry.distributable, entry.info, entry.email, selectedRow[10], entry.recordedFormat, entry.playTestEngine);
                         }
                     },
                     {
@@ -1431,7 +1432,7 @@
                                 return;
                             }
                             const idArr = [];
-                            dt.rows({selected: true}).every(function () {
+                            dt.rows({ selected: true }).every(function() {
                                 const data = this.data();
                                 idArr.push(data[0]);
                             });
@@ -1457,7 +1458,7 @@
                             if (responseStatus !== 200) {
                                 return alert(responseJson.message);
                             }
-                            dt.rows({selected: true}).remove().draw(false);
+                            dt.rows({ selected: true }).remove().draw(false);
                         }
                     }
                 ];
@@ -1466,7 +1467,7 @@
                 }
                 if (isPreviousRoundCard) {
                     dtOpts["columnDefs"] = [
-                        {"visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10]}
+                        { "visible": false, "targets": [0, 4, 5, 6, 7, 8, 9, 10] }
                     ];
                 }
 
@@ -1476,7 +1477,7 @@
                             text: 'Change status',
                             action: async (e, dt) => {
                                 const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
-                                const selectedRow = dt.row({selected: true}).data();
+                                const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
                                 let submission;
                                 try {
@@ -1502,7 +1503,7 @@
                             extend: 'selectedSingle',
                             text: 'Set YouTube link',
                             action: async (e, dt) => {
-                                const selectedRow = dt.row({selected: true}).data();
+                                const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
                                 document.getElementById("setYoutubeLinkSubmissionId").value = id;
                                 setYoutubeLinkModal.show();
@@ -1517,7 +1518,7 @@
                             extend: 'selectedSingle',
                             text: 'Modify',
                             action: async (e, dt) => {
-                                const selectedRow = dt.row({selected: true}).data();
+                                const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
                                 site.loading(true);
                                 let submission;
@@ -1582,7 +1583,7 @@
                             extend: 'selectedSingle',
                             text: 'Set file',
                             action: async (e, dt) => {
-                                const selectedRow = dt.row({selected: true}).data();
+                                const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
                                 site.loading(true);
                                 let submission;
@@ -1614,7 +1615,7 @@
                                     return;
                                 }
                                 const idArr = [];
-                                dt.rows({selected: true}).every(function () {
+                                dt.rows({ selected: true }).every(function() {
                                     const data = this.data();
                                     idArr.push(data[0]);
                                 });

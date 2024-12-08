@@ -1,4 +1,5 @@
 enum DOOM_ENGINE {
+    UNKNOWN = -2,
     NA = 0,
     GZDoom = -1,
     Doom = 3,

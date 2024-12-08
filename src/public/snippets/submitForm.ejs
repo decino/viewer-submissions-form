@@ -1,6 +1,8 @@
 <% const isPaused = model?.currentActiveRound?.paused ?? false;
 function mapEngine(value) {
     switch (value) {
+        case "UNKNOWN":
+            return "I don't know";
         case "NA":
             return "N/A";
         case "GZDoom":
@@ -96,22 +98,22 @@ function getHtml() {
         <input name="level" type="text" class="form-control" id="levelToPlay">
     </div>
     <div class="mb-3">
-        <label for="playTestEngine" class="form-label">Which engine is this level designed for?
+        <label for="playTestEngine" class="form-label">What source port did you play or test this map on?
             <span title="required" class="text-danger">*</span></label>
-        <div class="input-group mb-3">
-            <input type="text" class="form-control w-25" placeholder="What source port did you play or test this on?" id="playTestEngine">
-            <select name="engine" id="gameEngine" class="form-select input-group"
-                    aria-label="Which engine is this level designed for?">
-                <% for(const key in model.doomEngines) {
-                    const value = model.doomEngines[key];
-                    const display = mapEngine(value);
-                %>
-                <option data-value=<%- value; -%> value="<%- key; -%>"><%- display; -%></option>
-                <% } %>
-            </select>
-        </div>
-
-
+        <input type="text" class="form-control" required id="playTestEngine" name="playTestEngine">
+    </div>
+    <div class="mb-3">
+        <label for="gameEngine" class="form-label">Map compatibility
+            <span title="required" class="text-danger">*</span></label>
+        <select name="engine" id="gameEngine" class="form-select input-group"
+                aria-label="Which engine is this level designed for?">
+            <% for(const key in model.doomEngines) {
+                const value = model.doomEngines[key];
+                const display = mapEngine(value);
+            %>
+            <option data-value=<%- value; -%> value="<%- key; -%>"><%- display; -%></option>
+            <% } %>
+        </select>
     </div>
     <% if(!isAdmin){ %>
         <div class="mb-3 hidden" id="gzActionsContainer">
@@ -189,7 +191,7 @@ function getHtml() {
     </div>
     <% if(!isAdmin){ %>
         <div class="mb-3 text-center">
-            <%- getHtml() -%>
+            <%- getHtml(); -%>
         </div>
         <div class="alert alert-light" role="alert">
             By submitting, you agree to our <a href="tos" target="_blank">Privacy Policy</a>

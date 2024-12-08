@@ -1,6 +1,6 @@
 import { AbstractModel } from "./AbstractModel.js";
 import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from "typeorm";
-import { Any, Description, Enum, Example, Format, Ignore, Name, Nullable, Required } from "@tsed/schema";
+import { Any, Description, Enum, Example, Format, Name, Nullable, Required } from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions.js";
 import type { SubmissionRoundModel } from "./SubmissionRound.model.js";
 import DOOM_ENGINE from "../constants/DoomEngine.js";
@@ -42,6 +42,16 @@ export class SubmissionModel extends AbstractModel {
     @Example("Sunlust")
     @Required()
     public wadName: string;
+
+    @Column({
+        nullable: true,
+        type: "text",
+    })
+    @Name("playTestEngine")
+    @Description("The type of engine to use for the play test")
+    @Required()
+    @Any(String)
+    public playTestEngine: string | null;
 
     @Column({
         nullable: true,
@@ -155,7 +165,6 @@ export class SubmissionModel extends AbstractModel {
     @Name("customWad")
     @Description("The custom wad to play")
     @Nullable(String)
-    @Ignore()
     public customWadFileName: string | null;
 
     @Column({

@@ -1,5 +1,5 @@
 import { CreateDateColumn, PrimaryGeneratedColumn, RelationOptions, UpdateDateColumn } from "typeorm";
-import { Description, Ignore, Name } from "@tsed/schema";
+import { Description, Name } from "@tsed/schema";
 
 export abstract class AbstractModel {
     protected static readonly cascadeOps: RelationOptions = {
@@ -19,7 +19,6 @@ export abstract class AbstractModel {
 
     @UpdateDateColumn()
     @Name("updated")
-    @Ignore()
     @Description("When this entry was updated")
     public updatedAt: Date;
 }

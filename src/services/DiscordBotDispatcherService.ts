@@ -31,7 +31,7 @@ export class DiscordBotDispatcherService implements OnInit {
     private logger: Logger;
 
     public $onInit(): void {
-        if (this.dispatchAddress) {
+        if (this.botUri) {
             this.dispatchAddress = `${this.botUri}/bot`;
         }
     }

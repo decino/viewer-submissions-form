@@ -1,4 +1,4 @@
-import { Constant, Inject, OnInit, Service } from "@tsed/di";
+import { Constant, Inject, Service } from "@tsed/di";
 import { PendingEntryConfirmationModel } from "../model/db/PendingEntryConfirmation.model.js";
 import { BadRequest, NotFound } from "@tsed/exceptions";
 import { SubmissionModel } from "../model/db/Submission.model.js";
@@ -14,7 +14,7 @@ import EMAIL_TEMPLATE from "../model/constants/EmailTemplate.js";
 import type { UUID } from "crypto";
 
 @Service()
-export class SubmissionConfirmationService implements OnInit {
+export class SubmissionConfirmationService {
     @Inject()
     private emailService: EmailService;
 
@@ -71,12 +71,6 @@ export class SubmissionConfirmationService implements OnInit {
         }
         await this.sendConfirmationEmail(entryWithSubmission);
         return savedEntry;
-    }
-
-    public $onInit(): void {
-        if (!this.baseUrl) {
-            throw new Error("Base URL has not been set.");
-        }
     }
 
     private async sendConfirmationEmail(pendingEntry: PendingEntryConfirmationModel): Promise<SentMessageInfo> {

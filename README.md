@@ -24,6 +24,24 @@
 
 `npm run start` is for dev and `npm run start:prod` is for prod
 
+### production
+
+In order for production to work (and to an extent, docker), you will need to fill in all SMTP info for the system to use when sending emails.
+
+in your `.env` file you will need:
+
+```dotenv
+SMTP_HOST=
+SMTP_PORT=
+SMTP_SECURE=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+REPLY_TO=
+```
+
+These settings are validated on startup, however, they are NOT required if your `NODE_ENV` is `development` because in this case, a fake SMTP service is started, look at the logs in startup for the user/pass and the URL to log in to the smtp server
+
 ## Docker
 
 ```

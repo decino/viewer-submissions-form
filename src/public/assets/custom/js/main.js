@@ -71,7 +71,7 @@ const Site = (function() {
                 showError("Please activate CAPTCHA.");
                 return false;
             }
-            formData.append(key, response);
+            formData.set(key, response);
         }
 
         uploadAbortController = new AbortController();

@@ -31,4 +31,21 @@ enum GlobalEnv {
     REDIS_URI = `${prefix}REDIS_URI`,
 }
 
+const mandatorySettings: GlobalEnv[] = [
+    GlobalEnv.PORT,
+    GlobalEnv.ALLOWED_FILES,
+    GlobalEnv.ALLOWED_FILES_ZIP,
+    GlobalEnv.ALLOWED_HEADERS,
+    GlobalEnv.ALLOWED_HEADERS_ZIP,
+    GlobalEnv.BASE_URL,
+    GlobalEnv.HELP_EMAIL,
+    GlobalEnv.FILE_SIZE_UPLOAD_LIMIT_MB,
+    GlobalEnv.SESSION_KEY,
+    GlobalEnv.NODE_ENV,
+];
+
+export function isMandatory(env: GlobalEnv): boolean {
+    return mandatorySettings.includes(env);
+}
+
 export default GlobalEnv;

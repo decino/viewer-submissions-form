@@ -1,10 +1,11 @@
-import { Constant, Inject, OnInit, Service } from "@tsed/di";
+import { Configuration, Constant, Inject, OnInit, Service } from "@tsed/di";
 import SETTING from "../model/constants/Settings.js";
-import GlobalEnv from "../model/constants/GlobalEnv.js";
+import GlobalEnv, { isMandatory } from "../model/constants/GlobalEnv.js";
 import { Logger } from "@tsed/common";
 import { SettingsRepo } from "../db/repo/SettingsRepo.js";
 import { SettingsMap } from "../utils/typeings.js";
 import { SettingsModel } from "../model/db/Settings.model.js";
+import { ObjectUtils } from "../utils/Utils.js";
 
 @Service()
 export class SettingsService implements OnInit {
@@ -19,6 +20,9 @@ export class SettingsService implements OnInit {
 
     @Constant(GlobalEnv.ALLOWED_HEADERS_ZIP)
     private readonly defaultAllowedHeadersZip: string;
+
+    @Configuration()
+    private readonly configuration: Configuration;
 
     @Inject()
     private logger: Logger;
@@ -61,6 +65,7 @@ export class SettingsService implements OnInit {
     }
 
     public async $onInit(): Promise<void> {
+        this.validateSettings();
         this.logger.info("Setting default settings...");
 
         const hasAllowedHeaders = await this.hasSetting(SETTING.ALLOWED_HEADERS);
@@ -91,6 +96,20 @@ export class SettingsService implements OnInit {
 
         if (updateSettingMap.size !== 0) {
             await this.saveOrUpdateSettings(updateSettingMap);
+        }
+    }
+
+    private validateSettings(): void {
+        const invalidSettings: string[] = [];
+        const enumAsObject = ObjectUtils.getEnumAsObject(GlobalEnv);
+        for (const setting in enumAsObject) {
+            const settingValue = this.configuration.get<string | undefined>(setting);
+            if (!settingValue && isMandatory(setting as GlobalEnv)) {
+                invalidSettings.push(setting);
+            }
+        }
+        if (invalidSettings.length !== 0) {
+            throw new Error(`Missing settings: ${invalidSettings.join(", ")} in your .env file`);
         }
     }
 }

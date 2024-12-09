@@ -25,13 +25,15 @@ export class DiscordBotDispatcherService implements OnInit {
     @Constant(GlobalEnv.BOT_URI)
     private readonly botUri: string;
 
-    private dispatchAddress: string;
+    private dispatchAddress: string | null = null;
 
     @Inject()
     private logger: Logger;
 
     public $onInit(): void {
-        this.dispatchAddress = `${this.botUri}/bot`;
+        if (this.dispatchAddress) {
+            this.dispatchAddress = `${this.botUri}/bot`;
+        }
     }
 
     public async sendPendingSubmission(submission: SubmissionModel): Promise<void> {
@@ -68,7 +70,10 @@ export class DiscordBotDispatcherService implements OnInit {
         }
     }
 
-    private async doPost(endpoint: string, payload: unknown): Promise<Record<string, unknown>> {
+    private async doPost(endpoint: string, payload: unknown): Promise<Record<string, unknown> | null> {
+        if (!this.dispatchAddress) {
+            return null;
+        }
         let response: Response;
         try {
             response = await fetch(`${this.dispatchAddress}/${endpoint}`, {

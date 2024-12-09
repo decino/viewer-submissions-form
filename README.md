@@ -23,3 +23,13 @@
 ```
 
 `npm run start` is for dev and `npm run start:prod` is for prod
+
+## Docker
+
+```
+# build docker image
+docker compose build
+
+# start docker image
+docker compose up
+```

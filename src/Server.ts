@@ -199,7 +199,7 @@ export class Server implements BeforeRoutesInit {
                         if (request?.$ctx?.request?.request?.session?.passport) {
                             return true;
                         }
-                        return request.path.includes("/admin") ? true : !request.path.includes("/rest");
+                        return request.path.includes("/secure");
                     },
                     keyGenerator: request => {
                         return NetworkUtils.getIp(request);

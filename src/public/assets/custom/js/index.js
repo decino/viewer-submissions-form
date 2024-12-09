@@ -1,5 +1,4 @@
-// eslint-disable-next-line require-await
-Site.loadPage(async function (site) {
+Site.loadPage(async function(site) {
 
     Site.loading = function loading(show) {
         const submitButton = document.getElementById("submit");
@@ -13,6 +12,9 @@ Site.loadPage(async function (site) {
             submitButton.removeAttribute("disabled");
         }
     };
+
+    // SUPER HACK - move "I don't know" to the bottom of the list
+    document.getElementById("gameEngine")?.appendChild(document.querySelector("option[data-value='UNKNOWN']"));
 
     loadEventListeners();
 

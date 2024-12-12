@@ -5,7 +5,7 @@
   "jsc": {
     "minify": {
       "compress": {
-        "unused": true
+        "unused": false
       },
       "mangle": {
         "topLevel": false

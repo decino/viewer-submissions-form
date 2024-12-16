@@ -215,7 +215,12 @@ export class SubmissionService {
             }
         }
 
-        this.submissionSocket.emitSubmissionDelete(ids);
+        try {
+            this.submissionSocket.emitSubmissionDelete(ids);
+        } catch (e) {
+            this.logger.error("Unable to emit submission delete event", e);
+        }
+
         return true;
     }
 
@@ -282,29 +287,14 @@ export class SubmissionService {
 
     @RunEvery(1, METHOD_EXECUTOR_TIME_UNIT.minutes, true)
     private async detectAndRemoveExpiredSubmissions(): Promise<void> {
-        const invalidEntries = await this.submissionRepo.getInvalidSubmissions();
-        if (!invalidEntries || invalidEntries.length === 0) {
-            return;
-        }
-        const twentyMins = 1200000;
-        const now = Date.now();
-        const entriesToDelete: SubmissionModel[] = [];
-        for (const entry of invalidEntries) {
-            const createdAt = entry?.confirmation?.createdAt?.getTime() ?? null;
-            if (createdAt === null) {
-                continue;
-            }
-            if (now - createdAt > twentyMins) {
-                entriesToDelete.push(entry);
-            }
-        }
-        if (entriesToDelete.length === 0) {
+        const expiredEntries = await this.submissionRepo.getExpiredEntries();
+        if (expiredEntries.length === 0) {
             return;
         }
         this.logger.info(
-            `Deleting ${entriesToDelete.length} submissions with conformations ${entriesToDelete.map(s => s.confirmation!.confirmationUid).join(", ")} as they have expired...`,
+            `Deleting ${expiredEntries.length} submissions with conformations ${expiredEntries.map(s => s.confirmation!.confirmationUid).join(", ")} as they have expired...`,
         );
-        const entryIds = entriesToDelete.map(entry => entry.id);
+        const entryIds = expiredEntries.map(entry => entry.id);
         await this.deleteEntries(entryIds, false);
     }
 }

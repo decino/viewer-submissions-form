@@ -3,7 +3,7 @@ import { AbstractDao } from "./AbstractDao.js";
 import { SubmissionModel } from "../../model/db/Submission.model.js";
 import { Logger } from "@tsed/logger";
 import { SQLITE_DATA_SOURCE } from "../../model/di/tokens.js";
-import { DataSource, EntityManager, In } from "typeorm";
+import { DataSource, EntityManager, In, LessThanOrEqual } from "typeorm";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
@@ -78,9 +78,16 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         return true;
     }
 
-    public getInvalidSubmissions(transaction?: EntityManager): Promise<SubmissionModel[]> {
-        return this.getEntityManager(transaction).findBy({
-            submissionValid: false,
+    public getExpiredEntries(transaction?: EntityManager): Promise<SubmissionModel[]> {
+        const nowMinus20Mins = new Date(Date.now() - 1200000).getTime();
+        return this.getEntityManager(transaction).find({
+            relations: ["confirmation"],
+            where: {
+                submissionValid: false,
+                confirmation: {
+                    createdAt: LessThanOrEqual(nowMinus20Mins),
+                },
+            },
         });
     }
 }

@@ -29,7 +29,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getSubmission(id: number, transaction?: EntityManager): Promise<SubmissionModel | null> {
         return this.getEntityManager(transaction).findOne({
-            relations: ["confirmation", "status", "submissionRound"],
+            relations: ["confirmation", "status"],
             where: {
                 id,
             },
@@ -62,7 +62,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getAllSubmissions(roundId: number, transaction?: EntityManager): Promise<SubmissionModel[]> {
         return this.getEntityManager(transaction).find({
-            relations: ["confirmation", "status", "submissionRound"],
+            relations: ["confirmation", "status"],
             where: {
                 submissionRoundId: roundId,
             },

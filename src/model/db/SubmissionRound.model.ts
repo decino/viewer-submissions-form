@@ -1,10 +1,11 @@
 import xss from "xss";
 import { AbstractModel } from "./AbstractModel.js";
-import { BeforeInsert, Column, Entity, OneToMany } from "typeorm";
+import { BeforeInsert, Column, Entity, Index, OneToMany } from "typeorm";
 import { Description, Name } from "@tsed/schema";
 import { SubmissionModel } from "./Submission.model.js";
 
 @Entity()
+@Index(["id"])
 export class SubmissionRoundModel extends AbstractModel {
     @Column({
         nullable: false,

@@ -207,16 +207,13 @@ export class SubmissionModel extends AbstractModel {
 
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
-    @OneToOne("PendingEntryConfirmationModel", "submission", {
-        eager: true,
-    })
+    @OneToOne("PendingEntryConfirmationModel", "submission")
     public confirmation: PendingEntryConfirmationModel | null;
 
     @Name("status")
     @Description("The current status of this submission")
     @OneToOne("SubmissionStatusModel", "submission", {
         cascade: true,
-        eager: true,
     })
     public status: SubmissionStatusModel | null;
 

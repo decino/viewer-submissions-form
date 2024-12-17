@@ -67,8 +67,6 @@ export class SubmissionRepo {
         return this.submissionDao.getSubmissions(ids);
     }
 
-    public async deleteSubmissions(submissions: SubmissionModel[]): Promise<boolean>;
-    public async deleteSubmissions(submissions: number[]): Promise<boolean>;
     public async deleteSubmissions(submissions: number[] | SubmissionModel[]): Promise<boolean> {
         let submissionsToDelete: SubmissionModel[];
 
@@ -91,7 +89,11 @@ export class SubmissionRepo {
         return true;
     }
 
-    public getInvalidSubmissions(): Promise<SubmissionModel[]> {
-        return this.submissionDao.getInvalidSubmissions();
+    public getExpiredEntries(): Promise<SubmissionModel[]> {
+        return this.submissionDao.getExpiredEntries();
+    }
+
+    public getCurrentAndNotChosenSubmissions(): Promise<SubmissionModel[]> {
+        return this.submissionDao.getCurrentAndNotChosenSubmissions();
     }
 }

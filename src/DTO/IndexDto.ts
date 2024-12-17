@@ -43,7 +43,7 @@ export class IndexDto {
     }
 
     public getRoundDateAsString(round: SubmissionRoundModel): string {
-        const createdAt = round.createdAt;
+        const createdAt = new Date(round.createdAt);
         const date = createdAt.getUTCDate();
         const month = createdAt.getUTCMonth();
         const year = createdAt.getUTCFullYear();

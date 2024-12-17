@@ -37,15 +37,21 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
                 .where("submissionRound.active = true")
                 .getOne();
         }
-        return manager.findOneBy({
-            active: true,
+        return manager.findOne({
+            relations: ["submissions.status"],
+            where: {
+                active: true,
+            },
         });
     }
 
     public retrieveRound(roundId: number, transaction?: EntityManager): Promise<SubmissionRoundModel | null> {
         const manager = this.getEntityManager(transaction);
-        return manager.findOneBy({
-            id: roundId,
+        return manager.findOne({
+            relations: ["submissions.status"],
+            where: {
+                id: roundId,
+            },
         });
     }
 
@@ -81,10 +87,15 @@ export class SubmissionRoundDao extends AbstractDao<SubmissionRoundModel> {
         const manager = this.getEntityManager(transaction);
         let rounds: SubmissionRoundModel[];
         if (includeActive) {
-            rounds = await manager.find();
+            rounds = await manager.find({
+                relations: ["submissions.status"],
+            });
         } else {
-            rounds = await manager.findBy({
-                active: false,
+            rounds = await manager.find({
+                relations: ["submissions.status"],
+                where: {
+                    active: false,
+                },
             });
         }
         return rounds ?? [];

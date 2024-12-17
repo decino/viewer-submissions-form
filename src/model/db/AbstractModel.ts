@@ -15,10 +15,10 @@ export abstract class AbstractModel {
     @CreateDateColumn()
     @Name("created")
     @Description("When this entry was created")
-    public createdAt: Date;
+    public createdAt: number;
 
     @UpdateDateColumn()
     @Name("updated")
     @Description("When this entry was updated")
-    public updatedAt: Date;
+    public updatedAt: number;
 }

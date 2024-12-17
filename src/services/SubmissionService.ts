@@ -215,28 +215,28 @@ export class SubmissionService {
             }
         }
 
-        this.submissionSocket.emitSubmissionDelete(ids);
+        try {
+            this.submissionSocket.emitSubmissionDelete(ids);
+        } catch (e) {
+            this.logger.error("Unable to emit submission delete event", e);
+        }
+
         return true;
     }
 
     private async isAlreadySubmitted(entry: SubmissionModel): Promise<void> {
-        const allSubmissionRounds = await this.submissionRoundService.getAllSubmissionRounds();
-        for (const submissionRound of allSubmissionRounds) {
-            const allEntries = submissionRound.submissions;
-            for (const entryFromRound of allEntries) {
-                if (!submissionRound.active && !entryFromRound.isChosen) {
-                    continue;
+        const submissions = await this.submissionRepo.getCurrentAndNotChosenSubmissions();
+        for (const submission of submissions) {
+            if (
+                (submission.wadURL === entry.wadURL || submission.wadName === entry.wadName) &&
+                this.getNumberPart(submission.wadLevel) === this.getNumberPart(entry.wadLevel)
+            ) {
+                let errorMsg = "this wad/map combination already been submitted. Please submit a different map.";
+                const submissionRound = await submission.submissionRound;
+                if (!submissionRound.active) {
+                    errorMsg += ` The map was submitted in: "${submissionRound.name}" at position: ${submission.playOrder}`;
                 }
-                if (
-                    (entryFromRound.wadURL === entry.wadURL || entryFromRound.wadName === entry.wadName) &&
-                    this.getNumberPart(entryFromRound.wadLevel) === this.getNumberPart(entry.wadLevel)
-                ) {
-                    let errorMsg = "this wad/map combination already been submitted. Please submit a different map.";
-                    if (!submissionRound.active) {
-                        errorMsg += ` The map was submitted in: "${submissionRound.name}" at position: ${entryFromRound.playOrder}`;
-                    }
-                    throw new Error(errorMsg);
-                }
+                throw new Error(errorMsg);
             }
         }
     }
@@ -282,29 +282,14 @@ export class SubmissionService {
 
     @RunEvery(1, METHOD_EXECUTOR_TIME_UNIT.minutes, true)
     private async detectAndRemoveExpiredSubmissions(): Promise<void> {
-        const invalidEntries = await this.submissionRepo.getInvalidSubmissions();
-        if (!invalidEntries || invalidEntries.length === 0) {
-            return;
-        }
-        const twentyMins = 1200000;
-        const now = Date.now();
-        const entriesToDelete: SubmissionModel[] = [];
-        for (const entry of invalidEntries) {
-            const createdAt = entry?.confirmation?.createdAt?.getTime() ?? null;
-            if (createdAt === null) {
-                continue;
-            }
-            if (now - createdAt > twentyMins) {
-                entriesToDelete.push(entry);
-            }
-        }
-        if (entriesToDelete.length === 0) {
+        const expiredEntries = await this.submissionRepo.getExpiredEntries();
+        if (expiredEntries.length === 0) {
             return;
         }
         this.logger.info(
-            `Deleting ${entriesToDelete.length} submissions with conformations ${entriesToDelete.map(s => s.confirmation!.confirmationUid).join(", ")} as they have expired...`,
+            `Deleting ${expiredEntries.length} submissions with conformations ${expiredEntries.map(s => s.confirmation!.confirmationUid).join(", ")} as they have expired...`,
         );
-        const entryIds = entriesToDelete.map(entry => entry.id);
+        const entryIds = expiredEntries.map(entry => entry.id);
         await this.deleteEntries(entryIds, false);
     }
 }

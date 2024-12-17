@@ -225,23 +225,18 @@ export class SubmissionService {
     }
 
     private async isAlreadySubmitted(entry: SubmissionModel): Promise<void> {
-        const allSubmissionRounds = await this.submissionRoundService.getAllSubmissionRounds();
-        for (const submissionRound of allSubmissionRounds) {
-            const allEntries = submissionRound.submissions;
-            for (const entryFromRound of allEntries) {
-                if (!submissionRound.active && !entryFromRound.isChosen) {
-                    continue;
+        const submissions = await this.submissionRepo.getCurrentAndNotChosenSubmissions();
+        for (const submission of submissions) {
+            if (
+                (submission.wadURL === entry.wadURL || submission.wadName === entry.wadName) &&
+                this.getNumberPart(submission.wadLevel) === this.getNumberPart(entry.wadLevel)
+            ) {
+                let errorMsg = "this wad/map combination already been submitted. Please submit a different map.";
+                const submissionRound = await submission.submissionRound;
+                if (!submissionRound.active) {
+                    errorMsg += ` The map was submitted in: "${submissionRound.name}" at position: ${submission.playOrder}`;
                 }
-                if (
-                    (entryFromRound.wadURL === entry.wadURL || entryFromRound.wadName === entry.wadName) &&
-                    this.getNumberPart(entryFromRound.wadLevel) === this.getNumberPart(entry.wadLevel)
-                ) {
-                    let errorMsg = "this wad/map combination already been submitted. Please submit a different map.";
-                    if (!submissionRound.active) {
-                        errorMsg += ` The map was submitted in: "${submissionRound.name}" at position: ${entryFromRound.playOrder}`;
-                    }
-                    throw new Error(errorMsg);
-                }
+                throw new Error(errorMsg);
             }
         }
     }

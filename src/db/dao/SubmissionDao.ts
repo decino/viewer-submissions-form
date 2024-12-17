@@ -29,6 +29,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getSubmission(id: number, transaction?: EntityManager): Promise<SubmissionModel | null> {
         return this.getEntityManager(transaction).findOne({
+            relations: ["confirmation", "status", "submissionRound"],
             where: {
                 id,
             },
@@ -61,6 +62,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getAllSubmissions(roundId: number, transaction?: EntityManager): Promise<SubmissionModel[]> {
         return this.getEntityManager(transaction).find({
+            relations: ["confirmation", "status", "submissionRound"],
             where: {
                 submissionRoundId: roundId,
             },
@@ -88,6 +90,29 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
                     createdAt: LessThanOrEqual(nowMinus20Mins),
                 },
             },
+        });
+    }
+
+    /**
+     * Get all the submissions out of the currently active round and all the non-chosen submissions of the other rounds
+     * @param transaction
+     */
+    public getCurrentAndNotChosenSubmissions(transaction?: EntityManager): Promise<SubmissionModel[]> {
+        return this.getEntityManager(transaction).find({
+            relations: ["submissionRound"],
+            where: [
+                {
+                    submissionRound: {
+                        active: true,
+                    },
+                },
+                {
+                    isChosen: true,
+                    submissionRound: {
+                        active: false,
+                    },
+                },
+            ],
         });
     }
 }

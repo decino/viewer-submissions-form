@@ -92,4 +92,8 @@ export class SubmissionRepo {
     public getExpiredEntries(): Promise<SubmissionModel[]> {
         return this.submissionDao.getExpiredEntries();
     }
+
+    public getCurrentAndNotChosenSubmissions(): Promise<SubmissionModel[]> {
+        return this.submissionDao.getCurrentAndNotChosenSubmissions();
+    }
 }

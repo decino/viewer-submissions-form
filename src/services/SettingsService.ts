@@ -66,6 +66,9 @@ export class SettingsService implements OnInit {
     }
 
     public async $onInit(): Promise<void> {
+        if (isGhAction) {
+            return;
+        }
         this.validateSettings();
         this.logger.info("Setting default settings...");
 
@@ -101,9 +104,6 @@ export class SettingsService implements OnInit {
     }
 
     private validateSettings(): void {
-        if (isGhAction) {
-            return;
-        }
         const invalidSettings: string[] = [];
         const enumAsObject = ObjectUtils.getEnumAsObject(GlobalEnv);
         for (const setting in enumAsObject) {

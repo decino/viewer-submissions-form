@@ -78,7 +78,7 @@ export class EmailService implements AfterInit {
     }
 
     private async getTransport(): Promise<Transporter<SentMessageInfo>> {
-        if (isProduction) {
+        if (this.smtpHost || isProduction) {
             const transporter = createTransport({
                 host: this.smtpHost,
                 port: Number.parseInt(this.smtpPort),

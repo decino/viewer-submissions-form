@@ -32,8 +32,8 @@ jobs:
       - name: Run migrations
         run: npm run runmigration:ci
 
-      - name: Create files folder
-        run: mkdir -p files
+      - name: Create customWads folder
+        run: mkdir -p customWads
 
       - name: Start tests
         run: npm run start_js:ci

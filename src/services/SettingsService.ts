@@ -6,6 +6,7 @@ import { SettingsRepo } from "../db/repo/SettingsRepo.js";
 import { SettingsMap } from "../utils/typeings.js";
 import { SettingsModel } from "../model/db/Settings.model.js";
 import { ObjectUtils } from "../utils/Utils.js";
+import { isGhAction } from "../config/envs/index.js";
 
 @Service()
 export class SettingsService implements OnInit {
@@ -65,6 +66,9 @@ export class SettingsService implements OnInit {
     }
 
     public async $onInit(): Promise<void> {
+        if (isGhAction) {
+            return;
+        }
         this.validateSettings();
         this.logger.info("Setting default settings...");
 

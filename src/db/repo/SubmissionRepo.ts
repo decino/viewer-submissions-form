@@ -3,6 +3,7 @@ import { SubmissionDao } from "../dao/SubmissionDao.js";
 import { SubmissionConfirmationDao } from "../dao/SubmissionConfirmationDao.js";
 import { SubmissionModel } from "../../model/db/Submission.model.js";
 import { SubmissionStatusModel } from "../../model/db/SubmissionStatus.model.js";
+import { PendingEntryConfirmationModel } from "../../model/db/PendingEntryConfirmation.model.js";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
@@ -22,14 +23,13 @@ export class SubmissionRepo {
         return this.submissionDao.saveOrUpdateSubmission(entry);
     }
 
-    public validateSubmission(submission: SubmissionModel): Promise<SubmissionModel> {
+    public validateSubmission(confirmation: PendingEntryConfirmationModel): Promise<SubmissionModel> {
+        const submission = confirmation.submission;
         return this.submissionDao.dataSource.transaction(async entityManager => {
             submission.submissionValid = true;
             const updatedEntry = await this.submissionDao.saveOrUpdateSubmission(submission, entityManager);
-            if (updatedEntry.confirmation) {
-                await this.submissionConfirmationDao.deleteConfirmation(updatedEntry.confirmation, entityManager);
-                updatedEntry.confirmation = null;
-            }
+            await this.submissionConfirmationDao.deleteConfirmation(confirmation, entityManager);
+            updatedEntry.confirmation = null;
             return updatedEntry;
         });
     }

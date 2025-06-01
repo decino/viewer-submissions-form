@@ -41,7 +41,7 @@ export class SubmissionConfirmationService {
         if (!confirmation) {
             throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
         }
-        const updatedSubmission = await this.submissionRepo.validateSubmission(confirmation.submission);
+        const updatedSubmission = await this.submissionRepo.validateSubmission(confirmation);
         this.logger.info(`submission with uid ${confirmationUid} has been validated`);
         // ignore promise
         this.discordBotDispatcherService.sendPendingSubmission(updatedSubmission);

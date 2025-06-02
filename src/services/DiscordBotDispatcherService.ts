@@ -59,7 +59,7 @@ export class DiscordBotDispatcherService implements OnInit {
             wadName: entry.wadName,
             info: entry.info,
             wadLevel: entry.wadLevel,
-            timeStamp: new Date(entry.createdAt).getTime(),
+            timeStamp: entry.createdAt.getTime(),
             submissionRound: submissionRound.name,
         };
 

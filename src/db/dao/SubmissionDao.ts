@@ -81,13 +81,12 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
     }
 
     public getExpiredEntries(transaction?: EntityManager): Promise<SubmissionModel[]> {
-        const nowMinus20Mins = new Date(Date.now() - 1200000).getTime();
         return this.getEntityManager(transaction).find({
             relations: ["confirmation"],
             where: {
                 submissionValid: false,
                 confirmation: {
-                    createdAt: LessThanOrEqual(nowMinus20Mins),
+                    createdAt: LessThanOrEqual(new Date(Date.now() - 1200000)), // older than 20 mins
                 },
             },
         });

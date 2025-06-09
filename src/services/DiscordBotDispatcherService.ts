@@ -112,6 +112,7 @@ export class DiscordBotDispatcherService implements OnInit {
         if (!entry.shareable()) {
             return entry;
         }
+        await this.botDownloadAuthenticationRepo.createAuth(entry.id);
         return (await this.submissionRepo.retrieveSubmission(entry.id))!;
     }
 }

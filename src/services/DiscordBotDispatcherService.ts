@@ -2,6 +2,8 @@ import { Constant, Inject, OnInit, Service } from "@tsed/di";
 import { SubmissionModel } from "../model/db/Submission.model.js";
 import { Logger } from "@tsed/common";
 import GlobalEnv from "../model/constants/GlobalEnv.js";
+import { BotDownloadAuthenticationRepo } from "../db/repo/BotDownloadAuthenticationRepo.js";
+import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
 
 type SubmissionPayload = {
     wadName: string;
@@ -9,6 +11,7 @@ type SubmissionPayload = {
     submissionRound: string;
     timeStamp: number;
     info: string | null;
+    downloadUrl: string | null;
 };
 
 type PendingValidationPayload = {
@@ -29,6 +32,12 @@ export class DiscordBotDispatcherService implements OnInit {
 
     @Inject()
     private logger: Logger;
+
+    @Inject()
+    private botDownloadAuthenticationRepo: BotDownloadAuthenticationRepo;
+
+    @Inject()
+    private submissionRepo: SubmissionRepo;
 
     public $onInit(): void {
         if (this.botUri) {
@@ -55,12 +64,16 @@ export class DiscordBotDispatcherService implements OnInit {
 
     public async sendNewSubmission(entry: SubmissionModel): Promise<void> {
         const submissionRound = await entry.submissionRound;
+
+        entry = await this.createAuthEntry(entry);
+
         const payload: SubmissionPayload = {
             wadName: entry.wadName,
             info: entry.info,
             wadLevel: entry.wadLevel,
             timeStamp: entry.createdAt.getTime(),
             submissionRound: submissionRound.name,
+            downloadUrl: entry.getDownloadUrlViaBot(),
         };
 
         try {
@@ -93,5 +106,12 @@ export class DiscordBotDispatcherService implements OnInit {
             throw new Error(`Bot response error :${json.error}\ninfo:${json.message}`);
         }
         return json;
+    }
+
+    private async createAuthEntry(entry: SubmissionModel): Promise<SubmissionModel> {
+        if (!entry.shareable()) {
+            return entry;
+        }
+        return (await this.submissionRepo.retrieveSubmission(entry.id))!;
     }
 }

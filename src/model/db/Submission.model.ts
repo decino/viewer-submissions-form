@@ -11,6 +11,7 @@ import { SubmissionStatusModel } from "./SubmissionStatus.model.js";
 import STATUS from "../constants/STATUS.js";
 import { AfterDeserialize } from "@tsed/json-mapper";
 import RECORDED_FORMAT from "../constants/RecordedFormat.js";
+import { BotDownloadAuthenticationModel } from "./BotDownloadAuthentication.model.js";
 
 @Entity()
 // entries with same submissionRoundId must have unique emails
@@ -244,6 +245,10 @@ export class SubmissionModel extends AbstractModel {
     @Description("if it should be played blind or practised")
     public recordedFormat: RECORDED_FORMAT;
 
+    @Name("botDownloadToken")
+    @OneToOne("BotDownloadAuthenticationModel", "submission")
+    public botDownloadToken: BotDownloadAuthenticationModel | null;
+
     public downloadable(admin = false): boolean {
         if (admin) {
             return true;
@@ -253,7 +258,14 @@ export class SubmissionModel extends AbstractModel {
             return false;
         }
         // if submission is the author, and it's not distributable return false. else return true
-        return !(this.submitterAuthor && !this.distributable);
+        return this.shareable();
+    }
+
+    public downloadableViaBot(token: string): boolean {
+        if (token !== this.botDownloadToken?.token) {
+            return false;
+        }
+        return this.shareable();
     }
 
     public getDownloadUrl(admin = false): string | null {
@@ -263,6 +275,19 @@ export class SubmissionModel extends AbstractModel {
         return this.customWadFileName
             ? `${process.env.BASE_URL}/rest/submission/download/${this.submissionRoundId}/${this.id}`
             : this.wadURL;
+    }
+
+    public getDownloadUrlViaBot(): string | null {
+        if (!this.botDownloadToken?.token) {
+            return null;
+        }
+        return this.customWadFileName
+            ? `${process.env.BASE_URL}/rest/submission/download/bot/${this.submissionRoundId}/${this.id}?token=${this.botDownloadToken.token}`
+            : this.wadURL;
+    }
+
+    public shareable(): boolean {
+        return !(this.submitterAuthor && !this.distributable);
     }
 
     public getEngineAsString(): string {

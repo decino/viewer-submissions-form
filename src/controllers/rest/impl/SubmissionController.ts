@@ -126,23 +126,46 @@ export class SubmissionController extends BaseRestController {
         return super.doSuccess(res, `Entries have been deleted.`);
     }
 
-    private async getWad(roundId: number, entryId: number, secure = false): Promise<[SubmissionModel, CustomWadEntry]> {
-        let wad: CustomWadEntry | null;
-        try {
-            wad = await this.customWadEngine.getWad(roundId, entryId);
-        } catch {
+    @Get("/download/bot/:roundId/:id")
+    @Returns(StatusCodes.OK, Buffer)
+    @Returns(StatusCodes.NOT_FOUND, NotFound)
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    public async downloadWadBot(
+        @Req() req: Req,
+        @Res() res: PlatformResponse,
+        @PathParams("id") id: number,
+        @PathParams("roundId") roundId: number,
+        @QueryParams("token") token: string,
+    ): Promise<unknown> {
+        const [entry, wad] = await this.getWad(roundId, id, false, token);
+        res.attachment(entry.customWadFileName as string);
+        res.contentType("application/octet-stream");
+        return wad.content;
+    }
+
+    private async getWad(
+        roundId: number,
+        entryId: number,
+        adminLoggedIn = false,
+        botToken?: string,
+    ): Promise<[SubmissionModel, CustomWadEntry]> {
+        const wad = await this.customWadEngine.getWad(roundId, entryId).catch(() => {
             throw new NotFound(`Unable to find WAD with ID: ${entryId} from round ${roundId}.`);
-        }
+        });
         if (!wad) {
             throw new NotFound(`Unable to find WAD with ID: ${entryId} from round ${roundId}.`);
         }
+
         const entry = await this.submissionService.getEntry(entryId);
         if (!entry) {
             throw new InternalServerError("An error has occurred when trying to find this WAD's associated entry.");
         }
-        if (!entry.downloadable(secure)) {
+
+        const canDownload = botToken ? entry.downloadableViaBot(botToken) : entry.downloadable(adminLoggedIn);
+        if (!canDownload) {
             throw new Unauthorized("Unable to download file.");
         }
+
         return [entry, wad];
     }
 }

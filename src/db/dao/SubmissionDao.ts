@@ -29,7 +29,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getSubmission(id: number, transaction?: EntityManager): Promise<SubmissionModel | null> {
         return this.getEntityManager(transaction).findOne({
-            relations: ["confirmation", "status"],
+            relations: ["confirmation", "status", "botDownloadToken"],
             where: {
                 id,
             },

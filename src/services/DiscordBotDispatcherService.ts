@@ -4,14 +4,18 @@ import { Logger } from "@tsed/common";
 import GlobalEnv from "../model/constants/GlobalEnv.js";
 import { BotDownloadAuthenticationRepo } from "../db/repo/BotDownloadAuthenticationRepo.js";
 import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
+import RECORDED_FORMAT from "../model/constants/RecordedFormat.js";
+import DOOM_ENGINE from "../model/constants/DoomEngine.js";
 
 type SubmissionPayload = {
     wadName: string;
     wadLevel: string;
-    submissionRound: string;
     timeStamp: number;
     info: string | null;
     downloadUrl: string | null;
+    recordFormat: RECORDED_FORMAT;
+    mapCompatibility: DOOM_ENGINE;
+    sourcePort: string | null;
 };
 
 type PendingValidationPayload = {
@@ -63,8 +67,6 @@ export class DiscordBotDispatcherService implements OnInit {
     }
 
     public async sendNewSubmission(entry: SubmissionModel): Promise<void> {
-        const submissionRound = await entry.submissionRound;
-
         entry = await this.createAuthEntry(entry);
 
         const payload: SubmissionPayload = {
@@ -72,8 +74,10 @@ export class DiscordBotDispatcherService implements OnInit {
             info: entry.info,
             wadLevel: entry.wadLevel,
             timeStamp: entry.createdAt.getTime(),
-            submissionRound: submissionRound.name,
             downloadUrl: entry.getDownloadUrlViaBot(),
+            recordFormat: entry.recordedFormat,
+            mapCompatibility: entry.wadEngine,
+            sourcePort: entry.playTestEngine,
         };
 
         try {

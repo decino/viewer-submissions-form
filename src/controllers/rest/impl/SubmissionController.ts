@@ -143,6 +143,14 @@ export class SubmissionController extends BaseRestController {
         return wad.content;
     }
 
+    @Get("/:roundId/validAndVerifiedSubmissions")
+    @Authorize("login")
+    @(Returns(StatusCodes.OK, Array).Of(SubmissionModel))
+    @Returns(StatusCodes.BAD_REQUEST, BadRequest)
+    public getValidAndVerifiedSubmissions(@PathParams("roundId") roundId: number): Promise<SubmissionModel[]> {
+        return this.submissionService.getAllEntries(roundId, true);
+    }
+
     private async getWad(
         roundId: number,
         entryId: number,

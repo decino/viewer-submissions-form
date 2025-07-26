@@ -60,6 +60,25 @@
             </div>
             <div class="row mt-5">
                 <div class="col-md-12">
+                    <div class="card border-primary mb-3 ml-3" id="statsPanel">
+                        <div class="card-header">Stats</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div id="recordFormatDist" class="chart-container"></div></div>
+                                <div class="col-md-4">
+                                    <div id="mapAuthorChart"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="submissionTypeChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-12">
                     <div class="card border-primary mb-3 ml-3" id="validationSubmissionsPanel">
                         <div class="card-header">Submissions requiring verification</div>
                         <div class="card-body">
@@ -539,6 +558,17 @@
 <%- include('../snippets/scripts.ejs'); %>
 <script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
 <script type="text/javascript" src="../assets/custom/js/spinWheel.js"></script>
+
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/locales/de_DE.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/geodata/germanyLow.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/fonts/notosans-sc.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+
 </body>
 </html>
 
@@ -1686,5 +1716,229 @@
                 }
             });
         }
+        <% if (indexModel && indexModel.currentActiveRound) { %>
+            ((() => {
+            async function createSubmissionCharts() {
+
+                let submissions = [];
+                try {
+                    const roundId = <%- indexModel.currentActiveRound.id %>;
+                    const result = await fetch(`${baseUrl}/submission/${roundId}/validAndVerifiedSubmissions`);
+                    submissions = await result.json();
+                } catch (e) {
+                    console.error(e.message);
+                    submissions = [];
+                }
+
+                createRecordedFormatChart(submissions);
+                createAuthorDistributionChart(submissions);
+                createSubmissionTypeChart(submissions);
+            }
+
+            function createChart(containerId, title, data, colors) {
+                const statsBody = document.querySelector(`#${containerId}`);
+                if (!statsBody) {
+                    console.error(`Chart container #${containerId} not found`);
+                    return;
+                }
+
+                const chartContainer = document.createElement('div');
+                chartContainer.id = `${containerId}Chart`;
+                chartContainer.style.width = '100%';
+                chartContainer.style.height = '300px';
+
+                statsBody.innerHTML = `<h6 class="mb-3 text-white text-center">${title}</h6>`;
+                statsBody.appendChild(chartContainer);
+
+                const root = am5.Root.new(`${containerId}Chart`);
+                root.setThemes([am5themes_Animated.new(root)]);
+
+                const chart = root.container.children.push(am5percent.PieChart.new(root, {
+                    layout: root.verticalLayout,
+                    innerRadius: am5.percent(50)
+                }));
+
+                // Add "No data" message
+                const noDataLabel = chart.children.unshift(am5.Label.new(root, {
+                    text: "No chart data available",
+                    fontSize: 14,
+                    fontWeight: "500",
+                    textAlign: "center",
+                    x: am5.percent(50),
+                    y: am5.percent(50),
+                    centerX: am5.percent(50),
+                    centerY: am5.percent(50),
+                    fill: am5.color("#6c757d")
+                }));
+
+                const series = chart.series.push(am5percent.PieSeries.new(root, {
+                    valueField: "count",
+                    categoryField: "category",
+                    alignLabels: false
+                }));
+
+                series.get("colors").set("colors", colors.map(color => am5.color(color)));
+
+                series.labels.template.setAll({
+                    textType: "circular",
+                    centerX: 0,
+                    centerY: 0,
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    fill: am5.color("#ffffff"),
+                    oversizedBehavior: "wrap"
+                });
+
+                series.slices.template.setAll({
+                    stroke: am5.color("#495057"),
+                    strokeWidth: 2,
+                    cornerRadius: 3,
+                    shadowOpacity: 0.1,
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2,
+                    shadowBlur: 5,
+                    shadowColor: am5.color("#000000"),
+                    toggleKey: "active"
+                });
+
+                series.slices.template.states.create("hover", {
+                    scale: 1.05,
+                    shadowOpacity: 0.3,
+                    shadowOffsetX: 3,
+                    shadowOffsetY: 3,
+                    shadowBlur: 8
+                });
+
+                series.slices.template.states.create("active", {
+                    scale: 1.1,
+                    shiftRadius: 15
+                });
+
+                series.slices.template.set("cursorOverStyle", "pointer");
+                series.slices.template.set("tooltipText", "{category}: {count} submissions ({valuePercentTotal.formatNumber('#.0')}%)");
+
+                series.set("tooltip", am5.Tooltip.new(root, {
+                    getFillFromSprite: false,
+                    autoTextColor: false
+                }));
+
+                series.get("tooltip").get("background").setAll({
+                    fill: am5.color("#343a40"),
+                    stroke: am5.color("#6c757d"),
+                    strokeWidth: 1,
+                    cornerRadius: 4,
+                    fillOpacity: 0.95
+                });
+
+                series.get("tooltip").label.setAll({
+                    fill: am5.color("#ffffff"),
+                    fontSize: "11px",
+                    fontWeight: "500"
+                });
+
+                const legend = chart.children.push(am5.Legend.new(root, {
+                    centerX: am5.percent(50),
+                    x: am5.percent(50),
+                    marginTop: 10,
+                    marginBottom: 10
+                }));
+
+                legend.labels.template.setAll({
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    fill: am5.color("#ffffff")
+                });
+
+                legend.valueLabels.template.setAll({
+                    fill: am5.color("#ffffff")
+                });
+
+                legend.markers.template.setAll({
+                    width: 14,
+                    height: 14
+                });
+
+                legend.data.setAll(series.dataItems);
+
+                if (!data || data.length === 0) {
+                    chart.set("opacity", 0.3);
+                    series.set("visible", false);
+                    legend.set("visible", false);
+                    series.data.setAll([]);
+                } else {
+                    noDataLabel.set("visible", false);
+                    chart.set("opacity", 1);
+                    series.set("visible", true);
+                    legend.set("visible", true);
+                    series.data.setAll(data);
+                    series.appear(1000, 100);
+                }
+
+                return chart;
+            }
+
+            function createRecordedFormatChart(submissions) {
+                if (!submissions || submissions.length === 0) {
+                    createChart('recordFormatDist', 'Recorded Format', [], ['#4CAF50', '#F44336']);
+                    return;
+                }
+
+                const formatCounts = submissions.reduce((acc, submission) => {
+                    const format = submission.recordedFormat || 'Practised';
+                    acc[format] = (acc[format] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const chartData = Object.entries(formatCounts).map(([format, count]) => ({
+                    category: format,
+                    count: count
+                }));
+
+                createChart('recordFormatDist', 'Recorded Format', chartData, ['#4CAF50', '#F44336']);
+            }
+
+            function createAuthorDistributionChart(submissions) {
+                if (!submissions || submissions.length === 0) {
+                    createChart('mapAuthorChart', 'Map Author', [], ['#FF9800', '#2196F3']);
+                    return;
+                }
+
+                const authorCounts = submissions.reduce((acc, submission) => {
+                    const type = submission.author ? 'Yes' : 'No';
+                    acc[type] = (acc[type] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const chartData = Object.entries(authorCounts).map(([type, count]) => ({
+                    category: type,
+                    count: count
+                }));
+
+                createChart('mapAuthorChart', 'Map Author', chartData, ['#FF9800', '#2196F3']);
+            }
+
+            function createSubmissionTypeChart(submissions) {
+                if (!submissions || submissions.length === 0) {
+                    createChart('submissionTypeChart', 'Submission Distributable', [], ['#9C27B0', '#607D8B']);
+                    return;
+                }
+
+                const typeCounts = submissions.reduce((acc, submission) => {
+                    const type = !(submission.author && !submission.distributable) ? 'Yes' : 'No';
+                    acc[type] = (acc[type] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const chartData = Object.entries(typeCounts).map(([type, count]) => ({
+                    category: type,
+                    count: count
+                }));
+
+                createChart('submissionTypeChart', 'Submission Distributable', chartData, ['#9C27B0', '#607D8B']);
+            }
+
+            createSubmissionCharts()
+        })())
+        <% } %>
     });
 </script>

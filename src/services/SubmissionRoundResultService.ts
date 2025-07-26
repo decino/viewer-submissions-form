@@ -28,7 +28,7 @@ export class SubmissionRoundResultService {
             allEntries = entries;
         } else {
             // get all tbe entries for this round
-            allEntries = await this.submissionService.getAllEntries();
+            allEntries = await this.submissionService.getAllEntries(-1, true);
         }
         if (allEntries.length === 0) {
             throw new BadRequest("There are no entries in this round!");

@@ -170,15 +170,16 @@ export class SubmissionService {
         return this.submissionRepo.retrieveSubmission(id);
     }
 
-    public async getAllEntries(roundId = -1): Promise<SubmissionModel[]> {
+    public async getAllEntries(roundId = -1, validAndVerifiedOnly = false): Promise<SubmissionModel[]> {
         if (roundId === -1) {
-            const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+            const currentActiveRound =
+                await this.submissionRoundService.getCurrentActiveSubmissionRound(validAndVerifiedOnly);
             if (!currentActiveRound) {
                 throw new BadRequest("No round exists.");
             }
             return currentActiveRound.submissions;
         }
-        return this.submissionRepo.getAllSubmissions(roundId);
+        return this.submissionRepo.getAllSubmissions(roundId, validAndVerifiedOnly);
     }
 
     public async deleteEntries(ids: number[], notify = true): Promise<boolean> {

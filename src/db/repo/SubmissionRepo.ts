@@ -49,8 +49,8 @@ export class SubmissionRepo {
         return this.submissionDao.getSubmission(id);
     }
 
-    public getAllSubmissions(roundId: number): Promise<SubmissionModel[]> {
-        return this.submissionDao.getAllSubmissions(roundId);
+    public getAllSubmissions(roundId: number, validAndVerifiedOnly = false): Promise<SubmissionModel[]> {
+        return this.submissionDao.getAllSubmissions(roundId, validAndVerifiedOnly);
     }
 
     public async setSubmissionStatus(status: SubmissionStatusModel): Promise<SubmissionModel> {

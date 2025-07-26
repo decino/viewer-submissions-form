@@ -60,7 +60,22 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         });
     }
 
-    public getAllSubmissions(roundId: number, transaction?: EntityManager): Promise<SubmissionModel[]> {
+    public getAllSubmissions(
+        roundId: number,
+        validAndVerifiedOnly = false,
+        transaction?: EntityManager,
+    ): Promise<SubmissionModel[]> {
+        const manager = this.getEntityManager(transaction);
+        if (validAndVerifiedOnly) {
+            return manager.find({
+                relations: ["confirmation", "status"],
+                where: {
+                    submissionRoundId: roundId,
+                    submissionValid: true,
+                    verified: true,
+                },
+            });
+        }
         return this.getEntityManager(transaction).find({
             relations: ["confirmation", "status"],
             where: {

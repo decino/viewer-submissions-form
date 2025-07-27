@@ -50,4 +50,8 @@ export class SubmissionRoundModel extends AbstractModel {
     private sanitiseString(): void {
         this.name = xss(this.name);
     }
+
+    public get validAndVerifiedSubmissions(): SubmissionModel[] {
+        return this.submissions.filter(submission => submission.isSubmissionValidAndVerified());
+    }
 }

@@ -5,8 +5,9 @@ import { SubmissionRoundResultService } from "../../services/SubmissionRoundResu
 import { Authorize } from "@tsed/passport";
 import { Req } from "@tsed/common";
 import { CustomUserInfoModel } from "../../model/auth/CustomUserInfoModel.js";
-import { AdminDto } from "../../DTO/AdminDto.js";
+import { AdminDto } from "../../DTO/ejs/AdminDto.js";
 import { WadValidationService } from "../../services/WadValidationService.js";
+import { StatsDto } from "../../DTO/ejs/StatsDto.js";
 
 @Controller("/")
 export class AdminHome {
@@ -27,11 +28,14 @@ export class AdminHome {
         const currentActiveRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
         const previousRounds = await this.submissionRoundResultService.getAllSubmissionRoundResults();
         const user = req.user as CustomUserInfoModel;
-        const mostSubmittedWad = await this.submissionRoundService.getMostSubmittedWadName();
-        return {
+        const stats = new StatsDto(currentActiveRound, previousRounds);
+        const resp: Record<string, unknown> = {
             indexModel: new AdminDto(currentActiveRound, previousRounds, this.wadValidationService),
             user,
-            mostSubmittedWad,
         };
+
+        await stats.merge(resp);
+
+        return resp;
     }
 }

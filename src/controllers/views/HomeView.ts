@@ -5,7 +5,7 @@ import { SubmissionConfirmationService } from "../../services/SubmissionConfirma
 import { QueryParams, Req, Res } from "@tsed/common";
 import { NotFound } from "@tsed/exceptions";
 import { SubmissionRoundResultService } from "../../services/SubmissionRoundResultService.js";
-import { IndexDto } from "../../DTO/IndexDto.js";
+import { IndexDto } from "../../DTO/ejs/IndexDto.js";
 import type { UUID } from "crypto";
 import { WadValidationService } from "../../services/WadValidationService.js";
 import { CaptchaManager } from "../../manager/CaptchaManager.js";

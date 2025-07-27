@@ -2,7 +2,8 @@
 <html lang="en" data-bs-theme="dark">
 <head>
     <%- include('../snippets/head.ejs'); %>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css" />
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="../assets/custom/css/spinWheel.css">
 </head>
 <body>
@@ -30,7 +31,14 @@
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Most requested WAD</h5>
-                                    <h5 class="card-text"><%- mostSubmittedWad ?? "N/A"; -%></h5>
+                                    <% if (stats){ %>
+                                        <p class="card-text">
+                                        <h5><%- stats.mostSubmittedWad; -%></h5>
+                                        <small><%- stats.mostSubmittedWadPercentage; -%>% of all submissions</small>
+                                        </p>
+                                    <% }else{ %>
+                                        <h5 class="card-text">N/A</h5>
+                                    <% } %>
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title text-primary">Map authors</h5>
@@ -52,7 +60,9 @@
                                 <button type="button" class="btn btn-outline-success" id="endRoundButton"
                                         data-bs-toggle="modal" data-bs-target="#endRoundModal">End round
                                 </button>
-                                <button type="button" class="btn btn-outline-danger" id="deleteRoundButton" data-roundid="<%- indexModel.currentActiveRound.id; -%>">Delete round</button>
+                                <button type="button" class="btn btn-outline-danger" id="deleteRoundButton"
+                                        data-roundid="<%- indexModel.currentActiveRound.id; -%>">Delete round
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -60,21 +70,7 @@
             </div>
             <div class="row mt-5">
                 <div class="col-md-12">
-                    <div class="card border-primary mb-3 ml-3" id="statsPanel">
-                        <div class="card-header">Stats</div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div id="recordFormatDist" class="chart-container"></div></div>
-                                <div class="col-md-4">
-                                    <div id="mapAuthorChart"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div id="submissionTypeChart"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <%- include('../snippets/stats.ejs'); %>
                 </div>
             </div>
             <div class="row mt-5">
@@ -119,7 +115,9 @@
                 <div class="card-body">
                     <p class="card-text">Clicking this button will create a new submission round and enable people
                         to submit entries.</p>
-                    <button class="btn btn-outline-primary" id="makeNewRoundButton" data-bs-toggle="modal" data-bs-target="#newRoundModal">Make new round</button>
+                    <button class="btn btn-outline-primary" id="makeNewRoundButton" data-bs-toggle="modal"
+                            data-bs-target="#newRoundModal">Make new round
+                    </button>
                 </div>
             </div>
         <% } %>
@@ -458,7 +456,8 @@
                             <div class="alert alert-primary" role="alert">
                                 <p>Use the control below to map file extensions to the header</p>
                                 <hr />
-                                <p class="mb-0">You can leave the header mapping empty to skip header validation for that file type</p>
+                                <p class="mb-0">You can leave the header mapping empty to skip header validation for
+                                    that file type</p>
                             </div>
                         </div>
                     </div>
@@ -471,7 +470,9 @@
                                 </div>
                                 <div class="card-footer">
                                     <div class="d-grid gap-2">
-                                        <button class="btn btn-outline-success" type="button" id="addMapping">Add entry</button>
+                                        <button class="btn btn-outline-success" type="button" id="addMapping">Add
+                                            entry
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -482,7 +483,9 @@
                                 </div>
                                 <div class="card-footer">
                                     <div class="d-grid gap-2">
-                                        <button class="btn btn-outline-success" type="button" id="addMappingZip">Add entry</button>
+                                        <button class="btn btn-outline-success" type="button" id="addMappingZip">Add
+                                            entry
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -542,7 +545,8 @@
             </div>
             <div class="modal-body" id="setFileModelInfoContent">
                 <label for="setWadFile" class="form-label">Upload WAD</label>
-                <input name="file" class="form-control" type="file" id="setWadFile" accept="<%- indexModel.allowedUploadExtensions; -%>" />
+                <input name="file" class="form-control" type="file" id="setWadFile"
+                       accept="<%- indexModel.allowedUploadExtensions; -%>" />
                 <input type="hidden" name="id" id="setFileSubmissionId" />
             </div>
             <div class="modal-footer">
@@ -553,35 +557,26 @@
 </div>
 
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
+<script type="text/javascript"
+        src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/fh-3.3.1/sl-1.5.0/datatables.min.js"></script>
 <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <%- include('../snippets/scripts.ejs'); %>
 <script type="text/javascript" src="../assets/vendor/Enchanter/enchanter.js"></script>
 <script type="text/javascript" src="../assets/custom/js/spinWheel.js"></script>
-
-<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/locales/de_DE.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/geodata/germanyLow.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/fonts/notosans-sc.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-
 
 </body>
 </html>
 
 <script>
     Site.loadPage(async site => {
-        const submissionInfoModal = new bootstrap.Modal('#submissionInfoModal');
-        const submissionStatusModal = new bootstrap.Modal('#submissionStatusModal');
-        const setYoutubeLinkModal = new bootstrap.Modal('#setYoutubeLinkModal');
-        const headerValidationModal = new bootstrap.Modal('#headerValidationModal');
-        const setFileModel = new bootstrap.Modal('#setFileModel');
+        const submissionInfoModal = new bootstrap.Modal("#submissionInfoModal");
+        const submissionStatusModal = new bootstrap.Modal("#submissionStatusModal");
+        const setYoutubeLinkModal = new bootstrap.Modal("#setYoutubeLinkModal");
+        const headerValidationModal = new bootstrap.Modal("#headerValidationModal");
+        const setFileModel = new bootstrap.Modal("#setFileModel");
 
         const dtMap = new Map();
-        const submissionModificationModal = new bootstrap.Modal('#modifySubmissionModal');
+        const submissionModificationModal = new bootstrap.Modal("#modifySubmissionModal");
 
         loadEventListeners();
         initDt();
@@ -594,7 +589,7 @@
             site.loading(true);
             try {
                 await fetch(`${baseUrl}/submissionRound/${roundId}/deleteRound`, {
-                    method: 'DELETE'
+                    method: "DELETE"
                 });
                 return true;
             } catch (e) {
@@ -611,7 +606,7 @@
             const modalTitle = document.getElementById("submissionInfoModalLabel");
 
             const title = `Info for submission ${wadName}`;
-            const template = document.createElement('template');
+            const template = document.createElement("template");
             template.innerHTML = downloadUrl.trim();
             const anchor = template.content.firstChild;
             const body = `
@@ -635,7 +630,7 @@
         }
 
         function loadEventListeners() {
-            const changeDetailsModal = new bootstrap.Modal('#changeDetailsModel');
+            const changeDetailsModal = new bootstrap.Modal("#changeDetailsModel");
 
 
             ((() => {
@@ -813,8 +808,8 @@
                     let json;
                     try {
                         setValidationResp = await fetch(`${baseUrl}/utils/wadValidation`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(obj)
                         });
                     } finally {
@@ -843,15 +838,15 @@
                 }
 
                 site.initPRevSubmissionToggle((el) => {
-                    const activeButton = el.closest(".card").querySelector('button[data-bs-toggle="tab"].active');
+                    const activeButton = el.closest(".card").querySelector("button[data-bs-toggle=\"tab\"].active");
                     const entryId = activeButton.dataset.entryid;
                     resize(entryId);
                 });
 
-                const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+                const tabEls = document.querySelectorAll("button[data-bs-toggle=\"tab\"]");
                 for (let i = 0; i < tabEls.length; i++) {
                     const tab = tabEls[i];
-                    tab.addEventListener('shown.bs.tab', event => {
+                    tab.addEventListener("shown.bs.tab", event => {
                         const newTab = event.target;
                         const entryId = newTab.dataset.entryid;
                         resize(entryId);
@@ -891,7 +886,7 @@
                     site.loading(true);
                     try {
                         await fetch(endpoint, {
-                            method: 'POST'
+                            method: "POST"
                         });
                     } catch (e) {
                         alert(e.message);
@@ -923,7 +918,7 @@
                     site.loading(true);
                     try {
                         await fetch(`${baseUrl}/auth/changeDetails`, {
-                            method: 'POST',
+                            method: "POST",
                             body: formData
                         });
                     } catch (e) {
@@ -952,7 +947,7 @@
                     let response;
                     try {
                         response = await fetch(`${baseUrl}/submission/modifyEntry`, {
-                            method: 'POST',
+                            method: "POST",
                             body: form
                         });
                     } catch (e) {
@@ -998,7 +993,7 @@
                     site.loading(true);
                     try {
                         await fetch(`${baseUrl}/submission/changeStatus`, {
-                            method: 'POST',
+                            method: "POST",
                             body: formData
                         });
                     } catch (e) {
@@ -1012,7 +1007,7 @@
                         site.loading(true);
                         try {
                             await fetch(`${baseUrl}/submissionRoundResult/addRandomEntry?roundId=${submissionEntryId}`, {
-                                method: 'POST'
+                                method: "POST"
                             });
                         } catch (e) {
                             alert(e.message);
@@ -1105,7 +1100,7 @@
                     return dupeRows;
                 }
 
-                const wizard = new Enchanter('endRoundWizard', {}, {
+                const wizard = new Enchanter("endRoundWizard", {}, {
                     onNext: () => {
                         function validate() {
                             function validateStep1() {
@@ -1183,14 +1178,14 @@
                                 }
 
                                 step2Dt = $("#endRoundResultsTable").DataTable({
-                                    dom: 'Bfrtip',
+                                    dom: "Bfrtip",
                                     stateSave: true,
                                     paging: false,
                                     fixedHeader: {
                                         header: true
                                     },
                                     select: {
-                                        style: 'multi'
+                                        style: "multi"
                                     },
                                     columnDefs: [
                                         {
@@ -1201,7 +1196,7 @@
                                     ordering: false,
                                     buttons: [
                                         {
-                                            text: 'Generate random entry',
+                                            text: "Generate random entry",
                                             action: async (e, dt) => {
                                                 const generateEntryEndpoint = `${baseUrl}/submissionRoundResult/generateEntries?count=1`;
                                                 site.loading(true);
@@ -1234,8 +1229,8 @@
                                             }
                                         },
                                         {
-                                            extend: 'selected',
-                                            text: 'Re-generate',
+                                            extend: "selected",
+                                            text: "Re-generate",
                                             action: async (e, dt) => {
                                                 const selected = dt.rows({ selected: true }).count();
                                                 const generateEntryEndpoint = `${baseUrl}/submissionRoundResult/generateEntries?count=${selected}`;
@@ -1269,8 +1264,8 @@
                                             }
                                         },
                                         {
-                                            extend: 'selected',
-                                            text: 'Remove',
+                                            extend: "selected",
+                                            text: "Remove",
                                             action: async (e, dt) => {
                                                 dt.rows({ selected: true }).remove().draw(false);
                                                 highlightDupes();
@@ -1323,8 +1318,8 @@
                                 method: "POST",
                                 body: JSON.stringify(chosenIds),
                                 headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
+                                    "Accept": "application/json",
+                                    "Content-Type": "application/json"
                                 }
                             });
                         } catch (e) {
@@ -1338,7 +1333,7 @@
                             return;
                         }
                         window.location.reload();
-                    },
+                    }
                 });
             })());
             <% } %>
@@ -1409,7 +1404,7 @@
                 return json;
             }
 
-            $('.submissionsTable').each(function() {
+            $(".submissionsTable").each(function() {
                 const el = $(this);
                 const isValidationTable = el[0].closest("#validationSubmissionsPanel") !== null;
                 let ds = el[0].dataset.isresults === "true";
@@ -1418,7 +1413,7 @@
                 }
                 const isPreviousRoundCard = el.closest(".preRoundCard").length > 0;
                 const dtOpts = {
-                    dom: 'Bfrtip',
+                    dom: "Bfrtip",
                     stateSave: true,
                     scrollY: 600,
                     scrollX: false,
@@ -1428,7 +1423,7 @@
                         header: true
                     },
                     select: {
-                        style: isPreviousRoundCard ? 'single' : 'multi'
+                        style: isPreviousRoundCard ? "single" : "multi"
                     }
                 };
                 if (!ds) {
@@ -1437,10 +1432,10 @@
                 }
 
                 const buttons = [
-                    'colvis',
+                    "colvis",
                     {
-                        extend: 'selectedSingle',
-                        text: 'Full info',
+                        extend: "selectedSingle",
+                        text: "Full info",
                         action: async (e, dt) => {
                             const selectedRow = dt.row({ selected: true }).data();
                             let entry;
@@ -1454,8 +1449,8 @@
                         }
                     },
                     {
-                        extend: 'selected',
-                        text: 'Delete',
+                        extend: "selected",
+                        text: "Delete",
                         action: async (e, dt) => {
                             const confirm = window.confirm("Are you sure you wish to delete these entries?");
                             if (!confirm) {
@@ -1472,8 +1467,8 @@
                                 response = await fetch(`${baseUrl}/submission/deleteEntries`, {
                                     method: "DELETE",
                                     headers: {
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json'
+                                        "Accept": "application/json",
+                                        "Content-Type": "application/json"
                                     },
                                     body: JSON.stringify(idArr)
                                 });
@@ -1503,8 +1498,8 @@
 
                 if (isPreviousRoundCard) {
                     buttons.push({
-                            extend: 'selectedSingle',
-                            text: 'Change status',
+                            extend: "selectedSingle",
+                            text: "Change status",
                             action: async (e, dt) => {
                                 const submissionEntryId = e.target.closest(".tab-pane").dataset.entryid;
                                 const selectedRow = dt.row({ selected: true }).data();
@@ -1517,7 +1512,7 @@
                                 }
                                 const submissionObj = await submission.json();
                                 const statusObj = submissionObj.status;
-                                const dd = document.getElementById('statusSelect');
+                                const dd = document.getElementById("statusSelect");
                                 const input = document.getElementById("statusComments");
                                 document.getElementById("statusSubmissionId").value = submissionObj.id;
                                 input.value = null;
@@ -1530,8 +1525,8 @@
                             }
                         },
                         {
-                            extend: 'selectedSingle',
-                            text: 'Set YouTube link',
+                            extend: "selectedSingle",
+                            text: "Set YouTube link",
                             action: async (e, dt) => {
                                 const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
@@ -1545,8 +1540,8 @@
                 if (!isValidationTable) {
                     buttons.push(
                         {
-                            extend: 'selectedSingle',
-                            text: 'Modify',
+                            extend: "selectedSingle",
+                            text: "Modify",
                             action: async (e, dt) => {
                                 const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
@@ -1563,7 +1558,7 @@
                                 const isAuthor = submissionObj.author;
                                 const distributable = isAuthor && submissionObj.distributable;
                                 const format = submissionObj.recordedFormat;
-                                const changeEv = new Event('change');
+                                const changeEv = new Event("change");
                                 const authorYes = document.getElementById("authorYes");
                                 const authorNo = document.getElementById("authorNo");
                                 const distributableYes = document.getElementById("distributableYes");
@@ -1610,8 +1605,8 @@
                             }
                         },
                         {
-                            extend: 'selectedSingle',
-                            text: 'Set file',
+                            extend: "selectedSingle",
+                            text: "Set file",
                             action: async (e, dt) => {
                                 const selectedRow = dt.row({ selected: true }).data();
                                 const id = selectedRow[0];
@@ -1637,8 +1632,8 @@
                 if (isValidationTable) {
                     buttons.push(
                         {
-                            extend: 'selected',
-                            text: 'Verify',
+                            extend: "selected",
+                            text: "Verify",
                             action: async (e, dt) => {
                                 const confirm = window.confirm("Are you sure you wish to verify these entries?");
                                 if (!confirm) {
@@ -1655,8 +1650,8 @@
                                     response = await fetch(`${baseUrl}/submission/verifyEntries`, {
                                         method: "POST",
                                         headers: {
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/json'
+                                            "Accept": "application/json",
+                                            "Content-Type": "application/json"
                                         },
                                         body: JSON.stringify(idArr)
                                     });
@@ -1678,7 +1673,7 @@
                 }
                 if (isPreviousRoundCard) {
                     buttons.push({
-                        text: 'Add Random Entry',
+                        text: "Add Random Entry",
                         action: async (e, dt) => {
                             const roundId = e.target.closest(".tab-pane").dataset.entryid;
                             console.log(roundId);
@@ -1718,227 +1713,22 @@
         }
         <% if (indexModel && indexModel.currentActiveRound) { %>
             ((() => {
-            async function createSubmissionCharts() {
-
-                let submissions = [];
-                try {
-                    const roundId = <%- indexModel.currentActiveRound.id %>;
-                    const result = await fetch(`${baseUrl}/submission/${roundId}/validAndVerifiedSubmissions`);
-                    submissions = await result.json();
-                } catch (e) {
-                    console.error(e.message);
-                    submissions = [];
-                }
-
-                createRecordedFormatChart(submissions);
-                createAuthorDistributionChart(submissions);
-                createSubmissionTypeChart(submissions);
-            }
-
-            function createChart(containerId, title, data, colors) {
-                const statsBody = document.querySelector(`#${containerId}`);
-                if (!statsBody) {
-                    console.error(`Chart container #${containerId} not found`);
-                    return;
-                }
-
-                const chartContainer = document.createElement('div');
-                chartContainer.id = `${containerId}Chart`;
-                chartContainer.style.width = '100%';
-                chartContainer.style.height = '300px';
-
-                statsBody.innerHTML = `<h6 class="mb-3 text-white text-center">${title}</h6>`;
-                statsBody.appendChild(chartContainer);
-
-                const root = am5.Root.new(`${containerId}Chart`);
-                root.setThemes([am5themes_Animated.new(root)]);
-
-                const chart = root.container.children.push(am5percent.PieChart.new(root, {
-                    layout: root.verticalLayout,
-                    innerRadius: am5.percent(50)
-                }));
-
-                // Add "No data" message
-                const noDataLabel = chart.children.unshift(am5.Label.new(root, {
-                    text: "No chart data available",
-                    fontSize: 14,
-                    fontWeight: "500",
-                    textAlign: "center",
-                    x: am5.percent(50),
-                    y: am5.percent(50),
-                    centerX: am5.percent(50),
-                    centerY: am5.percent(50),
-                    fill: am5.color("#6c757d")
-                }));
-
-                const series = chart.series.push(am5percent.PieSeries.new(root, {
-                    valueField: "count",
-                    categoryField: "category",
-                    alignLabels: false
-                }));
-
-                series.get("colors").set("colors", colors.map(color => am5.color(color)));
-
-                series.labels.template.setAll({
-                    textType: "circular",
-                    centerX: 0,
-                    centerY: 0,
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    fill: am5.color("#ffffff"),
-                    oversizedBehavior: "wrap"
+                const roundId = <%- indexModel.currentActiveRound.id %>;
+                createSubmissionCharts(roundId, {
+                    distributable: {
+                        containerId: "submissionTypeChart",
+                        title: "Submission Distributable"
+                    },
+                    isAuthor: {
+                        containerId: "mapAuthorChart",
+                        title: "Map Author"
+                    },
+                    recordFormat: {
+                        containerId: "recordFormatDist",
+                        title: "Recorded Format"
+                    }
                 });
-
-                series.slices.template.setAll({
-                    stroke: am5.color("#495057"),
-                    strokeWidth: 2,
-                    cornerRadius: 3,
-                    shadowOpacity: 0.1,
-                    shadowOffsetX: 2,
-                    shadowOffsetY: 2,
-                    shadowBlur: 5,
-                    shadowColor: am5.color("#000000"),
-                    toggleKey: "active"
-                });
-
-                series.slices.template.states.create("hover", {
-                    scale: 1.05,
-                    shadowOpacity: 0.3,
-                    shadowOffsetX: 3,
-                    shadowOffsetY: 3,
-                    shadowBlur: 8
-                });
-
-                series.slices.template.states.create("active", {
-                    scale: 1.1,
-                    shiftRadius: 15
-                });
-
-                series.slices.template.set("cursorOverStyle", "pointer");
-                series.slices.template.set("tooltipText", "{category}: {count} submissions ({valuePercentTotal.formatNumber('#.0')}%)");
-
-                series.set("tooltip", am5.Tooltip.new(root, {
-                    getFillFromSprite: false,
-                    autoTextColor: false
-                }));
-
-                series.get("tooltip").get("background").setAll({
-                    fill: am5.color("#343a40"),
-                    stroke: am5.color("#6c757d"),
-                    strokeWidth: 1,
-                    cornerRadius: 4,
-                    fillOpacity: 0.95
-                });
-
-                series.get("tooltip").label.setAll({
-                    fill: am5.color("#ffffff"),
-                    fontSize: "11px",
-                    fontWeight: "500"
-                });
-
-                const legend = chart.children.push(am5.Legend.new(root, {
-                    centerX: am5.percent(50),
-                    x: am5.percent(50),
-                    marginTop: 10,
-                    marginBottom: 10
-                }));
-
-                legend.labels.template.setAll({
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    fill: am5.color("#ffffff")
-                });
-
-                legend.valueLabels.template.setAll({
-                    fill: am5.color("#ffffff")
-                });
-
-                legend.markers.template.setAll({
-                    width: 14,
-                    height: 14
-                });
-
-                legend.data.setAll(series.dataItems);
-
-                if (!data || data.length === 0) {
-                    chart.set("opacity", 0.3);
-                    series.set("visible", false);
-                    legend.set("visible", false);
-                    series.data.setAll([]);
-                } else {
-                    noDataLabel.set("visible", false);
-                    chart.set("opacity", 1);
-                    series.set("visible", true);
-                    legend.set("visible", true);
-                    series.data.setAll(data);
-                    series.appear(1000, 100);
-                }
-
-                return chart;
-            }
-
-            function createRecordedFormatChart(submissions) {
-                if (!submissions || submissions.length === 0) {
-                    createChart('recordFormatDist', 'Recorded Format', [], ['#4CAF50', '#F44336']);
-                    return;
-                }
-
-                const formatCounts = submissions.reduce((acc, submission) => {
-                    const format = submission.recordedFormat || 'Practised';
-                    acc[format] = (acc[format] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const chartData = Object.entries(formatCounts).map(([format, count]) => ({
-                    category: format,
-                    count: count
-                }));
-
-                createChart('recordFormatDist', 'Recorded Format', chartData, ['#4CAF50', '#F44336']);
-            }
-
-            function createAuthorDistributionChart(submissions) {
-                if (!submissions || submissions.length === 0) {
-                    createChart('mapAuthorChart', 'Map Author', [], ['#FF9800', '#2196F3']);
-                    return;
-                }
-
-                const authorCounts = submissions.reduce((acc, submission) => {
-                    const type = submission.author ? 'Yes' : 'No';
-                    acc[type] = (acc[type] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const chartData = Object.entries(authorCounts).map(([type, count]) => ({
-                    category: type,
-                    count: count
-                }));
-
-                createChart('mapAuthorChart', 'Map Author', chartData, ['#FF9800', '#2196F3']);
-            }
-
-            function createSubmissionTypeChart(submissions) {
-                if (!submissions || submissions.length === 0) {
-                    createChart('submissionTypeChart', 'Submission Distributable', [], ['#9C27B0', '#607D8B']);
-                    return;
-                }
-
-                const typeCounts = submissions.reduce((acc, submission) => {
-                    const type = !(submission.author && !submission.distributable) ? 'Yes' : 'No';
-                    acc[type] = (acc[type] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const chartData = Object.entries(typeCounts).map(([type, count]) => ({
-                    category: type,
-                    count: count
-                }));
-
-                createChart('submissionTypeChart', 'Submission Distributable', chartData, ['#9C27B0', '#607D8B']);
-            }
-
-            createSubmissionCharts()
-        })())
+            })())
         <% } %>
     });
 </script>

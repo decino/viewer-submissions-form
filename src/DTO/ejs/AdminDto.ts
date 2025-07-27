@@ -1,7 +1,7 @@
 import { IndexDto } from "./IndexDto.js";
-import { SubmissionRoundModel } from "../model/db/SubmissionRound.model";
-import { SubmissionModel } from "../model/db/Submission.model.js";
-import { WadValidationService } from "../services/WadValidationService.js";
+import { SubmissionRoundModel } from "../../model/db/SubmissionRound.model.js";
+import { SubmissionModel } from "../../model/db/Submission.model.js";
+import { WadValidationService } from "../../services/WadValidationService.js";
 
 export class AdminDto extends IndexDto {
     public constructor(
@@ -30,6 +30,6 @@ export class AdminDto extends IndexDto {
         if (!this.currentActiveRound) {
             return [];
         }
-        return this.currentActiveRound.submissions.filter(submission => submission.isSubmissionValidAndVerified());
+        return this.currentActiveRound.validAndVerifiedSubmissions;
     }
 }

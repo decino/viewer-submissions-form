@@ -1,8 +1,8 @@
-import { SubmissionRoundModel } from "../model/db/SubmissionRound.model.js";
-import DOOM_ENGINE from "../model/constants/DoomEngine.js";
-import GZDOOM_ACTIONS from "../model/constants/GZDoomActions.js";
-import { ObjectUtils } from "../utils/Utils.js";
-import { WadValidationService } from "../services/WadValidationService.js";
+import { SubmissionRoundModel } from "../../model/db/SubmissionRound.model.js";
+import DOOM_ENGINE from "../../model/constants/DoomEngine.js";
+import GZDOOM_ACTIONS from "../../model/constants/GZDoomActions.js";
+import { ObjectUtils } from "../../utils/Utils.js";
+import { WadValidationService } from "../../services/WadValidationService.js";
 
 export class IndexDto {
     private readonly months = [

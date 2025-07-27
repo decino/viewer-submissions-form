@@ -3,6 +3,7 @@
  */
 export * from "./BaseRestController.js";
 export * from "./impl/security/PassportCtrl.js";
+export * from "./impl/StatsController.js";
 export * from "./impl/SubmissionController.js";
 export * from "./impl/SubmissionRoundController.js";
 export * from "./impl/SubmissionRoundResultController.js";

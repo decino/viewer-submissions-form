@@ -65,7 +65,8 @@ function getCaptcha() {
                             </div>
                         </div>
                         <div class="card-footer text-center">
-                            <p>Please contact <a href="mailto:submissions@decino.nl">submissions@decino.nl</a> if you have any issues.</p>
+                            <p>Please contact <a href="mailto:submissions@decino.nl">submissions@decino.nl</a> if you
+                                have any issues.</p>
                         </div>
                     </div>
                 </div>
@@ -98,6 +99,13 @@ function getCaptcha() {
                 </div>
             </div>
         <% } %>
+        <% if (model.currentActiveRound) { %>
+            <div class="row mt-5">
+                <div class="col-md-12">
+                    <%- include('snippets/stats.ejs'); %>
+                </div>
+            </div>
+        <% } %>
         <% if(model.previousRounds.length > 0){ %>
             <div class="row mt-5">
                 <div class="col-md-12">
@@ -118,5 +126,27 @@ function getCaptcha() {
 <script src="assets/custom/js/wad.js"></script>
 <%- include('snippets/scripts.ejs'); %>
 <script src="assets/custom/js/index.js"></script>
+
+<script>
+    <% if (model.currentActiveRound) { %>
+    ((() => {
+        const roundId = <%- model.currentActiveRound.id %>;
+        createSubmissionCharts(roundId, {
+            distributable: {
+                containerId: "submissionTypeChart",
+                title: "Submission Distributable"
+            },
+            isAuthor: {
+                containerId: "mapAuthorChart",
+                title: "Map Author"
+            },
+            recordFormat: {
+                containerId: "recordFormatDist",
+                title: "Recorded Format"
+            }
+        });
+    })())
+    <% } %>
+</script>
 </body>
 </html>

@@ -91,7 +91,7 @@ export class SubmissionConfirmationService implements OnInit {
             this.submissionSocket.emitSubmission(entry);
             this.discordBotDispatcherService.sendNewSubmission(entry);
 
-            if (!this.sentCongrats && numberOfEntriesInCurrentRound++ > numberOfEntriesFromPreviousRound) {
+            if (!this.sentCongrats && ++numberOfEntriesInCurrentRound > numberOfEntriesFromPreviousRound) {
                 this.sentCongrats = true;
                 this.discordBotDispatcherService.sendCongratulations();
             }

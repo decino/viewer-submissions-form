@@ -129,4 +129,64 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
             ],
         });
     }
+
+    public getNumberOfSubmissions(
+        roundId?: number,
+        validAndVerifiedOnly = true,
+        transaction?: EntityManager,
+    ): Promise<number> {
+        const manager = this.getEntityManager(transaction);
+        const builder = manager.createQueryBuilder("submission");
+
+        if (roundId) {
+            builder.where("submission.submissionRoundId = :roundId", { roundId });
+        } else {
+            builder.innerJoin("submission.submissionRound", "submissionRound").where("submissionRound.active = true");
+        }
+
+        if (validAndVerifiedOnly) {
+            builder.andWhere("submission.submissionValid = true AND submission.verified = true");
+        }
+
+        return builder.getCount();
+    }
+
+    public async getNumberOfSubmissionsForPreviousRound(
+        validAndVerifiedOnly = true,
+        transaction?: EntityManager,
+    ): Promise<number> {
+        const manager = this.getEntityManager(transaction);
+
+        const previousRoundResult = await manager
+            .createQueryBuilder("submission")
+            .select("submission.submissionRoundId", "roundId")
+            .where(qb => {
+                const subQuery = qb
+                    .subQuery()
+                    .select("MAX(s.submissionRoundId)")
+                    .from(SubmissionModel, "s")
+                    .innerJoin("s.submissionRound", "activeRound")
+                    .where("activeRound.active = true")
+                    .getQuery();
+                return `submission.submissionRoundId < (${subQuery})`;
+            })
+            .orderBy("submission.submissionRoundId", "DESC")
+            .limit(1)
+            .getRawOne();
+
+        if (!previousRoundResult) {
+            return 0;
+        }
+
+        // Count submissions in the previous round
+        const builder = manager
+            .createQueryBuilder("submission")
+            .where("submission.submissionRoundId = :roundId", { roundId: previousRoundResult.roundId });
+
+        if (validAndVerifiedOnly) {
+            builder.andWhere("submission.submissionValid = true AND submission.verified = true");
+        }
+
+        return builder.getCount();
+    }
 }

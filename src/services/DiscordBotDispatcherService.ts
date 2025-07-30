@@ -49,6 +49,14 @@ export class DiscordBotDispatcherService implements OnInit {
         }
     }
 
+    public async sendCongratulations(): Promise<void> {
+        try {
+            await this.doPost("congratulations");
+        } catch (e) {
+            this.logger.warn(`Unable to send entry to bot.`, e.message);
+        }
+    }
+
     public async sendPendingSubmission(submission: SubmissionModel): Promise<void> {
         const payload: PendingValidationPayload = {
             wadName: submission.wadName,
@@ -87,7 +95,7 @@ export class DiscordBotDispatcherService implements OnInit {
         }
     }
 
-    private async doPost(endpoint: string, payload: unknown): Promise<Record<string, unknown> | null> {
+    private async doPost(endpoint: string, payload?: unknown): Promise<Record<string, unknown> | null> {
         if (!this.dispatchAddress) {
             return null;
         }
@@ -99,7 +107,7 @@ export class DiscordBotDispatcherService implements OnInit {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(payload),
+                body: payload ? JSON.stringify(payload) : undefined,
             });
         } catch (e) {
             this.logger.warn(`Unable to send entry to bot.`, e);

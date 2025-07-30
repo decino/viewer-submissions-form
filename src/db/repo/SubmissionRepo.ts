@@ -38,6 +38,14 @@ export class SubmissionRepo {
         return this.submissionDao.getUnverifiedSubmissions(ids);
     }
 
+    public getNumberOfSubmissions(roundId?: number, validAndVerifiedOnly = true): Promise<number> {
+        return this.submissionDao.getNumberOfSubmissions(roundId, validAndVerifiedOnly);
+    }
+
+    public getNumberOfSubmissionsForPreviousRound(validAndVerifiedOnly = true): Promise<number> {
+        return this.submissionDao.getNumberOfSubmissionsForPreviousRound(validAndVerifiedOnly);
+    }
+
     public verifySubmissions(submissions: SubmissionModel[]): Promise<SubmissionModel[]> {
         for (const submission of submissions) {
             submission.verified = true;

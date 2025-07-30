@@ -1,4 +1,4 @@
-import { Constant, Inject, Service } from "@tsed/di";
+import { Constant, Inject, OnInit, Service } from "@tsed/di";
 import { PendingEntryConfirmationModel } from "../model/db/PendingEntryConfirmation.model.js";
 import { BadRequest, NotFound } from "@tsed/exceptions";
 import { SubmissionModel } from "../model/db/Submission.model.js";
@@ -12,9 +12,10 @@ import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
 import { Logger } from "@tsed/common";
 import EMAIL_TEMPLATE from "../model/constants/EmailTemplate.js";
 import type { UUID } from "crypto";
+import { SubmissionRoundRepo } from "../db/repo/SubmissionRoundRepo.js";
 
 @Service()
-export class SubmissionConfirmationService {
+export class SubmissionConfirmationService implements OnInit {
     @Inject()
     private emailService: EmailService;
 
@@ -31,10 +32,28 @@ export class SubmissionConfirmationService {
     private submissionRepo: SubmissionRepo;
 
     @Inject()
+    private submissionRoundRepo: SubmissionRoundRepo;
+
+    @Inject()
     private logger: Logger;
 
     @Constant(GlobalEnv.BASE_URL)
     private readonly baseUrl: string;
+
+    private sentCongrats = false;
+
+    private currentRoundId: number | null = null;
+
+    public async $onInit(): Promise<void> {
+        const activeRound = await this.submissionRoundRepo.retrieveActiveRound();
+        if (activeRound) {
+            this.currentRoundId = activeRound.id;
+            const numberOfEntriesInCurrentRound = await this.submissionRepo.getNumberOfSubmissions();
+            const numberOfEntriesFromPreviousRound = await this.submissionRepo.getNumberOfSubmissionsForPreviousRound();
+
+            this.sentCongrats = numberOfEntriesInCurrentRound > numberOfEntriesFromPreviousRound;
+        }
+    }
 
     public async processConfirmation(confirmationUid: UUID): Promise<SubmissionModel> {
         const confirmation = await this.submissionConfirmationRepo.getConfirmation(confirmationUid);
@@ -55,11 +74,27 @@ export class SubmissionConfirmationService {
         }
         const verifiedEntries = await this.submissionRepo.verifySubmissions(unverifiedSubmissions);
 
+        if (verifiedEntries.length === 0) {
+            return;
+        }
+
+        const roundId = verifiedEntries[0].submissionRoundId;
+        if (this.currentRoundId !== roundId) {
+            this.currentRoundId = roundId;
+            this.sentCongrats = false;
+        }
+
+        let numberOfEntriesInCurrentRound = await this.submissionRepo.getNumberOfSubmissions();
+        const numberOfEntriesFromPreviousRound = await this.submissionRepo.getNumberOfSubmissionsForPreviousRound();
+
         for (const entry of verifiedEntries) {
             this.submissionSocket.emitSubmission(entry);
-
-            // ignore promise
             this.discordBotDispatcherService.sendNewSubmission(entry);
+
+            if (!this.sentCongrats && numberOfEntriesInCurrentRound++ > numberOfEntriesFromPreviousRound) {
+                this.sentCongrats = true;
+                this.discordBotDispatcherService.sendCongratulations();
+            }
         }
     }
 

@@ -9,7 +9,7 @@ export function registerDatasource(): void {
         await dataSource.initialize();
         const loggerInstance = $log;
         dataSource.setOptions({
-            logging: ["query"],
+            logging: false,
             logger: new (class LoggerProxy implements TypeOrmLogger {
                 public logQuery(query: string, parameters?: unknown[]): void {
                     loggerInstance.debug(query, parameters);

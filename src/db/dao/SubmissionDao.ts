@@ -112,22 +112,15 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
      * @param transaction
      */
     public getCurrentAndNotChosenSubmissions(transaction?: EntityManager): Promise<SubmissionModel[]> {
-        return this.getEntityManager(transaction).find({
-            relations: ["submissionRound"],
-            where: [
-                {
-                    submissionRound: {
-                        active: true,
-                    },
-                },
-                {
-                    isChosen: true,
-                    submissionRound: {
-                        active: false,
-                    },
-                },
-            ],
-        });
+        return this.getEntityManager(transaction)
+            .createQueryBuilder("submission")
+            .innerJoin("submission.submissionRound", "round")
+            .where("round.active = :active", { active: true })
+            .orWhere("submission.isChosen = :isChosen AND round.active = :inactive", {
+                isChosen: true,
+                inactive: false
+            })
+            .getMany();
     }
 
     public getNumberOfSubmissions(

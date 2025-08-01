@@ -84,14 +84,14 @@ export class SubmissionConfirmationService implements OnInit {
             this.sentCongrats = false;
         }
 
-        let numberOfEntriesInCurrentRound = await this.submissionRepo.getNumberOfSubmissions();
+        const numberOfEntriesInCurrentRound = await this.submissionRepo.getNumberOfSubmissions();
         const numberOfEntriesFromPreviousRound = await this.submissionRepo.getNumberOfSubmissionsForPreviousRound();
 
         for (const entry of verifiedEntries) {
             this.submissionSocket.emitSubmission(entry);
             this.discordBotDispatcherService.sendNewSubmission(entry);
 
-            if (!this.sentCongrats && ++numberOfEntriesInCurrentRound > numberOfEntriesFromPreviousRound) {
+            if (!this.sentCongrats && numberOfEntriesInCurrentRound > numberOfEntriesFromPreviousRound) {
                 this.sentCongrats = true;
                 this.discordBotDispatcherService.sendCongratulations();
             }

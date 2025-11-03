@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { useSubmissionForm } from "../../hooks";
 import * as submissionApi from "../../utils/api/submissionApi";
 import Alert from "../Alert/Alert";
@@ -41,7 +41,6 @@ export default function SubmissionForm({
     const [uploadMode, setUploadMode] = useState<"url" | "upload">("url");
     const [isAuthor, setIsAuthor] = useState(false);
     const [selectedEngine, setSelectedEngine] = useState("");
-    const [showGzActions, setShowGzActions] = useState(false);
     const [wadFile, setWadFile] = useState<File | null>(null);
     const [fileSizeError, setFileSizeError] = useState(false);
 
@@ -50,13 +49,9 @@ export default function SubmissionForm({
 
     const { loading, error, success, submitForm, setError } = useSubmissionForm();
 
-    useEffect(() => {
-        const engineValue = Object.keys(doomEngines).find(key => key === selectedEngine);
-        if (engineValue) {
-            const engineName = doomEngines[engineValue];
-            setShowGzActions(engineName === "GZDoom");
-        }
-    }, [selectedEngine, doomEngines]);
+    // Derive showGzActions from selectedEngine instead of using state
+    const engineValue = Object.keys(doomEngines).find(key => key === selectedEngine);
+    const showGzActions = engineValue ? doomEngines[engineValue] === "GZDoom" : false;
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

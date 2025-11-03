@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, CardBody, CardFooter, CardHeader, SubmissionForm, SubmissionsList } from "./components";
+import { Card, CardBody, CardFooter, CardHeader, PreviousRounds, SubmissionForm, SubmissionsList } from "./components";
 import * as submissionApi from "./utils/api/submissionApi";
 import type { HomeViewModel, SubmissionRoundModel } from "./types";
 import styles from "./App.module.scss";
@@ -118,17 +118,8 @@ export default function App() {
                     </div>
                 )}
 
-                {/* Previous Rounds - placeholder */}
-                {data.previousRounds.length > 0 && (
-                    <div className={styles.section}>
-                        <Card borderPrimary>
-                            <CardHeader>Previous Rounds</CardHeader>
-                            <CardBody>
-                                <p>Previous rounds will be displayed here</p>
-                            </CardBody>
-                        </Card>
-                    </div>
-                )}
+                {/* Previous Rounds */}
+                <PreviousRounds rounds={data.previousRounds} />
             </main>
         </div>
     );

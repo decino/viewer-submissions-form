@@ -26,6 +26,7 @@ import methodOverride from "method-override";
 import { isProduction } from "./config/envs/index.js";
 import helmet from "helmet";
 import process from "process";
+import e from "cors";
 import cors, { CorsRequest } from "cors";
 import { TypeormStore } from "connect-typeorm";
 import { SQLITE_DATA_SOURCE } from "./model/di/tokens.js";
@@ -43,7 +44,7 @@ import { Exception, TooManyRequests } from "@tsed/exceptions";
 import { Logger } from "@tsed/logger";
 import { DefaultRenderException } from "./model/rest/DefaultRenderException.js";
 import { NetworkUtils, wadDir } from "./utils/Utils.js";
-import { NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 function isPublicPath(path: string): boolean {
     return (
@@ -100,14 +101,11 @@ const opts: Partial<TsED.Configuration> = {
             },
         ],
     },
-    socketIO:
-        socketIoStatus === "dynamic"
-            ? {
-                  cors: {
-                      origin: [process.env.BASE_URL!, process.env.FRONT_END_URL!],
-                  },
-              }
-            : undefined,
+    socketIO: {
+        cors: {
+            origin: [process.env.BASE_URL!, process.env.FRONT_END_URL!],
+        },
+    },
     middlewares: [
         (req: Request, res: Response, next: NextFunction): void => {
             if (isPublicPath(req.path)) {

@@ -15,6 +15,15 @@ export interface SubmissionModel {
     customWadFileName?: string;
     downloadToken?: string;
     youtubeLink?: string;
+    submitterName?: string;
+    isChosen?: boolean;
+    playOrder?: number;
+    status?: SubmissionStatus;
+}
+
+export interface SubmissionStatus {
+    status: "Queued" | "In Progress" | "Completed" | "Rejected";
+    additionalInfo?: string;
 }
 
 export interface SubmissionRoundModel {

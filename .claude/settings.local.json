@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ray-q/IdeaProjects/WaifuVault/**)",
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(cat:*)",
+      "Bash(npm run dev)",
+      "Bash(tasklist)",
+      "Bash(findstr:*)",
+      "Bash(npm run lint)",
+      "Read(//c/Users/Kyle/IdeaProjects/WaifuVault/frontend/waifu-vault/src/app/components/**)",
+      "Read(//c/Users/Kyle/IdeaProjects/WaifuVault/frontend/waifu-vault/src/app/**)",
+      "Read(//c/Users/Kyle/IdeaProjects/WaifuVault/frontend/waifu-vault/src/**)",
+      "Bash(npm run build)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

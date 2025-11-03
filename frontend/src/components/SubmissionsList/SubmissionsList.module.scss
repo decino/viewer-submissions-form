@@ -1,0 +1,64 @@
+.statusBadge {
+    margin-bottom: var(--spacing-md);
+    text-align: right;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.875em;
+    font-weight: bold;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+
+    &.success {
+        background-color: var(--doom-success);
+        color: var(--doom-bg-primary);
+    }
+
+    &.danger {
+        background-color: var(--doom-danger);
+        color: var(--doom-text-primary);
+    }
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-md);
+
+    th,
+    td {
+        padding: var(--spacing-sm) var(--spacing-md);
+        text-align: left;
+        border-bottom: 1px solid var(--doom-border-secondary);
+    }
+
+    thead {
+        th {
+            background-color: var(--doom-bg-tertiary);
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--doom-border-primary);
+        }
+    }
+
+    tbody {
+        tr {
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: var(--doom-bg-tertiary);
+            }
+        }
+    }
+
+    .noData {
+        text-align: center;
+        color: var(--doom-text-secondary);
+        font-style: italic;
+    }
+}

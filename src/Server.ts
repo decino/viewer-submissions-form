@@ -26,7 +26,7 @@ import methodOverride from "method-override";
 import { isProduction } from "./config/envs/index.js";
 import helmet from "helmet";
 import process from "process";
-import cors from "cors";
+import cors, { CorsRequest } from "cors";
 import { TypeormStore } from "connect-typeorm";
 import { SQLITE_DATA_SOURCE } from "./model/di/tokens.js";
 import { DataSource } from "typeorm";
@@ -43,6 +43,14 @@ import { Exception, TooManyRequests } from "@tsed/exceptions";
 import { Logger } from "@tsed/logger";
 import { DefaultRenderException } from "./model/rest/DefaultRenderException.js";
 import { NetworkUtils, wadDir } from "./utils/Utils.js";
+import { NextFunction } from "express";
+
+function isPublicPath(path: string): boolean {
+    return (
+        path.startsWith("/f") ||
+        (path.startsWith("/rest") && !path.startsWith("/rest/admin") && !path.startsWith("/rest/auth"))
+    );
+}
 
 const opts: Partial<TsED.Configuration> = {
     ...config,
@@ -92,24 +100,44 @@ const opts: Partial<TsED.Configuration> = {
             },
         ],
     },
-    socketIO: {
-        cors: {
-            origin: process.env.BASE_URL,
-        },
-    },
+    socketIO:
+        socketIoStatus === "dynamic"
+            ? {
+                  cors: {
+                      origin: [process.env.BASE_URL!, process.env.FRONT_END_URL!],
+                  },
+              }
+            : undefined,
     middlewares: [
-        helmet({
-            contentSecurityPolicy: false,
-            crossOriginResourcePolicy: {
-                policy: "cross-origin",
-            },
-            crossOriginEmbedderPolicy: {
-                policy: "credentialless",
-            },
-        }),
-        cors({
-            origin: process.env.BASE_URL,
-            exposedHeaders: ["Location", "Content-Disposition"],
+        (req: Request, res: Response, next: NextFunction): void => {
+            if (isPublicPath(req.path)) {
+                return next();
+            }
+            helmet({
+                contentSecurityPolicy: false,
+                crossOriginResourcePolicy: {
+                    policy: "cross-origin",
+                },
+                crossOriginEmbedderPolicy: {
+                    policy: "credentialless",
+                },
+            })(req, res, next);
+        },
+        cors((req: CorsRequest, callback: (err: Error | null, options?: e.CorsOptions) => void) => {
+            const corsOptions = isPublicPath((req as Request).path)
+                ? {
+                      origin: "*",
+                      methods: "*",
+                      allowedHeaders: "*",
+                      exposedHeaders: "*",
+                  }
+                : {
+                      origin: [process.env.BASE_URL!, process.env.FRONT_END_URL!],
+                      exposedHeaders: ["Location", "Content-Disposition"],
+                      credentials: true,
+                  };
+
+            callback(null, corsOptions);
         }),
         cookieParser(),
         methodOverride(),

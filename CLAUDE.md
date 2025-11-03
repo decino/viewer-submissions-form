@@ -1,0 +1,1 @@
+- please never run vite, just run build

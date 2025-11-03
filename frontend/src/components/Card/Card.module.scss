@@ -1,0 +1,36 @@
+.card {
+    background-color: var(--doom-bg-secondary);
+    border: 2px solid var(--doom-border-primary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 4px 8px var(--doom-shadow);
+    transition: all 0.3s;
+
+    &:hover {
+        box-shadow: 0 0 15px var(--doom-red);
+    }
+
+    &.borderPrimary {
+        border-color: var(--doom-red);
+    }
+}
+
+.cardHeader {
+    background-color: var(--doom-red-dark);
+    padding: var(--spacing-md);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--doom-border-primary);
+}
+
+.cardBody {
+    padding: var(--spacing-lg);
+}
+
+.cardFooter {
+    background-color: var(--doom-bg-tertiary);
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--doom-border-secondary);
+    text-align: center;
+}

@@ -27,6 +27,22 @@ function getCaptcha() {
                     <p class="card-text">Please come back when an announcement has been made!</p>
                 </div>
             </div>
+        <% } else if (model.currentActiveRound === null) { %>
+            <div class="no-round-hero text-center">
+                <div class="no-round-hero__icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <h1 class="no-round-hero__title">No submission round is active</h1>
+                <p class="no-round-hero__lead">
+                    <strong>WADs cannot be submitted at the moment.</strong>
+                </p>
+                <p class="no-round-hero__text">
+                    A new round will open whenever the next one is created, where you can submit a WAD
+                    through an online form. The table below shows results from previous rounds.
+                    It does <u>not</u> mean a round is currently running.
+                </p>
+                <p class="no-round-hero__text">Stay tuned!</p>
+            </div>
         <% } else if(model.currentActiveRound !== null) { %>
             <% const isPaused = model.currentActiveRound.paused; %>
             <div class="row">

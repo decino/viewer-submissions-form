@@ -12,7 +12,7 @@ services:
             - NODE_ENV=production
             - BOT_URI=http://decino-bot:3000
         ports:
-            - "127.0.0.1:8081:8081"
+            - "127.0.0.1:4111:8081"
         volumes:
             - ./data:/home/node/app/data
             - ./customWads:/home/node/app/customWads

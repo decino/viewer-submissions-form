@@ -1,16 +1,32 @@
-version: '3.8'
+name: decino-submissions
+
 services:
-  server:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    image: tsed/server:latest
-    restart: always
-    ports:
-      - "8081:8081"
-    stdin_open: true  # -i
-    tty: true         # -t
+    decino-form:
+        build:
+            context: .
+            target: production
+        env_file:
+            - .env
+        environment:
+            - PORT=0.0.0.0:8081
+            - NODE_ENV=production
+            - BOT_URI=http://decino-bot:3000
+        ports:
+            - "127.0.0.1:8081:8081"
+        volumes:
+            - ./data:/home/node/app/data
+            - ./customWads:/home/node/app/customWads
+        depends_on:
+            - decino-bot
+        restart: unless-stopped
+
+    decino-bot:
+        build:
+            context: ../viewer-submissions-bot
+        env_file:
+            - ../viewer-submissions-bot/.env
+        environment:
+            - NODE_ENV=production
+            - API_SERVER_PORT=3000
+            - WEBAPP_BASEURL=http://decino-form:8081
+        restart: unless-stopped

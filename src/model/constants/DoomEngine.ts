@@ -1,7 +1,7 @@
 enum DOOM_ENGINE {
     UNKNOWN = -2,
     NA = 0,
-    GZDoom = -1,
+    UZDoom = -1,
     Doom = 3,
     DoomII = 2,
     FINAL_DOOM = 4,

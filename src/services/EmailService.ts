@@ -99,7 +99,7 @@ export class EmailService implements AfterInit {
                 await transporter.verify();
             } catch (e) {
                 this.logger.error(`Unable to connect to SMTP server: ${this.smtpHost}`);
-                throw new Error(e);
+                throw new Error(`Unable to connect to SMTP server: ${this.smtpHost}`, { cause: e });
             }
             this.logger.info(`Connected to SMTP server: ${this.smtpHost}:${this.smtpPort}`);
             return transporter;

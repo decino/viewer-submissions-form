@@ -5,8 +5,8 @@ function mapEngine(value) {
             return "I don't know";
         case "NA":
             return "N/A";
-        case "GZDoom":
-            return "GZDoom";
+        case "UZDoom":
+            return "GZDoom/UZDoom";
         case "Doom":
             return "Ultimate Doom";
         case "DoomII":
@@ -117,7 +117,7 @@ function getHtml() {
     </div>
     <% if(!isAdmin){ %>
         <div class="mb-3 hidden" id="gzActionsContainer">
-            <label class="d-block mb-2">If GZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
+            <label class="d-block mb-2">If GZDoom/UZDoom is required, am I allowed to jump, crouch, or mouse-look?</label>
             <% for(const key in model.gzActions) {
                 const value = model.gzActions[key];
                 const display = mapGzActions(value);

@@ -82,7 +82,7 @@ export class SubmissionModel extends AbstractModel {
     @Description("What game engine to use")
     @Example("Classic Doom")
     @Example("Boom")
-    @Example("GZDoom")
+    @Example("GZDoom/UZDoom")
     @Enum(DOOM_ENGINE)
     @Required()
     public wadEngine: DOOM_ENGINE;

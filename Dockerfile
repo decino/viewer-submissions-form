@@ -1,21 +1,19 @@
-FROM node:lts as base
+FROM node:lts AS base
 
 WORKDIR /home/node/app
 
 COPY package*.json ./
 
-RUN npm i
+RUN npm ci
 
 COPY . .
 
-FROM base as production
+FROM base AS production
 
-ENV NODE_PATH=./dist
+RUN npm run build && mkdir -p customWads data
 
-RUN npm run build
+ENV NODE_ENV=production
 
 EXPOSE 8081
-ENV PORT 8081
-ENV NODE_ENV production
 
-CMD [ "npm", "run" ,"start:prod" ]
+CMD ["sh", "-c", "node dist/db/runMigration.js && exec node dist/index.js"]

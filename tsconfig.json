@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "sourceRoot": "src",
     "rootDir": "src",
     "outDir": "dist",
@@ -11,11 +10,11 @@
     "declaration": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": false,
-    "suppressImplicitAnyIndexErrors": false,
     "noImplicitAny": true,
     "strictNullChecks": true,
+    "strictPropertyInitialization": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "allowSyntheticDefaultImports": true,
@@ -28,9 +27,8 @@
     "useDefineForClassFields": false,
     "skipLibCheck": true,
     "lib": [
-      "es7",
-      "dom",
-      "ESNext.AsyncIterable"
+      "ESNext",
+      "DOM"
     ],
     "typeRoots": [
       "./node_modules/@types"

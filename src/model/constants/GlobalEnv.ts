@@ -30,6 +30,8 @@ enum GlobalEnv {
     RATE_LIMIT_MS = `${prefix}RATE_LIMIT_MS`,
     REDIS_URI = `${prefix}REDIS_URI`,
     PROXY_BASE_URL = `${prefix}PROXY_BASE_URL`,
+    BOT_USER_EMAIL = `${prefix}BOT_USER_EMAIL`,
+    BOT_USER_PASSWORD = `${prefix}BOT_USER_PASSWORD`,
 }
 
 const mandatorySettings: GlobalEnv[] = [

@@ -3,8 +3,8 @@ import { Env } from "@tsed/core";
 import process from "process";
 
 export const envs = {
-    ...process.env,
     ...dotenv.config().parsed,
+    ...process.env,
 };
 
 const argv = process.argv.slice(2);

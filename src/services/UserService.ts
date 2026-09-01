@@ -1,4 +1,4 @@
-import { Inject, Service } from "@tsed/di";
+import { Constant, Inject, Service } from "@tsed/di";
 import { UserModel } from "../model/db/User.model.js";
 import argon2 from "argon2";
 import { CustomUserInfoModel } from "../model/auth/CustomUserInfoModel.js";
@@ -7,9 +7,16 @@ import { UserRepo } from "../db/repo/UserRepo.js";
 import { AfterInit } from "@tsed/common";
 import crypto from "node:crypto";
 import { Logger } from "@tsed/logger";
+import GlobalEnv from "../model/constants/GlobalEnv.js";
 
 @Service()
 export class UserService implements AfterInit {
+    @Constant(GlobalEnv.BOT_USER_EMAIL)
+    private readonly botUserEmail: string;
+
+    @Constant(GlobalEnv.BOT_USER_PASSWORD)
+    private readonly botUserPassword: string;
+
     public constructor(
         @Inject() private userRepo: UserRepo,
         @Inject() private logger: Logger,
@@ -44,12 +51,29 @@ export class UserService implements AfterInit {
             this.logger.info(
                 `New user created: email: "${email}" password: "${newPassword}" Please change this upon logging in!`,
             );
+        } else {
+            const entry = allUsers[0];
+            if (entry.email === email) {
+                this.logger.warn("Please change the default email/password!");
+            }
+        }
+
+        await this.ensureBotUser();
+    }
+
+    private async ensureBotUser(): Promise<void> {
+        if (!this.botUserEmail || !this.botUserPassword) {
             return;
         }
-        const entry = allUsers[0];
-        if (entry.email === email) {
-            this.logger.warn("Please change the default email/password!");
+
+        const existing = await this.userRepo.getUser(this.botUserEmail);
+        if (existing) {
+            return;
         }
+
+        const hashedPassword = await argon2.hash(this.botUserPassword);
+        await this.userRepo.createUser(this.botUserEmail, hashedPassword);
+        this.logger.info(`Bot user created: "${this.botUserEmail}"`);
     }
 
     private generatePassword(): string {

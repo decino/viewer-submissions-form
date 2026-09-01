@@ -9,3 +9,6 @@ ALLOWED_FILES=wad,pk3,zip
 ALLOWED_HEADERS=PWAD,PK,PK
 ALLOWED_FILES_ZIP=wad,txt
 ALLOWED_HEADERS_ZIP=PWAD,null
+BOT_URI=http://decino-bot:3000
+BOT_USER_EMAIL=bot@example.com
+BOT_USER_PASSWORD=YourBotPassword

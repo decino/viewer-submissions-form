@@ -169,7 +169,7 @@ Site.loadPage(async function(site) {
             const selectedOption = evt.target.options[evt.target.selectedIndex];
             const selectedValue = selectedOption.dataset.value;
             const gzActionsContainer = document.getElementById("gzActionsContainer");
-            if (selectedValue === "GZDoom") {
+            if (selectedValue === "UZDoom") {
                 site.display(false, gzActionsContainer);
             } else {
                 site.display(true, gzActionsContainer);

@@ -10,5 +10,5 @@ export const dataSource = new DataSource({
     entities: [`${path.dirname(fileURLToPath(import.meta.url))}/../model/db/**/*.model.{ts,js}`],
     synchronize: false,
     migrations: [`${path.dirname(fileURLToPath(import.meta.url))}/../migrations/*`],
-    database: "main.sqlite",
+    database: `${path.dirname(fileURLToPath(import.meta.url))}/../../data/main.sqlite`,
 });

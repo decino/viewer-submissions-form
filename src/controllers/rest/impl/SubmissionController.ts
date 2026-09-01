@@ -1,5 +1,5 @@
 import { Controller, Inject } from "@tsed/di";
-import { Delete, Get, Post, Returns, Security } from "@tsed/schema";
+import { CollectionOf, Delete, Get, Post, Returns, Security } from "@tsed/schema";
 import { StatusCodes } from "http-status-codes";
 import { SubmissionModel } from "../../../model/db/Submission.model.js";
 import { SubmissionService } from "../../../services/SubmissionService.js";
@@ -104,7 +104,10 @@ export class SubmissionController extends BaseRestController {
     @Authorize(["login", "basic"])
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
-    public async verifyEntries(@Res() res: PlatformResponse, @BodyParams() ids: number[]): Promise<unknown> {
+    public async verifyEntries(
+        @Res() res: PlatformResponse,
+        @BodyParams() @CollectionOf(Number) ids: number[],
+    ): Promise<unknown> {
         await this.submissionConfirmationService.verifySubmissions(ids);
         return super.doSuccess(res, `Entries have been verified.`);
     }
@@ -116,7 +119,7 @@ export class SubmissionController extends BaseRestController {
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async deleteEntry(
         @Res() res: PlatformResponse,
-        @BodyParams() ids: number[],
+        @BodyParams() @CollectionOf(Number) ids: number[],
         @QueryParams("notify") notify?: boolean,
     ): Promise<unknown> {
         const result = await this.submissionService.deleteEntries(ids, notify);

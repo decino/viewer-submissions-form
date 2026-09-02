@@ -9,6 +9,7 @@ import { BodyParams } from "@tsed/platform-params";
 import { WadValidationModel } from "../../../model/rest/wadValidationModel.js";
 import { Authorize } from "@tsed/passport";
 import { WadValidationService } from "../../../services/WadValidationService.js";
+import { getErrorMessage } from "../../../utils/Utils.js";
 
 @Controller("/utils")
 export class UtilsController extends BaseRestController {
@@ -24,7 +25,7 @@ export class UtilsController extends BaseRestController {
         try {
             return await this.corsProxyService.getHtml(url);
         } catch (e) {
-            throw new BadRequest(e.message);
+            throw new BadRequest(getErrorMessage(e));
         }
     }
 
@@ -36,7 +37,7 @@ export class UtilsController extends BaseRestController {
         try {
             return await this.wadValidationService.getValidationMappings();
         } catch (e) {
-            throw new BadRequest(e.message);
+            throw new BadRequest(getErrorMessage(e));
         }
     }
 
@@ -49,7 +50,7 @@ export class UtilsController extends BaseRestController {
         try {
             await this.wadValidationService.setValidation(payload);
         } catch (e) {
-            throw new BadRequest(e);
+            throw new BadRequest(getErrorMessage(e));
         }
     }
 }

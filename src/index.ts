@@ -6,6 +6,7 @@ import process from "process";
 import { Application } from "express";
 import { isGhAction } from "./config/envs/index.js";
 import { registerDatasource } from "./db/registerDatasource.js";
+import { getErrorMessage, getErrorStack } from "./utils/Utils.js";
 
 async function bootstrap(): Promise<void> {
     registerDatasource();
@@ -21,7 +22,7 @@ async function bootstrap(): Promise<void> {
         });
         await stopOnTest(platform, false);
     } catch (error) {
-        $log.error({ event: "SERVER_BOOTSTRAP_ERROR", message: error.message, stack: error.stack });
+        $log.error({ event: "SERVER_BOOTSTRAP_ERROR", message: getErrorMessage(error), stack: getErrorStack(error) });
         await stopOnTest(platform, true);
     }
 }

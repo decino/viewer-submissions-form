@@ -28,7 +28,10 @@ export class SubmissionRepo {
         return this.submissionDao.dataSource.transaction(async entityManager => {
             submission.submissionValid = true;
             const updatedEntry = await this.submissionDao.saveOrUpdateSubmission(submission, entityManager);
-            await this.submissionConfirmationDao.deleteConfirmation(confirmation, entityManager);
+
+            confirmation.confirmedAt = new Date();
+            await this.submissionConfirmationDao.createConfirmation(confirmation, entityManager);
+
             updatedEntry.confirmation = null;
             return updatedEntry;
         });

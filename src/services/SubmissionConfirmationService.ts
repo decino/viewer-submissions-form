@@ -1,7 +1,7 @@
 import { Constant, Inject, OnInit, Service } from "@tsed/di";
 import { PendingEntryConfirmationModel } from "../model/db/PendingEntryConfirmation.model.js";
 import { BadRequest, NotFound } from "@tsed/exceptions";
-import { SubmissionModel } from "../model/db/Submission.model.js";
+import { ConfirmationResult } from "../utils/typeings.js";
 import { EmailService } from "./EmailService.js";
 import { DiscordBotDispatcherService } from "./DiscordBotDispatcherService.js";
 import { SubmissionSocket } from "./socket/SubmissionSocket.js";
@@ -55,16 +55,22 @@ export class SubmissionConfirmationService implements OnInit {
         }
     }
 
-    public async processConfirmation(confirmationUid: UUID): Promise<SubmissionModel> {
+    public async processConfirmation(confirmationUid: UUID): Promise<ConfirmationResult> {
         const confirmation = await this.submissionConfirmationRepo.getConfirmation(confirmationUid);
         if (!confirmation) {
             throw new NotFound(`Unable to find submission with ID: ${confirmationUid}. It may have expired.`);
         }
+
+        if (confirmation.confirmedAt) {
+            this.logger.info(`submission with uid ${confirmationUid} was already confirmed`);
+            return { alreadyConfirmed: true };
+        }
+
         const updatedSubmission = await this.submissionRepo.validateSubmission(confirmation);
         this.logger.info(`submission with uid ${confirmationUid} has been validated`);
         // ignore promise
         this.discordBotDispatcherService.sendPendingSubmission(updatedSubmission);
-        return updatedSubmission;
+        return { alreadyConfirmed: false };
     }
 
     public async verifySubmissions(ids: number[]): Promise<void> {

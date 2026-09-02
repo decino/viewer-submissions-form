@@ -5,6 +5,7 @@ import { BadRequest } from "@tsed/exceptions";
 import { Logger } from "@tsed/logger";
 import { SubmissionRoundRepo } from "../db/repo/SubmissionRoundRepo.js";
 import { ScheduleService } from "./ScheduleService.js";
+import { getErrorMessage } from "../utils/Utils.js";
 
 @Service()
 export class SubmissionRoundService implements OnInit {
@@ -94,7 +95,7 @@ export class SubmissionRoundService implements OnInit {
         try {
             return this.submissionRoundRepo.pauseRound(pause);
         } catch (e) {
-            throw new BadRequest(e.message, e);
+            throw new BadRequest(getErrorMessage(e), e);
         }
     }
 

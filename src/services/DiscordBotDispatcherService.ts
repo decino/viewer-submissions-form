@@ -6,6 +6,7 @@ import { BotDownloadAuthenticationRepo } from "../db/repo/BotDownloadAuthenticat
 import { SubmissionRepo } from "../db/repo/SubmissionRepo.js";
 import RECORDED_FORMAT from "../model/constants/RecordedFormat.js";
 import DOOM_ENGINE from "../model/constants/DoomEngine.js";
+import { getErrorMessage } from "../utils/Utils.js";
 
 type SubmissionPayload = {
     wadName: string;
@@ -53,7 +54,7 @@ export class DiscordBotDispatcherService implements OnInit {
         try {
             await this.doPost("congratulations");
         } catch (e) {
-            this.logger.warn(`Unable to send entry to bot.`, e.message);
+            this.logger.warn(`Unable to send entry to bot.`, getErrorMessage(e));
         }
     }
 
@@ -70,7 +71,7 @@ export class DiscordBotDispatcherService implements OnInit {
         try {
             await this.doPost("postPendingValidationRequest", payload);
         } catch (e) {
-            this.logger.warn(`Unable to send entry to bot.`, e.message);
+            this.logger.warn(`Unable to send entry to bot.`, getErrorMessage(e));
         }
     }
 
@@ -91,7 +92,7 @@ export class DiscordBotDispatcherService implements OnInit {
         try {
             await this.doPost("postSubmission", payload);
         } catch (e) {
-            this.logger.warn(`Unable to send entry to bot.`, e.message);
+            this.logger.warn(`Unable to send entry to bot.`, getErrorMessage(e));
         }
     }
 

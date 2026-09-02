@@ -9,6 +9,7 @@ import { SuccessModel } from "../../../model/rest/SuccessModel.js";
 import { BadRequest, NotFound } from "@tsed/exceptions";
 import { Authorize } from "@tsed/passport";
 import { PathParams } from "@tsed/platform-params";
+import { getErrorMessage } from "../../../utils/Utils.js";
 
 @Controller("/submissionRound")
 export class SubmissionRoundController extends BaseRestController {
@@ -66,7 +67,7 @@ export class SubmissionRoundController extends BaseRestController {
                 return super.doSuccess(res, `Round ${roundId} has been deleted`);
             }
         } catch (e) {
-            throw new BadRequest(e.message);
+            throw new BadRequest(getErrorMessage(e));
         }
         throw new BadRequest("Unable to delete round");
     }

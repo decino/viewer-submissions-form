@@ -19,6 +19,7 @@ import EMAIL_TEMPLATE from "../model/constants/EmailTemplate.js";
 import STATUS from "../model/constants/STATUS.js";
 import { RunEvery } from "../model/di/decorators/Cron.js";
 import METHOD_EXECUTOR_TIME_UNIT from "../model/constants/METHOD_EXECUTOR_TIME_UNIT.js";
+import { getErrorMessage } from "../utils/Utils.js";
 
 @Service()
 export class SubmissionService {
@@ -67,7 +68,7 @@ export class SubmissionService {
                     this.logger.error(`Unable to delete file ${customWad.path}`);
                 }
             }
-            throw new BadRequest(e.message);
+            throw new BadRequest(getErrorMessage(e));
         }
         if (customWad) {
             try {
@@ -101,7 +102,7 @@ export class SubmissionService {
         try {
             await this.submissionRepo.setSubmissionStatus(status);
         } catch (e) {
-            throw new BadRequest(e.message, e);
+            throw new BadRequest(getErrorMessage(e), e);
         }
         if (status.status === STATUS.REJECTED) {
             const entry = await this.submissionRepo.retrieveSubmission(status.submissionId);
@@ -192,11 +193,7 @@ export class SubmissionService {
             }
         }
 
-        try {
-            await Promise.all(pArr);
-        } catch (e) {
-            throw new e();
-        }
+        await Promise.all(pArr);
 
         const remove = await this.submissionRepo.deleteSubmissions(submissionsToDelete);
         if (!remove) {

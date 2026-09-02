@@ -24,3 +24,7 @@ export type TurnstileResponse = CaptchaResponse & {
 export type HcaptchaResponse = CaptchaResponse;
 
 export type SettingsMap = Map<SETTING, string>;
+
+export type ConfirmationResult = {
+    alreadyConfirmed: boolean;
+};

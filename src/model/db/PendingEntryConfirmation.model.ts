@@ -14,6 +14,15 @@ export class PendingEntryConfirmationModel extends AbstractModel {
     })
     public confirmationUid: UUID;
 
+    @Name("confirmedAt")
+    @Description("When this confirmation was used, null if it is still pending")
+    @Column({
+        nullable: true,
+        type: "datetime",
+        default: null,
+    })
+    public confirmedAt: Date | null;
+
     @Name("submissionId")
     @Description("The submission this entry belongs to")
     @Example("1")

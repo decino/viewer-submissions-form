@@ -56,3 +56,11 @@ export class NetworkUtils {
 }
 
 export const wadDir = `${path.dirname(fileURLToPath(import.meta.url))}/../../customWads`;
+
+export function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
+
+export function getErrorStack(error: unknown): string | undefined {
+    return error instanceof Error ? error.stack : undefined;
+}

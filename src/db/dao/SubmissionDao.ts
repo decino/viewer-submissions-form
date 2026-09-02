@@ -3,7 +3,7 @@ import { AbstractDao } from "./AbstractDao.js";
 import { SubmissionModel } from "../../model/db/Submission.model.js";
 import { Logger } from "@tsed/logger";
 import { SQLITE_DATA_SOURCE } from "../../model/di/tokens.js";
-import { DataSource, EntityManager, In, LessThanOrEqual } from "typeorm";
+import { DataSource, EntityManager, In, IsNull, LessThanOrEqual } from "typeorm";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
@@ -101,6 +101,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
             where: {
                 submissionValid: false,
                 confirmation: {
+                    confirmedAt: IsNull(),
                     createdAt: LessThanOrEqual(new Date(Date.now() - 1200000)), // older than 20 mins
                 },
             },
@@ -118,7 +119,7 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
             .where("round.active = :active", { active: true })
             .orWhere("submission.isChosen = :isChosen AND round.active = :inactive", {
                 isChosen: true,
-                inactive: false
+                inactive: false,
             })
             .getMany();
     }

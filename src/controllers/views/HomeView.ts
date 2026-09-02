@@ -10,6 +10,7 @@ import type { UUID } from "crypto";
 import { WadValidationService } from "../../services/WadValidationService.js";
 import { CaptchaManager } from "../../manager/CaptchaManager.js";
 import CaptchaServices from "../../model/constants/CaptchaServices.js";
+import { getErrorMessage } from "../../utils/Utils.js";
 
 @Controller("/")
 export class HomeView {
@@ -68,9 +69,13 @@ export class HomeView {
             if (!uid) {
                 throw new NotFound("No UID supplied.");
             }
-            await this.submissionConfirmationService.processConfirmation(uid as UUID);
+            const result = await this.submissionConfirmationService.processConfirmation(uid as UUID);
+            if (result.alreadyConfirmed) {
+                retStre.message =
+                    "This submission has already been confirmed and is awaiting manual verification. There is nothing more for you to do.";
+            }
         } catch (e) {
-            retStre.message = e.message;
+            retStre.message = getErrorMessage(e);
             retStre.success = false;
         }
         return retStre;

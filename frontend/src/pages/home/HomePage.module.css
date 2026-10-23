@@ -1,0 +1,129 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.closed {
+    max-width: 60ch;
+}
+
+.roundName {
+    font: inherit;
+    overflow-wrap: anywhere;
+}
+
+.columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.main {
+    flex: 999 1 38rem;
+    min-width: 0;
+}
+
+.aside {
+    flex: 1 1 22rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+}
+
+.listPanel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.listPanel > :last-child {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.list {
+    flex: 1 1 0;
+    min-height: 10rem;
+    overflow-y: auto;
+    contain: size;
+}
+
+@media (max-width: 63.25rem) {
+    .list {
+        flex: none;
+        max-height: 28rem;
+        contain: none;
+    }
+}
+
+.contact {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.lamp,
+.lampLive {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--bevel-light);
+}
+
+.lampLive {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.35;
+    }
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-pit);
+    border: 2px solid;
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.table th {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.35rem;
+    text-align: left;
+    color: var(--text-muted);
+    padding: 0.35rem 0.75rem;
+    border-bottom: 2px solid var(--bevel-dark);
+}
+
+.table td {
+    padding: 0.45rem 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    overflow-wrap: anywhere;
+}
+
+.table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.number {
+    width: 3rem;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--red-bright);
+}
+
+.level {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    white-space: nowrap;
+    color: var(--gold);
+}

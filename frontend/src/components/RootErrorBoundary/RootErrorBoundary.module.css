@@ -1,0 +1,43 @@
+.page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.card {
+    max-width: 34rem;
+    padding: 1.5rem;
+    background: linear-gradient(var(--steel), var(--steel-dark));
+    border: 3px solid;
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--red-bright);
+    filter: drop-shadow(2px 2px 0 #000);
+}
+
+.blurb {
+    margin-top: 0.75rem;
+}
+
+.detail {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    color: var(--text-muted);
+    background: var(--bg-pit);
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}

@@ -1,7 +1,6 @@
 import { Constant, Inject, Service } from "@tsed/di";
 import { AfterInit, Logger } from "@tsed/common";
 import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
-import { Envelope } from "nodemailer/lib/mailer";
 import GlobalEnv from "../model/constants/GlobalEnv.js";
 import { createTestAccount, createTransport, Transporter } from "nodemailer";
 import { isProduction } from "../config/envs/index.js";
@@ -54,17 +53,14 @@ export class EmailService implements AfterInit {
     }
 
     public async sendMail(to: string, template: EMAIL_TEMPLATE, body?: string): Promise<SentMessageInfo> {
-        const env: Envelope = {
-            from: this.smtpFrom,
-            to,
-        };
         const mapping = this.emailTemplateMapping[template];
         if (!mapping.body && !body) {
             throw new Error("Unable to send email with no body");
         }
 
         const sentMail = await this.emailTransport.sendMail({
-            ...env,
+            from: this.smtpFrom,
+            to,
             text: body ?? mapping.body,
             replyTo: this.smtpReplyTo,
             sender: this.smtpFrom,
@@ -83,14 +79,12 @@ export class EmailService implements AfterInit {
                 host: this.smtpHost,
                 port: Number.parseInt(this.smtpPort),
                 secure: this.smtpSecure === "true",
+                requireTLS: this.smtpSecure !== "true",
                 auth: {
                     user: this.smtpUser,
                     pass: this.smtpPass,
                 },
                 debug: !isProduction,
-                tls: {
-                    rejectUnauthorized: false,
-                },
             });
             if (!this.smtpHost) {
                 throw new Error("No SMTP server has been defined.");
@@ -128,18 +122,6 @@ export class EmailService implements AfterInit {
     }
 
     private wasAccepted(sentMail: SentMessageInfo, emailSentTo: string): boolean {
-        const acceptedArr = sentMail.accepted;
-        for (const accepted of acceptedArr) {
-            if (typeof accepted === "string") {
-                if (accepted === emailSentTo) {
-                    return true;
-                }
-            } else {
-                if (accepted.address === emailSentTo) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return sentMail.accepted.includes(emailSentTo);
     }
 }

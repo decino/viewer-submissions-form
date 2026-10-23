@@ -1,0 +1,46 @@
+.panel {
+    background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+        linear-gradient(var(--steel), var(--steel-dark));
+    border: 3px solid;
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+        0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 1rem 0.4rem;
+    border-bottom: 2px solid var(--bevel-dark);
+    box-shadow: 0 1px 0 var(--bevel-light);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: var(--red);
+    background: linear-gradient(var(--red-bright), var(--red) 50%, var(--red-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(2px 2px 0 #000);
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.body {
+    padding: 1rem;
+}

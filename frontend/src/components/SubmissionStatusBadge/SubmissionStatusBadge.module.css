@@ -1,0 +1,8 @@
+.link {
+    display: inline-flex;
+    text-decoration: none;
+}
+
+.link:hover {
+    filter: brightness(1.2);
+}

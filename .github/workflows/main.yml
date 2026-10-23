@@ -8,8 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
           check-latest: true
@@ -20,11 +20,11 @@ jobs:
       - name: Compile TypeScript
         run: npm run tsc
 
-      - name: Run ESLint
+      - name: Run oxlint
         run: npm run lint
 
-      - name: Format with Prettier
-        run: npm run prettier
+      - name: Check oxfmt formatting
+        run: npm run format
 
       - name: Build application
         run: npm run build
@@ -37,3 +37,29 @@ jobs:
 
       - name: Start tests
         run: npm run start_js:ci
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Check oxfmt formatting
+        run: cd frontend && npm run format
+
+      - name: Run oxlint
+        run: cd frontend && npm run lint
+
+      - name: Run tests
+        run: cd frontend && npm run test:coverage
+
+      - name: Build frontend
+        run: cd frontend && npm run build

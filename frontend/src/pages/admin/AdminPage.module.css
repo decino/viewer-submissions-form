@@ -1,0 +1,38 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.sections {
+    display: flex;
+    flex-direction: column;
+}
+
+.tabRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0 1rem;
+    border-bottom: 3px solid var(--bevel-dark);
+    box-shadow: 0 1px 0 var(--bevel-light);
+}
+
+.tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0;
+    border-bottom: 0;
+    box-shadow: none;
+}
+
+.streaming {
+    flex: 0 0 11rem;
+    margin-left: auto;
+    padding-bottom: 0.15rem;
+}
+
+.content {
+    min-width: 0;
+    border-top: 0;
+}

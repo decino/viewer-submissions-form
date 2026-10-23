@@ -1,0 +1,76 @@
+.group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 0;
+}
+
+.legend {
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.segments {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 3px;
+    height: var(--control-height);
+    padding: 3px;
+    background: var(--bevel-dark);
+    border: 2px solid;
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.segment,
+.picked {
+    display: flex;
+    align-items: center;
+    padding: 0 1.1rem;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 2px solid;
+}
+
+.segment {
+    color: var(--text-muted);
+    background: linear-gradient(var(--steel), var(--steel-dark));
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+    transition: color 0.15s var(--ease-out);
+}
+
+.segment:hover {
+    color: var(--text);
+}
+
+.picked {
+    color: var(--gold);
+    background: var(--bg-pit);
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+    text-shadow: 0 0 8px rgba(var(--gold-rgb), 0.45);
+}
+
+.segment:has(.input:focus-visible),
+.picked:has(.input:focus-visible) {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.group:disabled .segment,
+.group:disabled .picked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}

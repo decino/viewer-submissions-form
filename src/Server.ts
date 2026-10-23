@@ -1,5 +1,5 @@
 import { Configuration, Constant, Inject } from "@tsed/di";
-import type { BeforeRoutesInit } from "@tsed/common";
+import type { AfterRoutesInit, BeforeRoutesInit } from "@tsed/common";
 import { PlatformApplication } from "@tsed/common";
 import "@tsed/platform-express";
 import "@tsed/ajv";
@@ -13,9 +13,6 @@ import "./protocols/index.js";
 import "./filters/index.js";
 import "./engine/impl/index.js";
 import * as rest from "./controllers/rest/index.js";
-import * as views from "./controllers/views/index.js";
-import * as secureViews from "./controllers/secureViews/index.js";
-// import * as secureViews from "./controllers/secureViews";
 // custom index imports end
 import { config } from "./config/index.js";
 import { CustomUserInfoModel } from "./model/auth/CustomUserInfoModel.js";
@@ -34,8 +31,10 @@ import { SessionModel } from "./model/db/Session.model.js";
 import compression from "compression";
 import GlobalEnv from "./model/constants/GlobalEnv.js";
 import path from "node:path";
-import rateLimit from "express-rate-limit";
-import { LRUCache } from "lru-cache";
+import fs from "node:fs";
+import type { ServerResponse } from "node:http";
+import type { NextFunction, Request, Response } from "express";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { fileURLToPath } from "node:url";
 import { ExpressRateLimitTypeOrmStore } from "typeorm-rate-limit-store";
 import { ExpressRateLimitStoreModel } from "./model/db/ExpressRateLimitStore.model.js";
@@ -43,6 +42,13 @@ import { Exception, TooManyRequests } from "@tsed/exceptions";
 import { Logger } from "@tsed/logger";
 import { DefaultRenderException } from "./model/rest/DefaultRenderException.js";
 import { NetworkUtils, wadDir } from "./utils/Utils.js";
+
+const frontendDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "static");
+
+function setStaticCacheHeaders(res: ServerResponse, filePath: string): void {
+    const hashedAsset = filePath.split(path.sep).includes("assets");
+    res.setHeader("Cache-Control", hashedAsset ? "public, max-age=31536000, immutable" : "no-cache");
+}
 
 const opts: Partial<TsED.Configuration> = {
     ...config,
@@ -59,36 +65,19 @@ const opts: Partial<TsED.Configuration> = {
         limits: {
             fileSize: Number.parseInt(process.env.FILE_SIZE_UPLOAD_LIMIT_MB as string) * 1048576,
         },
-        preservePath: true,
     },
     passport: {
         userInfoModel: CustomUserInfoModel,
     },
     mount: {
         "/rest": [...Object.values(rest)],
-        "/": [...Object.values(views)],
-        "/secure": [...Object.values(secureViews)],
     },
     statics: {
-        "/assets": [
+        "/": [
             {
-                root: `${path.dirname(fileURLToPath(import.meta.url))}/public/assets`,
-            },
-        ],
-        "/tos": [
-            {
-                root: `${path.dirname(fileURLToPath(import.meta.url))}/public/tos.html`,
-            },
-        ],
-        "/favicon.ico": [
-            {
-                // for safari...
-                root: `${path.dirname(fileURLToPath(import.meta.url))}/public/assets/custom/images/favicon.ico`,
-            },
-        ],
-        "/robots.txt": [
-            {
-                root: `${path.dirname(fileURLToPath(import.meta.url))}/public/robots.txt`,
+                root: frontendDir,
+                index: false,
+                setHeaders: setStaticCacheHeaders,
             },
         ],
     },
@@ -119,26 +108,15 @@ const opts: Partial<TsED.Configuration> = {
         }),
         compression(),
     ],
-    views: {
-        root: `${path.dirname(fileURLToPath(import.meta.url))}/public`,
-        viewEngine: "ejs",
-        extensions: {
-            ejs: "ejs",
-        },
-        options: {
-            ejs: {
-                rmWhitespace: false,
-                cache: isProduction ? LRUCache : null,
-            },
-        },
-    },
     exclude: ["**/*.spec.ts"],
 };
 
 await initRedis();
 
 @Configuration(opts)
-export class Server implements BeforeRoutesInit {
+export class Server implements BeforeRoutesInit, AfterRoutesInit {
+    @Constant(GlobalEnv.BASE_URL)
+    private readonly baseUrl: string;
     @Constant(GlobalEnv.SESSION_KEY)
     private readonly sessionKey: string;
     @Constant(GlobalEnv.HTTPS)
@@ -160,6 +138,16 @@ export class Server implements BeforeRoutesInit {
         if (isProduction) {
             this.app.getApp().set("trust proxy", 1);
         }
+        this.app.use((request: Request, response: Response, next: NextFunction) => {
+            response.on("close", () => {
+                for (const file of Object.values(request.files ?? {}).flat()) {
+                    fs.promises.rm(file.path, { force: true }).catch((error: unknown) => {
+                        this.logger.error(`Unable to delete file ${file.path}`, error);
+                    });
+                }
+            });
+            next();
+        });
         if (this.sessionKey) {
             this.app.use(
                 session({
@@ -199,10 +187,10 @@ export class Server implements BeforeRoutesInit {
                         if (request?.$ctx?.request?.request?.session?.passport) {
                             return true;
                         }
-                        return request.path.includes("/secure");
+                        return request.path.startsWith("/assets/");
                     },
                     keyGenerator: request => {
-                        return NetworkUtils.getIp(request);
+                        return ipKeyGenerator(NetworkUtils.getIp(request));
                     },
                     store: new ExpressRateLimitTypeOrmStore(this.ds.getRepository(ExpressRateLimitStoreModel)),
                 }),
@@ -211,6 +199,26 @@ export class Server implements BeforeRoutesInit {
         if (this.redisUrl) {
             this.logger.info(`Connected IO to redis at ${this.redisUrl}`);
         }
+    }
+
+    public $afterRoutesInit(): void {
+        const indexFile = path.join(frontendDir, "index.html");
+        if (!fs.existsSync(indexFile)) {
+            this.logger.warn(`No frontend build found at ${indexFile}, build the frontend to serve the site`);
+            return;
+        }
+
+        const indexHtml = fs.readFileSync(indexFile, "utf8").replaceAll("__BASE_URL__", this.baseUrl);
+        this.app.use((request: Request, response: Response, next: NextFunction) => {
+            const isPageRequest = request.method === "GET" || request.method === "HEAD";
+            if (!isPageRequest || request.path.startsWith("/rest") || path.extname(request.path) !== "") {
+                next();
+                return;
+            }
+
+            response.setHeader("Cache-Control", "no-cache");
+            response.type("html").send(indexHtml);
+        });
     }
 
     private parseError(error: Exception): DefaultRenderException {

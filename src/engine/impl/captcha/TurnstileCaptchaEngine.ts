@@ -14,6 +14,9 @@ export class TurnstileCaptchaEngine extends AbstractCaptchaEngine<TurnstileRespo
     @Constant(GlobalEnv.CAPTCHA_SECRET_KEY)
     private readonly turnstileSecretKey: string;
 
+    @Constant(GlobalEnv.CAPTCHA_SITE_KEY)
+    private readonly turnstileSiteKey: string;
+
     public constructor(@Inject() logger: Logger) {
         super(CaptchaServices.TURNSTILE, logger);
     }
@@ -24,6 +27,10 @@ export class TurnstileCaptchaEngine extends AbstractCaptchaEngine<TurnstileRespo
 
     protected override get secretKey(): string {
         return this.turnstileSecretKey;
+    }
+
+    public override get siteKey(): string {
+        return this.turnstileSiteKey;
     }
 
     protected override get baseUrl(): string {

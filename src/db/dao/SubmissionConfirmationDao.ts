@@ -32,7 +32,11 @@ export class SubmissionConfirmationDao extends AbstractDao<PendingEntryConfirmat
             where: {
                 confirmationUid,
             },
-            relations: ["submission", "submission.submissionRound"],
+            relations: {
+                submission: {
+                    submissionRound: true,
+                },
+            },
         });
     }
 

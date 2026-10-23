@@ -1,0 +1,84 @@
+.hud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bevel-dark);
+    border: 3px solid;
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.cell,
+.wideCell {
+    flex: 1 1 10rem;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+    min-height: 6.5rem;
+    padding: 0.6rem 0.75rem;
+    background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+        linear-gradient(var(--steel), var(--steel-dark));
+    border: 2px solid;
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.wideCell {
+    flex: 2 1 20rem;
+    align-items: flex-start;
+    padding-inline: 1.25rem;
+}
+
+.wideCell .value {
+    justify-content: flex-start;
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    text-align: left;
+}
+
+.label {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.6rem;
+    font-family: var(--font-display);
+    line-height: 0.9;
+    text-align: center;
+    filter: drop-shadow(3px 3px 0 #000);
+    overflow-wrap: anywhere;
+}
+
+.large {
+    font-size: 4rem;
+}
+
+.small {
+    font-size: 2rem;
+}
+
+.red {
+    color: var(--red);
+    background: linear-gradient(var(--red-bright), var(--red) 55%, var(--red-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.gold {
+    color: var(--gold);
+}
+
+.green {
+    color: var(--green);
+}

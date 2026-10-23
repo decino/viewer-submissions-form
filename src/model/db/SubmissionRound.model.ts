@@ -1,7 +1,7 @@
 import xss from "xss";
 import { AbstractModel } from "./AbstractModel.js";
 import { BeforeInsert, Column, Entity, Index, OneToMany } from "typeorm";
-import { Description, Name } from "@tsed/schema";
+import { CollectionOf, Description, Name } from "@tsed/schema";
 import { SubmissionModel } from "./Submission.model.js";
 
 @Entity()
@@ -40,6 +40,7 @@ export class SubmissionRoundModel extends AbstractModel {
 
     @Name("submissions")
     @Description("List of submissions that belong to this round")
+    @CollectionOf(SubmissionModel)
     @OneToMany(() => SubmissionModel, submissions => submissions.submissionRound, {
         cascade: true,
         eager: true,

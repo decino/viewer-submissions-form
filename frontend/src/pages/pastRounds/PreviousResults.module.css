@@ -1,0 +1,15 @@
+.others {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.othersTitle {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: var(--gold);
+    filter: drop-shadow(2px 2px 0 #000);
+}

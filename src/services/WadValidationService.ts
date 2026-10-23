@@ -1,21 +1,28 @@
-import { Inject, Service } from "@tsed/di";
+import { Constant, Inject, Service } from "@tsed/di";
+import GlobalEnv from "../model/constants/GlobalEnv.js";
 import { WadValidationModel } from "../model/rest/wadValidationModel.js";
 import SETTING from "../model/constants/Settings.js";
 import { SettingsService } from "./SettingsService.js";
 import { type PlatformMulterFile } from "@tsed/platform-multer";
 import { AfterInit, Logger } from "@tsed/common";
 import fs from "fs";
+import zlib from "node:zlib";
 import { BadRequest } from "@tsed/exceptions";
 import AdmZip, { IZipEntry } from "adm-zip";
 import { SettingsMap } from "../utils/typeings.js";
 
 @Service()
 export class WadValidationService implements AfterInit {
+    private static readonly ZIP_METHOD_STORED = 0;
+
     @Inject()
     private settingsService: SettingsService;
 
     @Inject()
     private logger: Logger;
+
+    @Constant(GlobalEnv.FILE_SIZE_UPLOAD_LIMIT_MB)
+    private readonly fileSizeLimit: string;
 
     // map of file extension to header BOM
     private allowedFilesMap: Map<string, string | null> = new Map();
@@ -25,6 +32,10 @@ export class WadValidationService implements AfterInit {
 
     public get allowedFiles(): string[] {
         return [...this.allowedFilesMap.keys()];
+    }
+
+    public get fileSizeLimitMb(): number {
+        return Number.parseInt(this.fileSizeLimit);
     }
 
     public async $afterInit(): Promise<void> {
@@ -206,19 +217,33 @@ export class WadValidationService implements AfterInit {
             const fileName = entry.entryName;
             this.checkFileExt(fileName, true);
             const fileExt = this.getFileExt(fileName);
-            const buff = await this.getZipData(entry);
+            const buff = await this.readZipEntryHeader(entry);
             this.checkHeaders(buff, true, fileExt);
         }
     }
 
-    private getZipData(entry: IZipEntry): Promise<Buffer> {
+    private readZipEntryHeader(entry: IZipEntry): Promise<Buffer> {
+        const compressedData = entry.getCompressedData();
+        if (entry.header.method === WadValidationService.ZIP_METHOD_STORED) {
+            return Promise.resolve(compressedData.subarray(0, 4));
+        }
+
         return new Promise((resolve, reject) => {
-            entry.getDataAsync((data, err) => {
-                if (err) {
-                    return reject(err);
+            const chunks: Buffer[] = [];
+            const inflater = zlib.createInflateRaw();
+            inflater.on("data", (chunk: Buffer) => {
+                chunks.push(chunk);
+                const header = Buffer.concat(chunks);
+                if (header.length >= 4) {
+                    inflater.destroy();
+                    resolve(header.subarray(0, 4));
                 }
-                return resolve(data);
             });
+            inflater.on("end", () => {
+                resolve(Buffer.concat(chunks));
+            });
+            inflater.on("error", reject);
+            inflater.end(compressedData);
         });
     }
 }

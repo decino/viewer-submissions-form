@@ -2,7 +2,7 @@ import { Constant, Inject, Service } from "@tsed/di";
 import { UserModel } from "../model/db/User.model.js";
 import argon2 from "argon2";
 import { CustomUserInfoModel } from "../model/auth/CustomUserInfoModel.js";
-import { Unauthorized } from "@tsed/exceptions";
+import { BadRequest, Unauthorized } from "@tsed/exceptions";
 import { UserRepo } from "../db/repo/UserRepo.js";
 import { AfterInit } from "@tsed/common";
 import crypto from "node:crypto";
@@ -17,6 +17,8 @@ export class UserService implements AfterInit {
     @Constant(GlobalEnv.BOT_USER_PASSWORD)
     private readonly botUserPassword: string;
 
+    private dummyHash: string;
+
     public constructor(
         @Inject() private userRepo: UserRepo,
         @Inject() private logger: Logger,
@@ -25,10 +27,15 @@ export class UserService implements AfterInit {
     public async getUser(email: string, password: string): Promise<UserModel | null> {
         const userObject = await this.userRepo.getUser(email);
         // use safe timings compare to verify the hash matches
-        if (!userObject || !(await argon2.verify(userObject.password, password))) {
+        const passwordMatches = await argon2.verify(userObject?.password ?? this.dummyHash, password);
+        if (!userObject || !passwordMatches) {
             return null;
         }
         return userObject;
+    }
+
+    public isBotUser(user: UserModel): boolean {
+        return user.email === this.botUserEmail;
     }
 
     public async changeDetails(newModel: UserModel, loggedInUser: CustomUserInfoModel): Promise<UserModel> {
@@ -36,12 +43,20 @@ export class UserService implements AfterInit {
         if (!userObject) {
             throw new Unauthorized("You are not logged in");
         }
+
+        const emailOwner = await this.userRepo.getUser(newModel.email);
+        if (emailOwner && emailOwner.id !== userObject.id) {
+            throw new BadRequest("That email is already in use");
+        }
+
         userObject.email = newModel.email;
         userObject.password = await argon2.hash(newModel.password);
         return this.userRepo.updateUser(userObject);
     }
 
     public async $afterInit(): Promise<void> {
+        this.dummyHash = await argon2.hash(this.generatePassword());
+
         const allUsers = await this.userRepo.getAllUsers();
         const email = "foo@example.com";
         if (!allUsers || allUsers.length === 0) {
@@ -67,11 +82,18 @@ export class UserService implements AfterInit {
         }
 
         const existing = await this.userRepo.getUser(this.botUserEmail);
-        if (existing) {
+        if (existing && (await argon2.verify(existing.password, this.botUserPassword))) {
             return;
         }
 
         const hashedPassword = await argon2.hash(this.botUserPassword);
+        if (existing) {
+            existing.password = hashedPassword;
+            await this.userRepo.updateUser(existing);
+            this.logger.info(`Bot user password updated: "${this.botUserEmail}"`);
+            return;
+        }
+
         await this.userRepo.createUser(this.botUserEmail, hashedPassword);
         this.logger.info(`Bot user created: "${this.botUserEmail}"`);
     }

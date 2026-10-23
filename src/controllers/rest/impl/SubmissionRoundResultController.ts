@@ -1,6 +1,6 @@
 import { Controller, Inject } from "@tsed/di";
 import { BaseRestController } from "../BaseRestController.js";
-import { Get, Integer, Post, Returns, Security } from "@tsed/schema";
+import { Get, Integer, Post, Required, Returns, Security } from "@tsed/schema";
 import { StatusCodes } from "http-status-codes";
 import { PlatformResponse, QueryParams, Res } from "@tsed/common";
 import { SubmissionModel } from "../../../model/db/Submission.model.js";
@@ -16,7 +16,7 @@ export class SubmissionRoundResultController extends BaseRestController {
     private submissionRoundResultService: SubmissionRoundResultService;
 
     @Get("/generateEntries")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @(Returns(StatusCodes.OK, Array).Of(SubmissionModel))
     public generateEntries(@Res() res: PlatformResponse, @QueryParams("count") count?: number): unknown {
@@ -24,7 +24,7 @@ export class SubmissionRoundResultController extends BaseRestController {
     }
 
     @Post("/buildResultSet")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     public async buildResultSet(@Res() res: PlatformResponse): Promise<unknown> {
@@ -33,7 +33,7 @@ export class SubmissionRoundResultController extends BaseRestController {
     }
 
     @Post("/submitEntries")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     public async submitEntries(
@@ -45,10 +45,10 @@ export class SubmissionRoundResultController extends BaseRestController {
     }
 
     @Post("/addRandomEntry")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SubmissionModel)
-    public async addRandomEntry(@QueryParams("roundId") roundId: number): Promise<unknown> {
+    public async addRandomEntry(@Required() @QueryParams("roundId") roundId: number): Promise<unknown> {
         const entryAdded = await this.submissionRoundResultService.addRandomEntry(roundId);
         if (!entryAdded) {
             throw new BadRequest("No more submissions to pick from");

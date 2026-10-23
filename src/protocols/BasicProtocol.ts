@@ -14,7 +14,7 @@ export class BasicProtocol implements OnVerify {
 
     public async $onVerify(@Arg(0) email: string, @Arg(1) password: string): Promise<UserModel | false> {
         const user = await this.usersService.getUser(email, password);
-        if (!user) {
+        if (!user || !this.usersService.isBotUser(user)) {
             return false;
         }
         return user;

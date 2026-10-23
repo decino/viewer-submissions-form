@@ -1,0 +1,108 @@
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    width: 100%;
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    padding: 1.75rem 1rem 0.5rem;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 4.5rem);
+    line-height: 0.85;
+    letter-spacing: 0.02em;
+    color: var(--red);
+    background: linear-gradient(var(--red-bright), var(--red) 45%, var(--red-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(4px 4px 0 #000);
+}
+
+.subtitle {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    filter: drop-shadow(2px 2px 0 #000);
+}
+
+.brand:hover .title {
+    filter: drop-shadow(4px 4px 0 #000) drop-shadow(0 0 10px rgba(var(--red-rgb), 0.5));
+}
+
+.nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.75rem;
+    padding-bottom: 0.4rem;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+}
+
+.action {
+    padding: 0;
+    background: none;
+    border: 0;
+}
+
+.action:hover {
+    background: none;
+}
+
+.action:active .label {
+    color: var(--red-bright);
+}
+
+.item::before {
+    content: "";
+    width: 0.8rem;
+    height: 0.95rem;
+    background: linear-gradient(var(--red-bright), var(--red) 55%, var(--red-dark));
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    filter: drop-shadow(2px 2px 0 #000);
+    visibility: hidden;
+}
+
+.item[aria-current="page"]::before,
+.item:hover::before,
+.item:focus-visible::before {
+    visibility: visible;
+}
+
+.label {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    transition: color 0.15s var(--ease-out);
+}
+
+.item:hover .label {
+    color: var(--text);
+}
+
+.item[aria-current="page"] .label {
+    color: var(--red);
+    background: linear-gradient(var(--red-bright), var(--red) 50%, var(--red-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(2px 2px 0 #000);
+}

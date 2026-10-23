@@ -29,7 +29,11 @@ export class BotDownloadAuthenticationDao extends AbstractDao<BotDownloadAuthent
             where: {
                 token,
             },
-            relations: ["submission", "submission.submissionRound"],
+            relations: {
+                submission: {
+                    submissionRound: true,
+                },
+            },
         });
     }
 

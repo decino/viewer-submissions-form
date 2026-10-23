@@ -19,10 +19,13 @@ import { UserService } from "../services/UserService.js";
 export class LoginLocalProtocol implements OnVerify {
     public constructor(@Inject() private usersService: UserService) {}
 
-    public async $onVerify(@BodyParams() credentials: UserModel): Promise<UserModel | false> {
-        const { email, password } = credentials;
-        const user = await this.usersService.getUser(email, password);
-        if (!user) {
+    public async $onVerify(@BodyParams() credentials?: UserModel): Promise<UserModel | false> {
+        if (!credentials?.email || !credentials.password) {
+            return false;
+        }
+
+        const user = await this.usersService.getUser(credentials.email, credentials.password);
+        if (!user || this.usersService.isBotUser(user)) {
             return false;
         }
         return user;

@@ -1,0 +1,55 @@
+.input {
+    min-width: 0;
+    min-height: var(--control-height);
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--bg-pit);
+    border: 2px solid;
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+    transition:
+        border-color 0.15s var(--ease-out),
+        box-shadow 0.15s var(--ease-out);
+}
+
+.input:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+    box-shadow: 0 0 8px rgba(var(--gold-rgb), 0.35);
+}
+
+.input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+.input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input[readonly] {
+    color: var(--text-muted);
+}
+
+.input[type="file"] {
+    padding: 0.35rem 0.5rem;
+}
+
+.input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.1rem 0.7rem;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--text);
+    background: var(--steel);
+    border: 2px solid;
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+    cursor: pointer;
+}
+
+.fullWidth {
+    width: 100%;
+    max-width: 100%;
+}

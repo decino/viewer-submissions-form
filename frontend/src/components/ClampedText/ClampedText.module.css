@@ -1,0 +1,9 @@
+.text {
+    min-width: 12rem;
+    max-width: 24rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    white-space: pre-wrap;
+}

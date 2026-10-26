@@ -21,8 +21,11 @@ export class SubmissionRoundResultService {
     // Map of wad names to an array of submissions
     private readonly entryCache: Map<string, SubmissionModel[]> = new Map();
 
+    private cacheBuilt = false;
+
     public async buildResultSet(entries?: SubmissionModel[]): Promise<void> {
         this.entryCache.clear();
+        this.cacheBuilt = false;
         let allEntries: SubmissionModel[];
         if (entries) {
             allEntries = entries;
@@ -49,26 +52,29 @@ export class SubmissionRoundResultService {
                 this.entryCache.set(wadIdentifier, [entry]);
             }
         }
+        this.cacheBuilt = true;
     }
 
     public generateEntries(count: number): SubmissionModel[] {
-        if (this.entryCache.size === 0) {
+        if (!this.cacheBuilt) {
             throw new Error("Unable to generate entries as the cache has not been built.");
         }
 
         // get a random unique array of wad names
         const wadNames = this.getMultipleRandom([...this.entryCache.keys()], count);
 
-        // transform the wad names above into actual submissions (maps)
-        const chosenEntries = wadNames.flatMap(wadName => this.entryCache.get(wadName) ?? []);
-
-        // get a unique random array of the maps from above
-        const results = this.getMultipleRandom(chosenEntries, count);
-
-        // remove that wad from the result set, only one wad is allowed
+        const results: SubmissionModel[] = [];
         for (const wadName of wadNames) {
+            // transform the wad name into one random submission (map) of that wad
+            const [entry] = this.getMultipleRandom(this.entryCache.get(wadName) ?? [], 1);
+            if (entry) {
+                results.push(entry);
+            }
+
+            // remove that wad from the result set, only one wad is allowed
             this.entryCache.delete(wadName);
         }
+
         return results;
     }
 
@@ -109,6 +115,7 @@ export class SubmissionRoundResultService {
             await this.submissionRoundService.endActiveSubmissionRound();
         }
         this.entryCache.clear();
+        this.cacheBuilt = false;
     }
 
     public async getAllSubmissionRoundResults(): Promise<SubmissionRoundModel[]> {
@@ -134,12 +141,19 @@ export class SubmissionRoundResultService {
         );
 
         await this.buildResultSet(filteredSubmissions);
-        const entry = this.generateEntries(1)[0];
+        const [entry] = this.generateEntries(1);
+        if (!entry) {
+            return null;
+        }
         await this.submitEntries([entry.id], round, true);
         return entry;
     }
 
     private getMultipleRandom<T>(array: T[], num = -1): T[] {
+        if (num === 1 && array.length > 0) {
+            return [array[Math.floor(Math.random() * array.length)]];
+        }
+
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));

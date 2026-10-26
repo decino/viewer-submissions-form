@@ -20,7 +20,7 @@ export class UtilsController extends BaseRestController {
     private wadValidationService: WadValidationService;
 
     @Get("/corsProxy")
-    @Returns(StatusCodes.OK, String)
+    @(Returns(StatusCodes.OK, String).ContentType("text/plain"))
     public async corsProxy(@QueryParams("url") url: string): Promise<unknown> {
         try {
             return await this.corsProxyService.getHtml(url);
@@ -30,7 +30,7 @@ export class UtilsController extends BaseRestController {
     }
 
     @Get("/wadValidation")
-    @Authorize(["login"])
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, WadValidationModel)
     public async getWadValidation(): Promise<WadValidationModel> {
@@ -42,7 +42,7 @@ export class UtilsController extends BaseRestController {
     }
 
     @Post("/wadValidation")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK)
     @(Returns(StatusCodes.BAD_REQUEST, BadRequest).Description("If the payload fails validation"))

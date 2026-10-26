@@ -79,13 +79,15 @@ export class SubmissionService {
             }
             entry.wadURL = null;
             entry.customWadFileName = customWad.originalname;
+        } else {
+            entry.customWadFileName = null;
         }
         entry.submissionRoundId = currentActiveRound.id;
-        const saveEntry = await this.submissionRepo.saveOrUpdateSubmission(entry);
+        const saveEntry = await this.submissionRepo.createSubmission(entry);
         if (customWad) {
             await this.customWadEngine.moveWad(saveEntry.id, customWad, currentActiveRound.id);
         }
-        saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(entry.id);
+        saveEntry.confirmation = await this.submissionConfirmationService.generateConfirmationEntry(saveEntry.id);
         return saveEntry;
     }
 

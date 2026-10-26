@@ -1,0 +1,109 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.intro {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-width: 70ch;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 6vw, 3.2rem);
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: var(--red);
+    background: linear-gradient(var(--red-bright), var(--red) 50%, var(--red-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(3px 3px 0 #000);
+}
+
+.note {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.well {
+    overflow-x: auto;
+    background: var(--bg-pit);
+    border: 2px solid;
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.table {
+    width: 100%;
+    min-width: 32rem;
+    border-collapse: collapse;
+}
+
+.table th {
+    padding: 0.4rem 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.3rem;
+    text-align: left;
+    white-space: nowrap;
+    color: var(--text-muted);
+    background: var(--steel-dark);
+    border-bottom: 2px solid var(--bevel-dark);
+}
+
+.table td {
+    padding: 0.4rem 0.6rem;
+    vertical-align: middle;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.extension {
+    width: 22%;
+}
+
+.zip {
+    width: 8rem;
+}
+
+.remove {
+    width: 3.5rem;
+}
+
+.hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.add {
+    margin-top: 0.75rem;
+}
+
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.unsaved {
+    font-weight: 600;
+    color: var(--gold);
+}

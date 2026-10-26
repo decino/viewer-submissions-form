@@ -1,0 +1,28 @@
+.tabs {
+    display: flex;
+    flex-direction: column;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+.started {
+    color: var(--text-muted);
+}
+
+.toggle {
+    width: 100%;
+    max-width: 16rem;
+}

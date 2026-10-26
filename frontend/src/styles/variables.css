@@ -1,0 +1,29 @@
+:root {
+    --bg-void: #120e0b;
+    --bg-pit: #1a1511;
+    --steel: #4a4238;
+    --steel-dark: #322c25;
+    --bevel-light: #7a6f60;
+    --bevel-dark: #1c1814;
+    --red: #c8211b;
+    --red-bright: #ff5a36;
+    --red-dark: #6e0e09;
+    --gold: #e3b341;
+    --gold-dark: #9c7522;
+    --green: #6fbf3f;
+    --blue: #4f7fe0;
+    --text: #e9dfcc;
+    --text-muted: #a69a88;
+
+    --red-rgb: 200, 33, 27;
+    --gold-rgb: 227, 179, 65;
+    --green-rgb: 111, 191, 63;
+    --blue-rgb: 79, 127, 224;
+
+    --font-display: "Jersey 10", "Impact", sans-serif;
+    --font-body: "Chakra Petch", "Segoe UI", sans-serif;
+    --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+    --page-max-width: 1200px;
+    --control-height: 2.5625rem;
+}

@@ -1,6 +1,6 @@
 import { AbstractModel } from "./AbstractModel.js";
 import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from "typeorm";
-import { Any, Description, Enum, Example, Format, Name, Nullable, Required } from "@tsed/schema";
+import { Any, Description, Enum, Example, Format, Groups, Name, Nullable, Property, Required } from "@tsed/schema";
 import GZDOOM_ACTIONS from "../constants/GZDoomActions.js";
 import type { SubmissionRoundModel } from "./SubmissionRound.model.js";
 import DOOM_ENGINE from "../constants/DoomEngine.js";
@@ -48,6 +48,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true,
         type: "text",
     })
+    @Groups("admin")
     @Name("playTestEngine")
     @Description("The type of engine to use for the play test")
     @Required()
@@ -58,6 +59,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true,
         type: "text",
     })
+    @Groups("admin")
     @Name("WAD")
     @Description("The URL of the wad")
     @Example("https://www.doomworld.com/idgames/levels/doom2/Ports/megawads/sunlust")
@@ -78,6 +80,7 @@ export class SubmissionModel extends AbstractModel {
         type: "integer",
         nullable: false,
     })
+    @Groups("admin")
     @Name("engine")
     @Description("What game engine to use")
     @Example("Classic Doom")
@@ -92,6 +95,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true,
         default: null,
     })
+    @Groups("admin")
     @Name("gzDoomAction")
     @Description("GZDoom parameters")
     @Example("mouselook, crouch")
@@ -115,6 +119,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         default: false,
     })
+    @Groups("admin")
     @Name("author")
     @Description("Did you make this map?")
     @Example("yes")
@@ -124,6 +129,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         default: false,
     })
+    @Groups("admin")
     @Name("distributable")
     @Description("If you made this, am I allowed to distribute it to the public?")
     @Example("yes")
@@ -134,6 +140,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true,
         type: "text",
     })
+    @Groups("admin")
     @Name("info")
     @Description("Additional info")
     @Example("This wad was made in 4 years")
@@ -163,6 +170,7 @@ export class SubmissionModel extends AbstractModel {
         nullable: true,
         type: "text",
     })
+    @Groups("admin")
     @Name("customWad")
     @Description("The custom wad to play")
     @Nullable(String)
@@ -180,6 +188,7 @@ export class SubmissionModel extends AbstractModel {
     @Column({
         nullable: false,
     })
+    @Groups("admin")
     @Name("email")
     @Description("Email of the submitter")
     @Example("foo@example.com")
@@ -191,12 +200,11 @@ export class SubmissionModel extends AbstractModel {
         nullable: false,
         default: false,
     })
+    @Groups("admin")
     @Name("submissionValid")
     @Description("Valid if the user clicks the confirmation URL")
     public submissionValid: boolean;
 
-    @Name("submissionRound")
-    @Description("The submission round this entry belongs to")
     @ManyToOne("SubmissionRoundModel", "submissions", {
         ...AbstractModel.cascadeOps,
     })
@@ -206,6 +214,7 @@ export class SubmissionModel extends AbstractModel {
     })
     public submissionRound: Promise<SubmissionRoundModel>;
 
+    @Groups("admin")
     @Name("confirmation")
     @Description("The confirmation (if any) that this submission belongs to")
     @OneToOne("PendingEntryConfirmationModel", "submission")
@@ -232,6 +241,7 @@ export class SubmissionModel extends AbstractModel {
         type: "boolean",
         default: false,
     })
+    @Groups("admin")
     @Name("verified")
     @Description("If submission is verified")
     public verified: boolean;
@@ -245,6 +255,7 @@ export class SubmissionModel extends AbstractModel {
     @Description("if it should be played blind or practised")
     public recordedFormat: RECORDED_FORMAT;
 
+    @Groups("admin")
     @Name("botDownloadToken")
     @OneToOne("BotDownloadAuthenticationModel", "submission")
     public botDownloadToken: BotDownloadAuthenticationModel | null;
@@ -268,8 +279,12 @@ export class SubmissionModel extends AbstractModel {
         return this.shareable();
     }
 
-    public getDownloadUrl(admin = false): string | null {
-        if (!this.downloadable(admin)) {
+    @Property()
+    @Name("downloadUrl")
+    @Description("Where the public can download this WAD, null when it may not be downloaded")
+    @Nullable(String)
+    public get downloadUrl(): string | null {
+        if (!this.downloadable()) {
             return null;
         }
         return this.customWadFileName

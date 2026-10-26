@@ -17,6 +17,8 @@ export abstract class AbstractCaptchaEngine<T extends CaptchaResponse> implement
         return process.env.CAPTCHA_SERVICE === this.type;
     }
 
+    public abstract get siteKey(): string;
+
     protected abstract get baseUrl(): string;
 
     protected abstract get secretKey(): string;

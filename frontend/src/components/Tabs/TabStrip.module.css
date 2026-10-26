@@ -1,0 +1,48 @@
+.strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 0.25rem;
+    border-bottom: 3px solid var(--bevel-dark);
+    box-shadow: 0 1px 0 var(--bevel-light);
+}
+
+.tab {
+    position: relative;
+    top: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+    padding: 0.2rem 0.9rem 0.25rem;
+    font-size: 1.3rem;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+    white-space: normal;
+    color: var(--text-muted);
+    background: var(--steel-dark);
+    border-bottom: none;
+    border-color: var(--bevel-light) var(--bevel-dark) transparent var(--bevel-light);
+    overflow-wrap: anywhere;
+    transition:
+        color 0.15s var(--ease-out),
+        background-color 0.15s var(--ease-out);
+}
+
+.tab:hover {
+    color: var(--text);
+    background: var(--steel);
+}
+
+.tab:active {
+    color: var(--text);
+    background: var(--steel-dark);
+}
+
+.active,
+.active:hover {
+    color: var(--gold);
+    background: linear-gradient(var(--steel), var(--steel-dark));
+    border-color: var(--gold-dark) var(--bevel-dark) transparent var(--gold-dark);
+    filter: drop-shadow(0 -2px 4px rgba(var(--gold-rgb), 0.2));
+}

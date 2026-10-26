@@ -11,6 +11,8 @@ export interface ICaptchaEngine {
      */
     type: CaptchaServices;
 
+    siteKey: string;
+
     /**
      * Verify the client response with the captcha service
      * @returns {Promise<boolean>}

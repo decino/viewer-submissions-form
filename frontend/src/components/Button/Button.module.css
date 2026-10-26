@@ -1,0 +1,67 @@
+.button {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--text);
+    background: var(--steel);
+    border: 2px solid;
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+    transition:
+        filter 0.15s var(--ease-out),
+        background-color 0.15s var(--ease-out);
+}
+
+.medium {
+    padding: 0.35rem 1.1rem;
+    font-size: 1.35rem;
+}
+
+.small {
+    padding: 0.15rem 0.7rem;
+    font-size: 1.1rem;
+}
+
+.primary {
+    color: #fff;
+    background: linear-gradient(var(--red-bright), var(--red) 55%, var(--red-dark));
+    border-color: var(--red-bright) var(--red-dark) var(--red-dark) var(--red-bright);
+    text-shadow: 2px 2px 0 #000;
+}
+
+.primary:where(:hover:not(:disabled)) {
+    filter: brightness(1.15) drop-shadow(0 0 6px rgba(var(--red-rgb), 0.6));
+}
+
+.secondary:where(:hover:not(:disabled)) {
+    background: var(--bevel-light);
+}
+
+.danger {
+    color: var(--red-bright);
+    background: var(--bg-pit);
+    border-color: var(--red) var(--red-dark) var(--red-dark) var(--red);
+}
+
+.danger:where(:hover:not(:disabled)) {
+    background: rgba(var(--red-rgb), 0.2);
+}
+
+.ghost {
+    color: var(--gold);
+    background: transparent;
+    border: 2px dashed rgba(var(--gold-rgb), 0.5);
+}
+
+.ghost:where(:hover:not(:disabled)) {
+    border-color: var(--gold);
+}
+
+.button:where(:active:not(:disabled)) {
+    border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.button:where(:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

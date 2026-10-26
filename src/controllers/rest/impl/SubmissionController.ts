@@ -1,5 +1,5 @@
 import { Controller, Inject } from "@tsed/di";
-import { CollectionOf, Delete, Get, Post, Returns, Security } from "@tsed/schema";
+import { CollectionOf, Delete, Get, Post, Required, Returns, Security } from "@tsed/schema";
 import { StatusCodes } from "http-status-codes";
 import { SubmissionModel } from "../../../model/db/Submission.model.js";
 import { SubmissionService } from "../../../services/SubmissionService.js";
@@ -14,6 +14,7 @@ import { Authorize } from "@tsed/passport";
 import { SubmissionStatusModel } from "../../../model/db/SubmissionStatus.model.js";
 import { SubmissionConfirmationService } from "../../../services/SubmissionConfirmationService.js";
 import { CaptchaMiddleWare } from "../../../middleware/endpoint/CaptchaMiddleWare.js";
+import type { UUID } from "crypto";
 
 @Controller("/submission")
 export class SubmissionController extends BaseRestController {
@@ -28,29 +29,29 @@ export class SubmissionController extends BaseRestController {
 
     @Post("/addEntry")
     @UseBefore(CaptchaMiddleWare)
-    @Returns(StatusCodes.CREATED, SubmissionModel)
+    @(Returns(StatusCodes.CREATED, SubmissionModel).Groups("public"))
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     public addEntry(
         @BodyParams() submission: SubmissionModel,
-        @MultipartFile("file") customWad?: PlatformMulterFile,
+        @MultipartFile("file", 1) customWad?: PlatformMulterFile,
     ): Promise<unknown> {
         return this.submissionService.addEntry(submission, customWad);
     }
 
     @Post("/modifyEntry")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SubmissionModel)
     public modifyEntry(
         @BodyParams() submission: Record<string, string>,
-        @MultipartFile("file") replacementWad?: PlatformMulterFile,
+        @MultipartFile("file", 1) replacementWad?: PlatformMulterFile,
     ): unknown {
         return this.submissionService.modifyEntry(submission, replacementWad);
     }
 
     @Post("/changeStatus")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK)
     public async changeStatus(
@@ -62,12 +63,12 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Post("/:id/setYoutubeLink")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK)
     public async setYoutubeLink(
         @Res() res: PlatformResponse,
-        @PathParams("id") submissionId: number,
+        @Required() @PathParams("id") submissionId: number,
         @QueryParams("link") youtubeLink?: string,
     ): Promise<unknown> {
         await this.submissionService.addYoutubeToSubmission(submissionId, youtubeLink ?? null);
@@ -75,12 +76,12 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Get("/getSubmission/:id")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     @Returns(StatusCodes.OK, SubmissionModel)
     @Security("login")
-    public getSubmission(@PathParams("id") id: number): Promise<unknown> {
+    public getSubmission(@Required() @PathParams("id") id: number): Promise<unknown> {
         return this.submissionService.getEntry(id);
     }
 
@@ -100,8 +101,28 @@ export class SubmissionController extends BaseRestController {
         return wad.content;
     }
 
+    @Post("/confirm")
+    @Returns(StatusCodes.OK, SuccessModel)
+    @Returns(StatusCodes.NOT_FOUND, NotFound)
+    public async confirmSubmission(
+        @Res() res: PlatformResponse,
+        @Required() @BodyParams("uid") uid: string,
+    ): Promise<PlatformResponse> {
+        const result = await this.submissionConfirmationService.processConfirmation(uid as UUID);
+        if (result.alreadyConfirmed) {
+            return this.doSuccess(
+                res,
+                "This submission has already been confirmed and is awaiting manual verification. There is nothing more for you to do.",
+            );
+        }
+        return this.doSuccess(
+            res,
+            "Your submission has been submitted and is awaiting manual verification. It will show as soon as it is verified.",
+        );
+    }
+
     @Post("/verifyEntries")
-    @Authorize(["login", "basic"])
+    @Authorize("basic")
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     public async verifyEntries(
@@ -113,7 +134,7 @@ export class SubmissionController extends BaseRestController {
     }
 
     @Delete("/deleteEntries")
-    @Authorize(["login", "basic"])
+    @Authorize("basic")
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)

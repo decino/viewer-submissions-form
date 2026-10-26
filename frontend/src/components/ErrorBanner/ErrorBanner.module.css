@@ -1,0 +1,12 @@
+.banner {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--red-bright);
+    background: rgba(var(--red-rgb), 0.14);
+    border: 2px solid;
+    border-color: var(--red) var(--red-dark) var(--red-dark) var(--red);
+    border-left-width: 6px;
+    overflow-wrap: anywhere;
+}

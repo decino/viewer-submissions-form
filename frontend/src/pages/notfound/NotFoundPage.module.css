@@ -1,0 +1,24 @@
+.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.code {
+    font-family: var(--font-display);
+    font-size: 7rem;
+    line-height: 0.85;
+    color: var(--red);
+    background: linear-gradient(var(--red-bright), var(--red) 55%, var(--red-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(4px 4px 0 #000);
+}
+
+.cta {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+}

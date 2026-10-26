@@ -4,6 +4,7 @@ import { SubmissionConfirmationDao } from "../dao/SubmissionConfirmationDao.js";
 import { SubmissionModel } from "../../model/db/Submission.model.js";
 import { SubmissionStatusModel } from "../../model/db/SubmissionStatus.model.js";
 import { PendingEntryConfirmationModel } from "../../model/db/PendingEntryConfirmation.model.js";
+import { Builder } from "builder-pattern";
 
 @Injectable({
     scope: ProviderScope.SINGLETON,
@@ -21,6 +22,26 @@ export class SubmissionRepo {
 
     public saveOrUpdateSubmission(entry: SubmissionModel): Promise<SubmissionModel> {
         return this.submissionDao.saveOrUpdateSubmission(entry);
+    }
+
+    public createSubmission(entry: SubmissionModel): Promise<SubmissionModel> {
+        const model = Builder(SubmissionModel)
+            .wadName(entry.wadName)
+            .playTestEngine(entry.playTestEngine)
+            .wadURL(entry.wadURL)
+            .wadLevel(entry.wadLevel)
+            .wadEngine(entry.wadEngine)
+            .gzDoomActions(entry.gzDoomActions)
+            .submitterName(entry.submitterName)
+            .submitterAuthor(entry.submitterAuthor)
+            .distributable(entry.distributable)
+            .info(entry.info)
+            .submitterEmail(entry.submitterEmail)
+            .recordedFormat(entry.recordedFormat)
+            .customWadFileName(entry.customWadFileName)
+            .submissionRoundId(entry.submissionRoundId)
+            .build();
+        return this.submissionDao.saveOrUpdateSubmission(model);
     }
 
     public validateSubmission(confirmation: PendingEntryConfirmationModel): Promise<SubmissionModel> {

@@ -1,5 +1,5 @@
 import { Controller, Inject } from "@tsed/di";
-import { Delete, Get, Post, Returns, Security } from "@tsed/schema";
+import { Delete, Get, Post, Required, Returns, Security } from "@tsed/schema";
 import { StatusCodes } from "http-status-codes";
 import { PlatformResponse, QueryParams, Res } from "@tsed/common";
 import { SubmissionRoundModel } from "../../../model/db/SubmissionRound.model.js";
@@ -17,7 +17,7 @@ export class SubmissionRoundController extends BaseRestController {
     private submissionRoundService: SubmissionRoundService;
 
     @Post("/newRound")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.CREATED, SubmissionRoundModel)
     public createRound(@QueryParams("name") name: string, @QueryParams("endDate") endDate?: number): unknown {
@@ -25,7 +25,7 @@ export class SubmissionRoundController extends BaseRestController {
     }
 
     @Post("/pauseRound")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
@@ -35,12 +35,12 @@ export class SubmissionRoundController extends BaseRestController {
     }
 
     @Get("/currentActiveRound")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SubmissionRoundModel)
     @Returns(StatusCodes.NOT_FOUND, NotFound)
     public async getActiveRound(): Promise<unknown> {
-        const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound();
+        const activeRound = await this.submissionRoundService.getCurrentActiveSubmissionRound(false);
         if (!activeRound) {
             throw new NotFound("No submission rounds are currently active.");
         }
@@ -48,7 +48,7 @@ export class SubmissionRoundController extends BaseRestController {
     }
 
     @Get("/getAllRounds")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @(Returns(StatusCodes.OK, Array).Of(SubmissionRoundModel))
     public getAllRounds(@Res() res: PlatformResponse, @QueryParams("includeActive") includeActive: boolean): unknown {
@@ -56,11 +56,14 @@ export class SubmissionRoundController extends BaseRestController {
     }
 
     @Delete("/:roundId/deleteRound")
-    @Authorize("login")
+    @Authorize("loggedIn")
     @Security("login")
     @Returns(StatusCodes.OK, SuccessModel)
     @Returns(StatusCodes.BAD_REQUEST, BadRequest)
-    public async deleteRound(@Res() res: PlatformResponse, @PathParams("roundId") roundId: number): Promise<unknown> {
+    public async deleteRound(
+        @Res() res: PlatformResponse,
+        @Required() @PathParams("roundId") roundId: number,
+    ): Promise<unknown> {
         try {
             const result = await this.submissionRoundService.deleteRound(roundId);
             if (result) {

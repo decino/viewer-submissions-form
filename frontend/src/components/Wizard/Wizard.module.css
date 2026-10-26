@@ -1,0 +1,68 @@
+.wizard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: min(36rem, 68vh);
+}
+
+.steps {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    flex-wrap: wrap;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 1;
+    min-width: 9rem;
+    padding: 0.35rem 0.6rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    background: var(--bg-pit);
+    border: 2px solid var(--bevel-dark);
+}
+
+.number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--bg-void);
+    background: var(--bevel-light);
+}
+
+.current {
+    color: var(--gold);
+    border-color: var(--gold-dark);
+}
+
+.current .number {
+    background: var(--gold);
+}
+
+.done {
+    color: var(--text);
+}
+
+.done .number {
+    background: var(--green);
+}
+
+.body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}

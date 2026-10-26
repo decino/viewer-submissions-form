@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "sourceRoot": "src",
     "rootDir": "src",
     "outDir": "dist",
     "module": "ESNext",

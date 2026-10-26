@@ -1,0 +1,10 @@
+.title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.25rem, 6vw, 3.5rem);
+    line-height: 1;
+    text-align: center;
+    color: var(--gold);
+    filter: drop-shadow(3px 3px 0 #000);
+    overflow-wrap: anywhere;
+}

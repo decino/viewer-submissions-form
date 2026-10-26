@@ -1,0 +1,61 @@
+.panel > header {
+    flex-wrap: wrap;
+}
+
+.open,
+.paused {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.open {
+    color: var(--green);
+}
+
+.paused {
+    color: var(--red-bright);
+}
+
+.dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.hud {
+    flex: 999 1 40rem;
+    min-width: 0;
+    border: 0;
+    box-shadow: none;
+}
+
+.actions {
+    display: flex;
+    flex: 1 1 14rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.end {
+    font-size: 1.5rem;
+}
+
+.row {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.row > * {
+    flex: 1;
+}

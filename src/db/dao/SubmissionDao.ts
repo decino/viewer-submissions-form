@@ -29,7 +29,11 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getSubmission(id: number, transaction?: EntityManager): Promise<SubmissionModel | null> {
         return this.getEntityManager(transaction).findOne({
-            relations: ["confirmation", "status", "botDownloadToken"],
+            relations: {
+                confirmation: true,
+                status: true,
+                botDownloadToken: true,
+            },
             where: {
                 id,
             },
@@ -68,7 +72,10 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
         const manager = this.getEntityManager(transaction);
         if (validAndVerifiedOnly) {
             return manager.find({
-                relations: ["confirmation", "status"],
+                relations: {
+                    confirmation: true,
+                    status: true,
+                },
                 where: {
                     submissionRoundId: roundId,
                     submissionValid: true,
@@ -77,7 +84,10 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
             });
         }
         return this.getEntityManager(transaction).find({
-            relations: ["confirmation", "status"],
+            relations: {
+                confirmation: true,
+                status: true,
+            },
             where: {
                 submissionRoundId: roundId,
             },
@@ -97,7 +107,9 @@ export class SubmissionDao extends AbstractDao<SubmissionModel> {
 
     public getExpiredEntries(transaction?: EntityManager): Promise<SubmissionModel[]> {
         return this.getEntityManager(transaction).find({
-            relations: ["confirmation"],
+            relations: {
+                confirmation: true,
+            },
             where: {
                 submissionValid: false,
                 confirmation: {

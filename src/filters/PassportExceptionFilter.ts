@@ -11,6 +11,7 @@ export class PassportExceptionFilter implements ExceptionFilterMethods<PassportE
 
     public catch(exception: PassportException, ctx: PlatformContext): unknown {
         if (exception.name === "AuthenticationError") {
+            ctx.response.raw.removeHeader("WWW-Authenticate");
             return this.httpExceptionFilter.catch(new AuthenticationError(exception.message, exception.origin), ctx);
         }
         return this.httpExceptionFilter.catch(exception, ctx);

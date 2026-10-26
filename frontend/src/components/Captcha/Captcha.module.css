@@ -1,0 +1,5 @@
+.captcha {
+    min-height: 65px;
+    max-width: 100%;
+    overflow-x: auto;
+}

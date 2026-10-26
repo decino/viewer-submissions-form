@@ -4,10 +4,6 @@
     gap: 1.25rem;
 }
 
-.closed {
-    max-width: 60ch;
-}
-
 .roundName {
     font: inherit;
     overflow-wrap: anywhere;

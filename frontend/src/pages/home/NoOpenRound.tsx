@@ -14,7 +14,7 @@ export function NoOpenRound() {
     return (
         <div className={styles.page}>
             <Panel title="No round is open">
-                <p className={styles.closed}>
+                <p>
                     {rounds.length === 0 && !error
                         ? "No submission rounds have taken place yet. Come back when one is announced."
                         : "WADs can't be submitted right now. Submissions open again when decino announces the next round."}

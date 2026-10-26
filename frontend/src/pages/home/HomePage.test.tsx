@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "../../test-utils/render";
 import type { CurrentRound, PreviousRound } from "../../types/api";
@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../../hooks/queries/round", () => ({
     useCurrentRound: mocks.useCurrentRound,
     usePreviousRounds: mocks.usePreviousRounds,
+    useRefetchRoundAfterDeadline: vi.fn(),
 }));
 vi.mock("../../hooks/useRealtimeConnected", () => ({ useRealtimeConnected: mocks.useRealtimeConnected }));
 vi.mock("./SubmitForm", () => ({
@@ -20,14 +21,29 @@ vi.mock("./SubmitForm", () => ({
         <p>{paused ? "Paused submission form" : "Open submission form"}</p>
     ),
 }));
-vi.mock("../pastRounds/PreviousResults", () => ({
-    PreviousResults: ({ rounds }: { rounds: PreviousRound[] }) => (
-        <p>Results of {rounds.map(round => round.name).join(", ")}</p>
-    ),
-}));
 vi.mock("../../components/RoundStatsCharts/RoundStatsCharts", () => ({
     RoundStatsCharts: ({ roundId }: { roundId: number }) => <p>Statistics of round {roundId}</p>,
 }));
+vi.mock("./LatestRound", () => ({
+    LatestRound: ({ round }: { round: PreviousRound }) => <p>Latest round {round.name}</p>,
+}));
+
+function makePreviousRound(id: number): PreviousRound {
+    return {
+        id,
+        created: "2026-09-01T12:00:00.000Z",
+        updated: "2026-09-30T12:00:00.000Z",
+        active: false,
+        name: `Round ${id}`,
+        paused: false,
+        endDate: null,
+        submissions: [],
+    };
+}
+
+function stubPreviousRounds(rounds: PreviousRound[], loading = false, error: string | null = null): void {
+    mocks.usePreviousRounds.mockReturnValue({ rounds, loading, error });
+}
 
 function makeRound(overrides: Partial<CurrentRound> = {}): CurrentRound {
     return {
@@ -44,25 +60,8 @@ function makeRound(overrides: Partial<CurrentRound> = {}): CurrentRound {
     };
 }
 
-function makePreviousRound(): PreviousRound {
-    return {
-        id: 41,
-        created: "2026-09-01T12:00:00.000Z",
-        updated: "2026-09-30T12:00:00.000Z",
-        active: false,
-        name: "Round 41",
-        paused: false,
-        endDate: null,
-        submissions: [],
-    };
-}
-
 function stubRound(round: CurrentRound | null, loading = false): void {
     mocks.useCurrentRound.mockReturnValue({ round, loading });
-}
-
-function stubPreviousRounds(rounds: PreviousRound[], loading = false): void {
-    mocks.usePreviousRounds.mockReturnValue({ rounds, loading });
 }
 
 beforeEach(() => {
@@ -86,19 +85,6 @@ describe("HomePage", () => {
         expect(screen.getByText("Loading the current round...")).toBeInTheDocument();
     });
 
-    it("keeps loading until it knows whether any round has finished when no round is open", () => {
-        // given
-        stubRound(null);
-        stubPreviousRounds([], true);
-
-        // when
-        renderWithProviders(<HomePage />);
-
-        // then
-        expect(screen.getByText("Loading the past rounds...")).toBeInTheDocument();
-        expect(screen.queryByRole("heading", { name: "No round is open" })).not.toBeInTheDocument();
-    });
-
     it("shows why the round could not be loaded instead of claiming none is open", () => {
         // given
         mocks.useCurrentRound.mockReturnValue({
@@ -115,32 +101,33 @@ describe("HomePage", () => {
         expect(screen.queryByRole("heading", { name: "No round is open" })).not.toBeInTheDocument();
     });
 
-    it("shows why the earlier results could not be loaded while no round is open", () => {
+    it("keeps loading until it knows the latest round when no round is open", () => {
         // given
         stubRound(null);
-        mocks.usePreviousRounds.mockReturnValue({
-            rounds: [],
-            loading: false,
-            error: "Could not load the previous rounds.",
-        });
+        stubPreviousRounds([], true);
 
         // when
         renderWithProviders(<HomePage />);
 
         // then
-        expect(screen.getByRole("alert")).toHaveTextContent("Could not load the previous rounds.");
+        expect(screen.getByText("Loading the latest round...")).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "No round is open" })).not.toBeInTheDocument();
     });
 
-    it("explains that nothing can be submitted when no round is open", () => {
+    it("shows the latest round under the notice when no round is open", () => {
         // given
         stubRound(null);
+        stubPreviousRounds([makePreviousRound(41), makePreviousRound(43), makePreviousRound(42)]);
 
         // when
         renderWithProviders(<HomePage />);
 
         // then
         expect(screen.getByRole("heading", { name: "No round is open" })).toBeInTheDocument();
-        expect(screen.queryByRole("table")).not.toBeInTheDocument();
+        expect(screen.getByText(/Submissions open again when decino announces the next round/)).toBeInTheDocument();
+        expect(screen.getByText("Latest round Round 43")).toBeInTheDocument();
+        expect(screen.queryByText(/Latest round Round 4[12]/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Open submission form/)).not.toBeInTheDocument();
     });
 
     it("says no round has taken place yet when there has never been one", () => {
@@ -154,21 +141,33 @@ describe("HomePage", () => {
         expect(
             screen.getByText("No submission rounds have taken place yet. Come back when one is announced."),
         ).toBeInTheDocument();
-        expect(screen.queryByText(/Results of/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Latest round/)).not.toBeInTheDocument();
     });
 
-    it("shows the results of earlier rounds while no round is open", () => {
+    it("shows why the latest round could not be loaded while no round is open", () => {
         // given
         stubRound(null);
-        stubPreviousRounds([makePreviousRound()]);
+        stubPreviousRounds([], false, "Could not load the previous rounds.");
 
         // when
         renderWithProviders(<HomePage />);
 
         // then
-        expect(screen.getByText(/Submissions open again when decino announces the next round/)).toBeInTheDocument();
-        expect(screen.getByText("Results of Round 41")).toBeInTheDocument();
-        expect(screen.queryByText(/Open submission form/)).not.toBeInTheDocument();
+        expect(screen.getByRole("alert")).toHaveTextContent("Could not load the previous rounds.");
+    });
+
+    it("leaves the finished rounds to the past rounds page while a round is open", () => {
+        // given
+        mocks.usePreviousRounds.mockClear();
+        stubRound(makeRound());
+
+        // when
+        renderWithProviders(<HomePage />);
+
+        // then
+        expect(screen.getByText("Open submission form")).toBeInTheDocument();
+        expect(screen.queryByText(/Latest round/)).not.toBeInTheDocument();
+        expect(mocks.usePreviousRounds).not.toHaveBeenCalled();
     });
 
     it("lists every verified submission in order with its WAD and level", () => {
@@ -201,18 +200,22 @@ describe("HomePage", () => {
         ]);
     });
 
-    it("counts down to the deadline on the status bar", () => {
+    it("counts down to the deadline on the status bar every second", () => {
         // given
-        vi.spyOn(Date, "now").mockReturnValue(Date.parse("2099-11-01T20:00:00.000Z"));
+        vi.useFakeTimers({ now: Date.parse("2099-11-01T20:00:00.000Z") });
         stubRound(makeRound({ endDate: "2099-11-03T23:59:59.000Z" }));
+        renderWithProviders(<HomePage />);
+        const hud = within(screen.getByLabelText("Round status"));
+        expect(hud.getByText("2d 03:59:59")).toBeInTheDocument();
 
         // when
-        renderWithProviders(<HomePage />);
+        act(() => {
+            vi.advanceTimersByTime(2000);
+        });
 
         // then
-        const hud = within(screen.getByLabelText("Round status"));
         expect(hud.getByText("Time left")).toBeInTheDocument();
-        expect(hud.getByText("2d 03h")).toBeInTheDocument();
+        expect(hud.getByText("2d 03:59:57")).toBeInTheDocument();
     });
 
     it("shows a paused round as paused", () => {
@@ -292,19 +295,6 @@ describe("HomePage", () => {
         // then
         expect(screen.getByRole("heading", { name: "Round statistics" })).toBeInTheDocument();
         expect(screen.getByText("Statistics of round 42")).toBeInTheDocument();
-    });
-
-    it("does not fetch earlier rounds while a round is open", () => {
-        // given
-        mocks.usePreviousRounds.mockClear();
-        stubRound(makeRound());
-
-        // when
-        renderWithProviders(<HomePage />);
-
-        // then
-        expect(mocks.usePreviousRounds).not.toHaveBeenCalled();
-        expect(screen.queryByText(/Results of/)).not.toBeInTheDocument();
     });
 
     it("gives an address to write to with questions about a submission", () => {

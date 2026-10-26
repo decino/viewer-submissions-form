@@ -34,7 +34,8 @@ export function hasDeadlinePassed(endDate: string, now: number): boolean {
     return now >= new Date(endDate).getTime();
 }
 
-const MINUTE = 60_000;
+const SECOND = 1_000;
+const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
@@ -45,16 +46,15 @@ export function formatTimeLeft(endDate: string, now: number): string {
     }
 
     const days = Math.floor(remaining / DAY);
-    const hours = Math.floor((remaining % DAY) / HOUR);
-    const minutes = Math.floor((remaining % HOUR) / MINUTE);
+    const clock = [
+        Math.floor((remaining % DAY) / HOUR),
+        Math.floor((remaining % HOUR) / MINUTE),
+        Math.floor((remaining % MINUTE) / SECOND),
+    ]
+        .map(part => String(part).padStart(2, "0"))
+        .join(":");
 
-    if (days > 0) {
-        return `${days}d ${String(hours).padStart(2, "0")}h`;
-    }
-    if (hours > 0) {
-        return `${hours}h ${String(minutes).padStart(2, "0")}m`;
-    }
-    return `${Math.max(minutes, 1)}m`;
+    return days > 0 ? `${days}d ${clock}` : clock;
 }
 
 export function formatDeadline(iso: string): string {

@@ -1,27 +1,31 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "../../test-utils/render";
 import type { PreviousRound } from "../../types/api";
 import { PastRoundsPage } from "./PastRoundsPage";
 
 const mocks = vi.hoisted(() => ({
+    useCurrentRound: vi.fn(),
     usePreviousRounds: vi.fn(),
 }));
 
-vi.mock("../../hooks/queries/round", () => ({ usePreviousRounds: mocks.usePreviousRounds }));
+vi.mock("../../hooks/queries/round", () => ({
+    useCurrentRound: mocks.useCurrentRound,
+    usePreviousRounds: mocks.usePreviousRounds,
+}));
 vi.mock("./PreviousResults", () => ({
     PreviousResults: ({ rounds }: { rounds: PreviousRound[] }) => (
         <p>Results of {rounds.map(round => round.name).join(", ")}</p>
     ),
 }));
 
-function makePreviousRound(): PreviousRound {
+function makePreviousRound(id: number): PreviousRound {
     return {
-        id: 41,
+        id,
         created: "2026-09-01T12:00:00.000Z",
         updated: "2026-09-30T12:00:00.000Z",
         active: false,
-        name: "Round 41",
+        name: `Round ${id}`,
         paused: false,
         endDate: null,
         submissions: [],
@@ -31,6 +35,14 @@ function makePreviousRound(): PreviousRound {
 function stubPreviousRounds(rounds: PreviousRound[], loading = false, error: string | null = null): void {
     mocks.usePreviousRounds.mockReturnValue({ rounds, loading, error });
 }
+
+function stubRoundOpen(open: boolean): void {
+    mocks.useCurrentRound.mockReturnValue({ round: open ? { id: 50 } : null, loading: false, error: null });
+}
+
+beforeEach(() => {
+    stubRoundOpen(false);
+});
 
 describe("PastRoundsPage", () => {
     it("says it is loading while the past rounds are on their way", () => {
@@ -67,14 +79,38 @@ describe("PastRoundsPage", () => {
         expect(screen.getByText("No round has finished yet.")).toBeInTheDocument();
     });
 
-    it("shows the results of every finished round", () => {
+    it("shows every finished round while a new round is open", () => {
         // given
-        stubPreviousRounds([makePreviousRound()]);
+        stubRoundOpen(true);
+        stubPreviousRounds([makePreviousRound(42), makePreviousRound(41)]);
 
         // when
         renderWithProviders(<PastRoundsPage />);
 
         // then
-        expect(screen.getByText("Results of Round 41")).toBeInTheDocument();
+        expect(screen.getByText("Results of Round 42, Round 41")).toBeInTheDocument();
+    });
+
+    it("shows every finished round except the latest, which is on This round while no round is open", () => {
+        // given
+        stubPreviousRounds([makePreviousRound(43), makePreviousRound(41), makePreviousRound(42)]);
+
+        // when
+        renderWithProviders(<PastRoundsPage />);
+
+        // then
+        expect(screen.getByText("Results of Round 41, Round 42")).toBeInTheDocument();
+    });
+
+    it("says older rounds show up here when only the latest round has finished", () => {
+        // given
+        stubPreviousRounds([makePreviousRound(41)]);
+
+        // when
+        renderWithProviders(<PastRoundsPage />);
+
+        // then
+        expect(screen.getByText("The latest round is on This round. Older rounds show up here.")).toBeInTheDocument();
+        expect(screen.queryByText(/Results of/)).not.toBeInTheDocument();
     });
 });

@@ -9,6 +9,29 @@
     overflow-wrap: anywhere;
 }
 
+.results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+.started {
+    color: var(--text-muted);
+}
+
+.showAll {
+    width: 100%;
+    max-width: 16rem;
+}
+
 .columns {
     display: flex;
     flex-wrap: wrap;

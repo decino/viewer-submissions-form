@@ -1,8 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { invalidateViews } from "../../api/cache/invalidate";
 import { getCurrentRound, getPreviousRounds } from "../../api/endpoints/round";
 import { queryKeys } from "../../api/queryKeys";
 import { sortSubmissions } from "../../domain/round/submissions";
 import { errorMessage } from "../../utils/errorMessage";
+
+const DEADLINE_GRACE_MS = 1_000;
 
 export function useCurrentRound() {
     const q = useQuery({
@@ -15,6 +19,18 @@ export function useCurrentRound() {
         loading: q.isLoading,
         error: q.error ? errorMessage(q.error, "Could not load the current round.") : null,
     };
+}
+
+export function useRefetchRoundAfterDeadline(endDate: string, now: number): void {
+    const qc = useQueryClient();
+    const due = now >= new Date(endDate).getTime() + DEADLINE_GRACE_MS;
+    const [dueOnArrival] = useState(due);
+
+    useEffect(() => {
+        if (due && !dueOnArrival) {
+            invalidateViews(qc, "round");
+        }
+    }, [qc, due, dueOnArrival]);
 }
 
 export function usePreviousRounds() {

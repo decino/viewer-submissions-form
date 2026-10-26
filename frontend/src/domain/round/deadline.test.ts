@@ -42,10 +42,10 @@ describe("formatTimeLeft", () => {
     const minutes = (count: number) => count * 60_000;
 
     it.each([
-        ["days and hours when more than a day is left", minutes(7 * 24 * 60 + 2 * 60 + 30), "7d 02h"],
-        ["hours and minutes when less than a day is left", minutes(5 * 60 + 7), "5h 07m"],
-        ["minutes when less than an hour is left", minutes(42), "42m"],
-        ["a minute when less than a minute is left", 30_000, "1m"],
+        ["days and a clock when more than a day is left", minutes(7 * 24 * 60 + 2 * 60 + 30) + 5_000, "7d 02:30:05"],
+        ["a clock when less than a day is left", minutes(5 * 60 + 7), "05:07:00"],
+        ["a clock when less than an hour is left", minutes(42) + 9_000, "00:42:09"],
+        ["the seconds when less than a minute is left", 30_500, "00:00:30"],
     ])("shows %s", (_case, remaining, expected) => {
         // then
         expect(formatTimeLeft(endDate, deadline - remaining)).toBe(expected);

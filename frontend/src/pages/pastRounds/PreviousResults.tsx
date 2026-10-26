@@ -20,6 +20,11 @@ interface PreviousResultsProps {
     rounds: readonly PreviousRound[];
 }
 
+type RoundResultTablesProps = {
+    round: PreviousRound;
+    showAll: boolean;
+};
+
 const RESULT_COLUMNS: readonly DataTableColumn<PublicSubmission>[] = [
     playOrderColumn,
     wadColumn,
@@ -33,34 +38,38 @@ const RESULT_COLUMNS: readonly DataTableColumn<PublicSubmission>[] = [
 
 const OTHER_COLUMNS: readonly DataTableColumn<PublicSubmission>[] = [numberColumn, wadColumn, levelColumn];
 
+export function RoundResultTables({ round, showAll }: RoundResultTablesProps) {
+    return (
+        <>
+            <DataTable
+                label={`Results of ${round.name}`}
+                rows={chosenInPlayOrder(round.submissions)}
+                columns={RESULT_COLUMNS}
+                rowKey={submission => submission.id}
+                emptyMessage="No entries were picked in this round"
+            />
+
+            {showAll && (
+                <section className={styles.others}>
+                    <h3 className={styles.othersTitle}>Submissions that weren't picked</h3>
+                    <DataTable
+                        label={`Submissions to ${round.name} that weren't picked`}
+                        rows={notChosen(round.submissions)}
+                        columns={OTHER_COLUMNS}
+                        rowKey={submission => submission.id}
+                        emptyMessage="Every submission in this round was picked"
+                    />
+                </section>
+            )}
+        </>
+    );
+}
+
 export function PreviousResults({ rounds }: PreviousResultsProps) {
     return (
         <Panel title="Past rounds">
             <RoundTabs rounds={rounds} idPrefix="previous-results" ariaLabel="Previous rounds">
-                {(round, showAll) => (
-                    <>
-                        <DataTable
-                            label={`Results of ${round.name}`}
-                            rows={chosenInPlayOrder(round.submissions)}
-                            columns={RESULT_COLUMNS}
-                            rowKey={submission => submission.id}
-                            emptyMessage="No entries were picked in this round"
-                        />
-
-                        {showAll && (
-                            <section className={styles.others}>
-                                <h3 className={styles.othersTitle}>Submissions that weren't picked</h3>
-                                <DataTable
-                                    label={`Submissions to ${round.name} that weren't picked`}
-                                    rows={notChosen(round.submissions)}
-                                    columns={OTHER_COLUMNS}
-                                    rowKey={submission => submission.id}
-                                    emptyMessage="Every submission in this round was picked"
-                                />
-                            </section>
-                        )}
-                    </>
-                )}
+                {(round, showAll) => <RoundResultTables round={round} showAll={showAll} />}
             </RoundTabs>
         </Panel>
     );

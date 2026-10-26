@@ -1,9 +1,11 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getCurrentRound, getPreviousRounds } from "../../api/endpoints/round";
+import { queryKeys } from "../../api/queryKeys";
+import { expectInvalidated } from "../../test-utils/query";
 import { createTestQueryClient, providerWrapper } from "../../test-utils/render";
 import type { CurrentRound, PreviousRound } from "../../types/api";
-import { useCurrentRound, usePreviousRounds } from "./round";
+import { useCurrentRound, usePreviousRounds, useRefetchRoundAfterDeadline } from "./round";
 
 vi.mock("../../api/endpoints/round", () => ({
     getCurrentRound: vi.fn(),
@@ -190,5 +192,62 @@ describe("usePreviousRounds", () => {
 
         // then
         expect(result.current).toEqual({ rounds: [], loading: false, error: "The server is down for maintenance." });
+    });
+});
+
+describe("useRefetchRoundAfterDeadline", () => {
+    const endDate = "2026-10-27T23:59:59.000Z";
+    const deadline = Date.parse(endDate);
+
+    function setup(now: number) {
+        const queryClient = createTestQueryClient();
+        vi.spyOn(queryClient, "invalidateQueries");
+        const view = renderHook(({ at }) => useRefetchRoundAfterDeadline(endDate, at), {
+            wrapper: providerWrapper({ queryClient }),
+            initialProps: { at: now },
+        });
+
+        return { queryClient, ...view };
+    }
+
+    it("refetches the round a second after the deadline passes, once the backend has paused it", () => {
+        // given
+        const { queryClient, rerender } = setup(deadline - 5_000);
+
+        // when
+        rerender({ at: deadline + 999 });
+        const beforeGrace = vi.mocked(queryClient.invalidateQueries).mock.calls.length;
+        rerender({ at: deadline + 1_000 });
+
+        // then
+        expect(beforeGrace).toBe(0);
+        expectInvalidated(queryClient, queryKeys.round.all);
+    });
+
+    it("refetches only once while the clock keeps ticking", () => {
+        // given
+        const { queryClient, rerender } = setup(deadline - 5_000);
+
+        // when
+        rerender({ at: deadline + 1_000 });
+        rerender({ at: deadline + 2_000 });
+        rerender({ at: deadline + 3_000 });
+
+        // then
+        const roundRefetches = vi
+            .mocked(queryClient.invalidateQueries)
+            .mock.calls.filter(([filters]) => filters?.queryKey === queryKeys.round.all);
+        expect(roundRefetches).toHaveLength(1);
+    });
+
+    it("does not refetch a page opened after the deadline, which already has the paused round", () => {
+        // given
+        const { queryClient, rerender } = setup(deadline + 60_000);
+
+        // when
+        rerender({ at: deadline + 61_000 });
+
+        // then
+        expect(queryClient.invalidateQueries).not.toHaveBeenCalled();
     });
 });

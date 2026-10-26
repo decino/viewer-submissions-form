@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chosenInPlayOrder, notChosen, roundsOldestFirst } from "./results";
+import { chosenInPlayOrder, isBeingPlayed, notChosen, roundsOldestFirst, splitLatestRound } from "./results";
 
 interface TestSubmission {
     id: number;
@@ -84,5 +84,45 @@ describe("roundsOldestFirst", () => {
 
         // then
         expect(rounds.map(round => round.id)).toEqual([2, 1]);
+    });
+});
+
+describe("splitLatestRound", () => {
+    it("takes the newest round apart from the older ones", () => {
+        // when
+        const { latest, older } = splitLatestRound([{ id: 2 }, { id: 3 }, { id: 1 }]);
+
+        // then
+        expect(latest).toEqual({ id: 3 });
+        expect(older.map(round => round.id)).toEqual([1, 2]);
+    });
+
+    it("has no latest round when none has finished", () => {
+        // then
+        expect(splitLatestRound([])).toEqual({ latest: null, older: [] });
+    });
+});
+
+describe("isBeingPlayed", () => {
+    it("says a round is being played while a picked entry is queued or in progress", () => {
+        // then
+        expect(
+            isBeingPlayed([{ chosen: true, status: { status: "Queued", additionalInfo: null, submissionId: 1 } }]),
+        ).toBe(true);
+        expect(
+            isBeingPlayed([{ chosen: true, status: { status: "In Progress", additionalInfo: null, submissionId: 1 } }]),
+        ).toBe(true);
+    });
+
+    it("says a round is played once every picked entry is completed or rejected", () => {
+        // then
+        expect(
+            isBeingPlayed([
+                { chosen: true, status: { status: "Completed", additionalInfo: null, submissionId: 1 } },
+                { chosen: true, status: { status: "Rejected", additionalInfo: null, submissionId: 2 } },
+                { chosen: false, status: { status: "Queued", additionalInfo: null, submissionId: 3 } },
+                { chosen: true, status: null },
+            ]),
+        ).toBe(false);
     });
 });

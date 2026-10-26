@@ -1,13 +1,12 @@
-import { useState } from "react";
 import { Badge } from "../../components/Badge/Badge";
 import { ErrorBanner } from "../../components/ErrorBanner/ErrorBanner";
 import { Hud, HudCell } from "../../components/Hud/Hud";
 import { Panel } from "../../components/Panel/Panel";
 import { RoundStatsCharts } from "../../components/RoundStatsCharts/RoundStatsCharts";
-import { formatDeadline, formatTimeLeft, hasDeadlinePassed } from "../../domain/round/deadline";
 import { useCurrentRound } from "../../hooks/queries/round";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useRealtimeConnected } from "../../hooks/useRealtimeConnected";
+import { DeadlineCells } from "./DeadlineCells";
 import styles from "./HomePage.module.css";
 import { NoOpenRound } from "./NoOpenRound";
 import { SubmitForm } from "./SubmitForm";
@@ -16,7 +15,6 @@ export function HomePage() {
     usePageTitle();
     const { round, loading, error } = useCurrentRound();
     const live = useRealtimeConnected();
-    const [now] = useState(Date.now);
 
     if (loading) {
         return <div className="loading">Loading the current round...</div>;
@@ -30,8 +28,6 @@ export function HomePage() {
         return <NoOpenRound />;
     }
 
-    const deadlinePassed = round.endDate !== null && hasDeadlinePassed(round.endDate, now);
-
     return (
         <div className={styles.page}>
             <Hud aria-label="Round status">
@@ -43,20 +39,11 @@ export function HomePage() {
                     tone={round.paused ? "red" : "green"}
                     size="small"
                 />
-                {round.endDate && (
-                    <HudCell
-                        label="Time left"
-                        value={formatTimeLeft(round.endDate, now)}
-                        tone={deadlinePassed ? "red" : "gold"}
-                        size="small"
-                    />
+                {round.endDate ? (
+                    <DeadlineCells endDate={round.endDate} />
+                ) : (
+                    <HudCell label="Deadline" value="None set" tone="gold" size="small" />
                 )}
-                <HudCell
-                    label="Deadline"
-                    value={round.endDate ? formatDeadline(round.endDate) : "None set"}
-                    tone={deadlinePassed ? "red" : "gold"}
-                    size="small"
-                />
             </Hud>
 
             <div className={styles.columns}>

@@ -1,6 +1,16 @@
 import { useSyncExternalStore } from "react";
-import { isRealtimeConnected, onStatus } from "../api/realtime/socket";
+import { submissionSocket } from "../api/realtime/socket";
+
+function onConnectionChange(listener: () => void): () => void {
+    submissionSocket.on("connect", listener);
+    submissionSocket.on("disconnect", listener);
+
+    return () => {
+        submissionSocket.off("connect", listener);
+        submissionSocket.off("disconnect", listener);
+    };
+}
 
 export function useRealtimeConnected(): boolean {
-    return useSyncExternalStore(onStatus, isRealtimeConnected);
+    return useSyncExternalStore(onConnectionChange, () => submissionSocket.connected);
 }

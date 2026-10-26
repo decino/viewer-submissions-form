@@ -1,25 +1,35 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestQueryClient, providerWrapper } from "../../../test-utils/render";
 import type { CurrentRound } from "../../../types/api";
 import { queryKeys } from "../../queryKeys";
-import { dispatch } from "../bus";
-import type { RealtimeEvent } from "../events";
 import { useCurrentRoundSync } from "./useCurrentRoundSync";
 
-const epoch = vi.hoisted(() => ({ value: 0 }));
+type Listener = (data?: unknown) => void;
 
-vi.mock("../useRealtime", async importOriginal => {
-    const actual = await importOriginal<typeof import("../useRealtime")>();
+const socket = vi.hoisted(() => {
+    const listeners = new Map<string, Listener>();
+    const managerListeners = new Map<string, Listener>();
+
     return {
-        ...actual,
-        useRealtimeStatus: () => epoch.value,
+        listeners,
+        managerListeners,
+        fake: {
+            on: (event: string, listener: Listener) => listeners.set(event, listener),
+            off: (event: string) => listeners.delete(event),
+            io: {
+                on: (event: string, listener: Listener) => managerListeners.set(event, listener),
+                off: (event: string) => managerListeners.delete(event),
+            },
+        },
     };
 });
 
-function emit(event: RealtimeEvent): void {
+vi.mock("../socket", () => ({ submissionSocket: socket.fake }));
+
+function emit(event: string, data?: unknown): void {
     act(() => {
-        dispatch(event);
+        socket.listeners.get(event)?.(data);
     });
 }
 
@@ -34,22 +44,32 @@ function makeRound(ids: number[]): CurrentRound {
     };
 }
 
+function setup(round: CurrentRound | null) {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(queryKeys.round.current(), round);
+    const { unmount } = renderHook(() => useCurrentRoundSync(), { wrapper: providerWrapper({ queryClient }) });
+
+    return { queryClient, unmount };
+}
+
 function cachedIds(queryClient: ReturnType<typeof createTestQueryClient>): number[] | undefined {
     return queryClient
         .getQueryData<CurrentRound | null>(queryKeys.round.current())
         ?.submissions.map(submission => submission.id);
 }
 
+beforeEach(() => {
+    socket.listeners.clear();
+    socket.managerListeners.clear();
+});
+
 describe("useCurrentRoundSync", () => {
     it("adds a newly verified submission to the cached round in the REST shape", () => {
         // given
-        epoch.value = 1;
-        const queryClient = createTestQueryClient();
-        queryClient.setQueryData(queryKeys.round.current(), makeRound([1]));
-        renderHook(() => useCurrentRoundSync(), { wrapper: providerWrapper({ queryClient }) });
+        const { queryClient } = setup(makeRound([1]));
 
         // when
-        emit({ type: "newSubmission", data: { id: 2, wadName: "Sunlust", wadLevel: "MAP12" } });
+        emit("newSubmission", { id: 2, wadName: "Sunlust", wadLevel: "MAP12" });
 
         // then
         const round = queryClient.getQueryData<CurrentRound | null>(queryKeys.round.current());
@@ -59,55 +79,60 @@ describe("useCurrentRoundSync", () => {
 
     it("removes deleted submissions from the cached round", () => {
         // given
-        epoch.value = 1;
-        const queryClient = createTestQueryClient();
-        queryClient.setQueryData(queryKeys.round.current(), makeRound([1, 2, 3]));
-        renderHook(() => useCurrentRoundSync(), { wrapper: providerWrapper({ queryClient }) });
+        const { queryClient } = setup(makeRound([1, 2, 3]));
 
         // when
-        emit({ type: "deleteSubmission", data: [1, 3] });
+        emit("deleteSubmission", [1, 3]);
 
         // then
         expect(cachedIds(queryClient)).toEqual([2]);
     });
 
-    it("leaves the cache alone when there is no active round", () => {
+    it("ignores a malformed payload", () => {
         // given
-        epoch.value = 1;
-        const queryClient = createTestQueryClient();
-        queryClient.setQueryData(queryKeys.round.current(), null);
-        renderHook(() => useCurrentRoundSync(), { wrapper: providerWrapper({ queryClient }) });
+        const { queryClient } = setup(makeRound([1, 2]));
 
         // when
-        emit({ type: "newSubmission", data: { id: 2, wadName: "Sunlust", wadLevel: "MAP12" } });
+        emit("newSubmission", { id: "3", wadName: "Sunlust" });
+        emit("deleteSubmission", "1");
+
+        // then
+        expect(cachedIds(queryClient)).toEqual([1, 2]);
+    });
+
+    it("leaves the cache alone when there is no active round", () => {
+        // given
+        const { queryClient } = setup(null);
+
+        // when
+        emit("newSubmission", { id: 2, wadName: "Sunlust", wadLevel: "MAP12" });
 
         // then
         expect(queryClient.getQueryData(queryKeys.round.current())).toBeNull();
     });
 
-    it("does not refetch on the first connection", () => {
-        // given
-        epoch.value = 1;
-        const queryClient = createTestQueryClient();
-        vi.spyOn(queryClient, "invalidateQueries");
-
-        // when
-        renderHook(() => useCurrentRoundSync(), { wrapper: providerWrapper({ queryClient }) });
-
-        // then
-        expect(queryClient.invalidateQueries).not.toHaveBeenCalled();
-    });
-
     it("refetches the round after a reconnect, because events were missed while offline", () => {
         // given
-        epoch.value = 2;
-        const queryClient = createTestQueryClient();
+        const { queryClient } = setup(makeRound([1]));
         vi.spyOn(queryClient, "invalidateQueries");
 
         // when
-        renderHook(() => useCurrentRoundSync(), { wrapper: providerWrapper({ queryClient }) });
+        act(() => {
+            socket.managerListeners.get("reconnect")?.();
+        });
 
         // then
         expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.round.current() });
+    });
+
+    it("stops listening once it unmounts", () => {
+        // given
+        const { unmount } = setup(makeRound([1]));
+
+        // when
+        unmount();
+
+        // then
+        expect([...socket.listeners.keys(), ...socket.managerListeners.keys()]).toEqual([]);
     });
 });

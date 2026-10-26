@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RealtimeEvent } from "./events";
-import { isDeleteSubmissionPayload, isNewSubmissionPayload, passesRealtimeGuard, toRealtimeEvent } from "./guards";
+import { isDeleteSubmissionPayload, isNewSubmissionPayload } from "./events";
 
 describe("isNewSubmissionPayload", () => {
     it("accepts what the server emits on verify", () => {
@@ -41,35 +40,5 @@ describe("isDeleteSubmissionPayload", () => {
         expect(isDeleteSubmissionPayload(3)).toBe(false);
         expect(isDeleteSubmissionPayload(["3"])).toBe(false);
         expect(isDeleteSubmissionPayload([1, null])).toBe(false);
-    });
-});
-
-describe("toRealtimeEvent", () => {
-    it("turns a known, well-formed socket frame into a bus event", () => {
-        // then
-        expect(toRealtimeEvent("deleteSubmission", [3])).toEqual({ type: "deleteSubmission", data: [3] });
-    });
-
-    it("drops an event this client does not handle", () => {
-        // then
-        expect(toRealtimeEvent("roundPaused", {})).toBeNull();
-        expect(toRealtimeEvent("toString", {})).toBeNull();
-    });
-
-    it("drops a known event whose payload is malformed", () => {
-        // then
-        expect(toRealtimeEvent("newSubmission", { id: "1" })).toBeNull();
-    });
-});
-
-describe("passesRealtimeGuard", () => {
-    it("lets a well-formed event through and stops a malformed one", () => {
-        // given
-        const good: RealtimeEvent = { type: "deleteSubmission", data: [1] };
-        const bad = { type: "deleteSubmission", data: "1" } as unknown as RealtimeEvent;
-
-        // then
-        expect(passesRealtimeGuard(good)).toBe(true);
-        expect(passesRealtimeGuard(bad)).toBe(false);
     });
 });

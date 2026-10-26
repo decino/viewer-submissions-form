@@ -3,32 +3,40 @@ import { useQueryClient } from "@tanstack/react-query";
 import { addSubmission, removeSubmissions } from "../../../domain/round/submissions";
 import type { CurrentRound } from "../../../types/api";
 import { queryKeys } from "../../queryKeys";
-import { REALTIME_EVENTS } from "../events";
-import { useRealtimeEvent, useRealtimeStatus } from "../useRealtime";
+import { isDeleteSubmissionPayload, isNewSubmissionPayload } from "../events";
+import { submissionSocket } from "../socket";
 
 export function useCurrentRoundSync(): void {
     const qc = useQueryClient();
-    const epoch = useRealtimeStatus();
 
     useEffect(() => {
-        if (epoch <= 1) {
-            return;
+        const key = queryKeys.round.current();
+
+        function added(data: unknown) {
+            if (!isNewSubmissionPayload(data)) {
+                return;
+            }
+
+            const submission = { id: data.id, WADName: data.wadName, level: data.wadLevel };
+            qc.setQueryData<CurrentRound | null>(key, round => (round ? addSubmission(round, submission) : round));
         }
 
-        qc.invalidateQueries({ queryKey: queryKeys.round.current() });
-    }, [qc, epoch]);
+        function deleted(data: unknown) {
+            if (!isDeleteSubmissionPayload(data)) {
+                return;
+            }
 
-    useRealtimeEvent(REALTIME_EVENTS.NEW_SUBMISSION, event => {
-        const submission = { id: event.data.id, WADName: event.data.wadName, level: event.data.wadLevel };
+            qc.setQueryData<CurrentRound | null>(key, round => (round ? removeSubmissions(round, data) : round));
+        }
 
-        qc.setQueryData<CurrentRound | null>(queryKeys.round.current(), round =>
-            round ? addSubmission(round, submission) : round,
-        );
-    });
+        submissionSocket.on("newSubmission", added);
+        submissionSocket.on("deleteSubmission", deleted);
+        submissionSocket.io.on("reconnect", () => qc.invalidateQueries({ queryKey: key }));
 
-    useRealtimeEvent(REALTIME_EVENTS.DELETE_SUBMISSION, event => {
-        qc.setQueryData<CurrentRound | null>(queryKeys.round.current(), round =>
-            round ? removeSubmissions(round, event.data) : round,
-        );
-    });
+        return () => {
+            submissionSocket.off("newSubmission", added);
+            submissionSocket.off("deleteSubmission", deleted);
+            submissionSocket.io.off("reconnect");
+        };
+    }, [qc]);
 }

@@ -1,22 +1,25 @@
-export const REALTIME_EVENTS = {
-    NEW_SUBMISSION: "newSubmission",
-    DELETE_SUBMISSION: "deleteSubmission",
-} as const;
-
-export interface NewSubmissionPayload {
+export type NewSubmissionPayload = {
     id: number;
     wadName: string;
     wadLevel: string;
-}
+};
 
 export type DeleteSubmissionPayload = number[];
 
-export type RealtimeEvent =
-    | { type: "newSubmission"; data: NewSubmissionPayload }
-    | { type: "deleteSubmission"; data: DeleteSubmissionPayload };
+function isSubmissionId(value: unknown): value is number {
+    return typeof value === "number" && Number.isInteger(value);
+}
 
-export type RealtimeEventName = RealtimeEvent["type"];
+export function isNewSubmissionPayload(data: unknown): data is NewSubmissionPayload {
+    if (data === null || typeof data !== "object" || Array.isArray(data)) {
+        return false;
+    }
 
-export type RealtimeEventOf<K extends RealtimeEventName> = Extract<RealtimeEvent, { type: K }>;
+    const record = data as Record<string, unknown>;
 
-export type RealtimeEventPayload<K extends RealtimeEventName> = RealtimeEventOf<K>["data"];
+    return isSubmissionId(record.id) && typeof record.wadName === "string" && typeof record.wadLevel === "string";
+}
+
+export function isDeleteSubmissionPayload(data: unknown): data is DeleteSubmissionPayload {
+    return Array.isArray(data) && data.every(isSubmissionId);
+}
